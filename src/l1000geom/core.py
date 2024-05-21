@@ -5,7 +5,7 @@ from importlib import resources
 from legendmeta import LegendMetadata, TextDB
 from pyg4ometry import geant4
 
-from . import cryo, fibers, hpge_strings, materials
+from . import cryo, materials
 
 lmeta = LegendMetadata()
 configs = TextDB(resources.files("l1000geom") / "configs")
@@ -15,7 +15,7 @@ DEFINED_ASSEMBLIES = ["strings", "fibers"]
 
 def construct(
     assemblies: list[str] = DEFINED_ASSEMBLIES,
-    use_detailed_fiber_model: bool = False,
+    #    use_detailed_fiber_model: bool = False,
 ) -> geant4.Registry:
     """Construct the LEGEND-1000 geometry and return the pyg4ometry Registry containing the world volume."""
     if set(assemblies) - set(DEFINED_ASSEMBLIES) != set():
@@ -45,6 +45,7 @@ def construct(
     lar_pv = cryo.place_argon(lar_lv, cryostat_lv, coordinate_z_displacement, reg)
 
     return reg
+
 
 """
 
