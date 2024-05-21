@@ -71,7 +71,7 @@ pytest
 Use pytest-cov to generate coverage reports:
 
 ```bash
-pytest --cov=legend-pygeom-l1000
+pytest --cov=l1000geom
 ```
 
 # Building docs

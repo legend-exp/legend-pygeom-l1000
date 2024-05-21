@@ -1,4 +1,4 @@
-# legend-pygeom-l1000
+# l1000geom
 
 ```{toctree}
 :maxdepth: 2

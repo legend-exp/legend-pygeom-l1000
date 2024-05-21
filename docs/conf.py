@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import importlib.metadata
 
-project = "legend-pygeom-l1000"
+project = "l1000geom"
 copyright = "2024, Moritz Neuberger"
 author = "Moritz Neuberger"
-version = release = importlib.metadata.version("legend_pygeom_l1000")
+version = release = importlib.metadata.version("l1000geom")
 
 extensions = [
     "myst_parser",
