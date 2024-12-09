@@ -1,0 +1,13 @@
+{
+    "hpge": "V04199A",
+    "string": {
+        "units":{
+            "n": 8,
+            "l": 125.4
+        },
+        "copper_rods":{
+            "r": 1.5,
+            "r_offset_from_center": 51 
+        }
+    }
+}

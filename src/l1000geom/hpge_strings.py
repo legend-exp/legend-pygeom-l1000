@@ -77,9 +77,9 @@ def _place_hpge_string(
     string_meta = b.special_metadata.hpge_string[string_id]
 
     angle_in_rad = math.pi * string_meta.angle_in_deg / 180
-    x_pos = string_meta.radius_in_mm * math.cos(angle_in_rad)
-    y_pos = -string_meta.radius_in_mm * math.sin(angle_in_rad)
-    # rotation angle for anything in the string.
+    x_pos = string_meta.radius_in_mm * math.cos(angle_in_rad) + string_meta.center.x_in_mm
+    y_pos = -string_meta.radius_in_mm * math.sin(angle_in_rad) + string_meta.center.y_in_mm
+    # rotation angle for anything in the string. 
     string_rot = -np.pi + angle_in_rad
     string_rot_m = np.array(
         [[np.sin(string_rot), np.cos(string_rot)], [np.cos(string_rot), -np.sin(string_rot)]]

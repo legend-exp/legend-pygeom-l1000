@@ -73,9 +73,13 @@ def construct(
     # top of the top plate, this is still a dummy value!
     top_plate_z_pos = 11.1
 
-    timestamp = config.get("metadata_timestamp", "20230311T235840Z")
-    channelmap = load_dict_from_config(config, "channelmap", lambda: lmeta.channelmap(timestamp))
-    special_metadata = load_dict_from_config(config, "special_metadata", lambda: configs.on(timestamp))
+#    timestamp = config.get("metadata_timestamp", "20230311T235840Z")
+#    channelmap = load_dict_from_config(config, "channelmap", lambda: lmeta.channelmap(timestamp))
+#    special_metadata = load_dict_from_config(config, "special_metadata", lambda: configs.on(timestamp))
+
+    channelmap = load_dict_from_config(config, "channelmap", lambda: AttrsDict(configs["channelmap.json"]))
+    special_metadata = load_dict_from_config(config, "special_metadata", lambda: AttrsDict(configs["special_metadata.yaml"]))
+
     instr = InstrumentationData(
         lar_lv, lar_pv, mats, reg, channelmap, special_metadata, AttrsDict(config), top_plate_z_pos
     )
@@ -83,8 +87,8 @@ def construct(
     # Place all other instrumentation into the liquid argon
     if "strings" in assemblies:
         hpge_strings.place_hpge_strings(instr)
-    if "fibers" in assemblies:
-        fibers.place_fiber_modules(lmeta.hardware.detectors.lar.fibers, instr, use_detailed_fiber_model)
+    #if "fibers" in assemblies:
+    #    fibers.place_fiber_modules(lmeta.hardware.detectors.lar.fibers, instr, use_detailed_fiber_model)
 
     _assign_common_copper_surface(instr)
 

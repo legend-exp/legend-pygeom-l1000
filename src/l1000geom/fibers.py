@@ -9,7 +9,7 @@ from legendmeta import TextDB
 from pyg4ometry import geant4 as g4
 from pygeomtools import RemageDetectorInfo
 
-from . import core, materials, top
+from . import core, materials
 
 
 def place_fiber_modules(
@@ -50,7 +50,6 @@ def place_fiber_modules(
     z_displacement_fiber_assembly = (
         # avoid the overlap of the top SiPMs with the top plate.
         b.top_plate_z_pos
-        - top.TOP_PLATE_THICKNESS
         - ModuleFactoryBase.SIPM_HEIGHT
         - ModuleFactoryBase.SIPM_OUTER_EXTRA
     )
