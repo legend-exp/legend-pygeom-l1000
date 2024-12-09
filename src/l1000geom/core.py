@@ -8,12 +8,12 @@ from pyg4ometry import geant4
 from pygeomtools import detectors, geometry, visualization
 from pygeomtools.utils import load_dict_from_config
 
-from . import calibration, cryo, fibers, hpge_strings, materials, top, wlsr
+from . import cryo, fibers, hpge_strings, materials
 
 lmeta = LegendMetadata()
 configs = TextDB(resources.files("l1000geom") / "configs")
 
-DEFINED_ASSEMBLIES = ["wlsr", "strings", "calibration", "fibers", "top"]
+DEFINED_ASSEMBLIES = ["strings", "fibers"]
 
 
 class InstrumentationData(NamedTuple):
@@ -71,7 +71,7 @@ def construct(
     lar_pv = cryo.place_argon(lar_lv, cryostat_lv, coordinate_z_displacement, reg)
 
     # top of the top plate, this is still a dummy value!
-    top_plate_z_pos = 1700
+    top_plate_z_pos = 11.1
 
     timestamp = config.get("metadata_timestamp", "20230311T235840Z")
     channelmap = load_dict_from_config(config, "channelmap", lambda: lmeta.channelmap(timestamp))
