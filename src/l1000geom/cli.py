@@ -70,7 +70,7 @@ def dump_gdml_cli() -> None:
         "--fiber-modules",
         action="store",
         choices=("segmented", "detailed"),
-        default="detailed",
+        default="segmented",
         help="""Select the fiber shroud model, either coarse segments or single fibers. (default: %(default)s)""",
     )
     geom_opts.add_argument(
