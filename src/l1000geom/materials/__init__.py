@@ -7,6 +7,7 @@ import legendoptics.lar
 import legendoptics.nylon
 import legendoptics.pen
 import legendoptics.tpb
+import numpy as np
 import pint
 import pyg4ometry.geant4 as g4
 
@@ -52,6 +53,8 @@ class OpticalMaterialRegistry:
         self._add_element(name="Cobalt", symbol="Co", Z=27, A=58.9332)
         self._add_element(name="Nickel", symbol="Ni", Z=28, A=58.6934)
         self._add_element(name="Copper", symbol="Cu", Z=29, A=63.55)
+        self._add_element(name="Tantalum", symbol="Ta", Z=73, A=180.94)
+        self._add_element(name="Gold", symbol="Au", Z=79, A=196.967)
 
     @property
     def liquidargon(self) -> g4.Material:
@@ -117,12 +120,28 @@ class OpticalMaterialRegistry:
         self._metal_silicon = g4.Material(
             name="metal_silicon",
             density=2.330,
-            number_of_components=5,
+            number_of_components=1,
             registry=self.g4_registry,
         )
         self._metal_silicon.add_element_natoms(self.get_element("Si"), natoms=1)
 
         return self._metal_silicon
+
+    @property
+    def metal_tantalum(self) -> g4.Material:
+        """Tantalum."""
+        if hasattr(self, "_metal_tantalum"):
+            return self._metal_tantalum
+
+        self._metal_tantalum = g4.Material(
+            name="metal_tantalum",
+            density=16.69,
+            number_of_components=1,
+            registry=self.g4_registry,
+        )
+        self._metal_tantalum.add_element_natoms(self.get_element("Ta"), natoms=1)
+
+        return self._metal_tantalum
 
     @property
     def metal_copper(self) -> g4.Material:
@@ -143,6 +162,47 @@ class OpticalMaterialRegistry:
         self._metal_copper.add_element_natoms(self.get_element("Cu"), natoms=1)
 
         return self._metal_copper
+
+    @property
+    def metal_caps_gold(self) -> g4.Material:
+        """Gold for calibration source.
+
+        .. note:: modified density in order to have the equivalent of two 2x2cm gold
+            foils, with 20 um thickness.
+        """
+        if hasattr(self, "_metal_caps_gold"):
+            return self._metal_caps_gold
+
+        # quoting https://doi.org/10.1088/1748-0221/18/02/P02001:
+        # After the deposition, the external part of the foil with no 228Th
+        # activity was cut off, and the foil rolled
+
+        volume_of_foil = np.pi * (1 / 8 * 2.54) ** 2 * 50e-4  # 1/4” diameter, 50 um thickness
+        volume_of_inner = np.pi * 0.2**2 * 0.4  # 2 cm radius, 4 cm height
+        self._metal_caps_gold = g4.Material(
+            name="metal_caps_gold",
+            density=19.3 * volume_of_foil / volume_of_inner,
+            number_of_components=1,
+            registry=self.g4_registry,
+        )
+        self._metal_caps_gold.add_element_natoms(self.get_element("Au"), natoms=1)
+
+        return self._metal_caps_gold
+
+    @property
+    def peek(self) -> g4.Material:
+        """PEEK for the SIS absorber holder."""
+        if hasattr(self, "_peek"):
+            return self._peek
+
+        self._peek = g4.Material(
+            name="peek", density=1.320, number_of_components=3, registry=self.g4_registry
+        )
+        self._peek.add_element_natoms(self.get_element("C"), natoms=19)
+        self._peek.add_element_natoms(self.get_element("H"), natoms=12)  # TODO: MaGe uses C19H1203??
+        self._peek.add_element_natoms(self.get_element("O"), natoms=3)
+
+        return self._peek
 
     @property
     def pmma(self) -> g4.Material:

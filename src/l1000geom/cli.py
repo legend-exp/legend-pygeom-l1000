@@ -4,6 +4,7 @@ import argparse
 import logging
 
 from pyg4ometry import gdml
+from pygeomtools import detectors, utils, visualization
 
 from . import _version, core
 
@@ -72,6 +73,11 @@ def dump_gdml_cli() -> None:
         default="segmented",
         help="""Select the fiber shroud model, either coarse segments or single fibers. (default: %(default)s)""",
     )
+    geom_opts.add_argument(
+        "--config",
+        action="store",
+        help="""Select a config file to read geometry config from.""",
+    )
 
     parser.add_argument(
         "filename",
@@ -92,9 +98,14 @@ def dump_gdml_cli() -> None:
     if args.debug:
         logging.root.setLevel(logging.DEBUG)
 
+    config = {}
+    if args.config:
+        config = utils.load_dict(args.config)
+
     registry = core.construct(
         assemblies=args.assemblies.split(","),
         use_detailed_fiber_model=args.fiber_modules == "detailed",
+        config=config,
     )
 
     if args.check_overlaps:
@@ -110,17 +121,13 @@ def dump_gdml_cli() -> None:
         w.write(args.filename)
 
     if args.det_macro_file:
-        from . import det_utils
-
-        det_utils.generate_detector_macro(registry, args.det_macro_file)
+        detectors.generate_detector_macro(registry, args.det_macro_file)
 
     if args.vis_macro_file:
-        from . import vis_utils
-
-        vis_utils.generate_color_macro(registry, args.vis_macro_file)
+        visualization.generate_color_macro(registry, args.vis_macro_file)
 
     if args.visualize:
         log.info("visualizing...")
-        from . import vis_utils
+        from pygeomtools import viewer
 
-        vis_utils.visualize(registry)
+        viewer.visualize(registry)
