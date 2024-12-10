@@ -41,7 +41,7 @@ class InstrumentationData(NamedTuple):
 
 def construct(
     assemblies: list[str] = DEFINED_ASSEMBLIES,
-    use_detailed_fiber_model: bool = False,
+    use_detailed_fiber_model: bool = True,
     config: dict | None = None,
 ) -> geant4.Registry:
     """Construct the LEGEND-1000 geometry and return the pyg4ometry Registry containing the world volume."""
@@ -87,8 +87,8 @@ def construct(
     # Place all other instrumentation into the liquid argon
     if "strings" in assemblies:
         hpge_strings.place_hpge_strings(instr)
-    #if "fibers" in assemblies:
-    #    fibers.place_fiber_modules(lmeta.hardware.detectors.lar.fibers, instr, use_detailed_fiber_model)
+    if "fibers" in assemblies:
+        fibers.place_fiber_modules(special_metadata["fibers"], instr, use_detailed_fiber_model)
 
     _assign_common_copper_surface(instr)
 

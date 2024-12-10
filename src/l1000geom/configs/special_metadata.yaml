@@ -1,4 +1,1265 @@
 calibration: {}
+fibers:
+  S0101:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: 220.0
+      y: 0.0
+    name: S0101
+    type: single_string
+  S0102:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: 220.0
+      y: 0.0
+    name: S0102
+    type: single_string
+  S0103:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: 220.0
+      y: 0.0
+    name: S0103
+    type: single_string
+  S0201:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: 110.00000000000003
+      y: 190.5255888325765
+    name: S0201
+    type: single_string
+  S0202:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: 110.00000000000003
+      y: 190.5255888325765
+    name: S0202
+    type: single_string
+  S0203:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: 110.00000000000003
+      y: 190.5255888325765
+    name: S0203
+    type: single_string
+  S0301:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: -109.99999999999996
+      y: 190.52558883257652
+    name: S0301
+    type: single_string
+  S0302:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: -109.99999999999996
+      y: 190.52558883257652
+    name: S0302
+    type: single_string
+  S0303:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: -109.99999999999996
+      y: 190.52558883257652
+    name: S0303
+    type: single_string
+  S0401:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: -220.0
+      y: 2.694222958124177e-14
+    name: S0401
+    type: single_string
+  S0402:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: -220.0
+      y: 2.694222958124177e-14
+    name: S0402
+    type: single_string
+  S0403:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: -220.0
+      y: 2.694222958124177e-14
+    name: S0403
+    type: single_string
+  S0501:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: -110.0000000000001
+      y: -190.52558883257643
+    name: S0501
+    type: single_string
+  S0502:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: -110.0000000000001
+      y: -190.52558883257643
+    name: S0502
+    type: single_string
+  S0503:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: -110.0000000000001
+      y: -190.52558883257643
+    name: S0503
+    type: single_string
+  S0601:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: 110.00000000000003
+      y: -190.5255888325765
+    name: S0601
+    type: single_string
+  S0602:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: 110.00000000000003
+      y: -190.5255888325765
+    name: S0602
+    type: single_string
+  S0603:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: 110.00000000000003
+      y: -190.5255888325765
+    name: S0603
+    type: single_string
+  S0701:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: 770.0
+      y: 190.5
+    name: S0701
+    type: single_string
+  S0702:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: 770.0
+      y: 190.5
+    name: S0702
+    type: single_string
+  S0703:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: 770.0
+      y: 190.5
+    name: S0703
+    type: single_string
+  S0801:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: 660.0
+      y: 381.0255888325765
+    name: S0801
+    type: single_string
+  S0802:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: 660.0
+      y: 381.0255888325765
+    name: S0802
+    type: single_string
+  S0803:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: 660.0
+      y: 381.0255888325765
+    name: S0803
+    type: single_string
+  S0901:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: 440.00000000000006
+      y: 381.02558883257655
+    name: S0901
+    type: single_string
+  S0902:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: 440.00000000000006
+      y: 381.02558883257655
+    name: S0902
+    type: single_string
+  S0903:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: 440.00000000000006
+      y: 381.02558883257655
+    name: S0903
+    type: single_string
+  S1001:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: 330.0
+      y: 190.50000000000003
+    name: S1001
+    type: single_string
+  S1002:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: 330.0
+      y: 190.50000000000003
+    name: S1002
+    type: single_string
+  S1003:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: 330.0
+      y: 190.50000000000003
+    name: S1003
+    type: single_string
+  S1101:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: 439.9999999999999
+      y: -0.02558883257643174
+    name: S1101
+    type: single_string
+  S1102:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: 439.9999999999999
+      y: -0.02558883257643174
+    name: S1102
+    type: single_string
+  S1103:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: 439.9999999999999
+      y: -0.02558883257643174
+    name: S1103
+    type: single_string
+  S1201:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: 660.0
+      y: -0.025588832576488585
+    name: S1201
+    type: single_string
+  S1202:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: 660.0
+      y: -0.025588832576488585
+    name: S1202
+    type: single_string
+  S1203:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: 660.0
+      y: -0.025588832576488585
+    name: S1203
+    type: single_string
+  S1301:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: 330.0
+      y: 571.6
+    name: S1301
+    type: single_string
+  S1302:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: 330.0
+      y: 571.6
+    name: S1302
+    type: single_string
+  S1303:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: 330.0
+      y: 571.6
+    name: S1303
+    type: single_string
+  S1401:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: 220.00000000000003
+      y: 762.1255888325766
+    name: S1401
+    type: single_string
+  S1402:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: 220.00000000000003
+      y: 762.1255888325766
+    name: S1402
+    type: single_string
+  S1403:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: 220.00000000000003
+      y: 762.1255888325766
+    name: S1403
+    type: single_string
+  S1501:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: 4.263256414560601e-14
+      y: 762.1255888325766
+    name: S1501
+    type: single_string
+  S1502:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: 4.263256414560601e-14
+      y: 762.1255888325766
+    name: S1502
+    type: single_string
+  S1503:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: 4.263256414560601e-14
+      y: 762.1255888325766
+    name: S1503
+    type: single_string
+  S1601:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: -110.0
+      y: 571.6
+    name: S1601
+    type: single_string
+  S1602:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: -110.0
+      y: 571.6
+    name: S1602
+    type: single_string
+  S1603:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: -110.0
+      y: 571.6
+    name: S1603
+    type: single_string
+  S1701:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: -9.947598300641403e-14
+      y: 381.0744111674236
+    name: S1701
+    type: single_string
+  S1702:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: -9.947598300641403e-14
+      y: 381.0744111674236
+    name: S1702
+    type: single_string
+  S1703:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: -9.947598300641403e-14
+      y: 381.0744111674236
+    name: S1703
+    type: single_string
+  S1801:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: 220.00000000000003
+      y: 381.07441116742353
+    name: S1801
+    type: single_string
+  S1802:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: 220.00000000000003
+      y: 381.07441116742353
+    name: S1802
+    type: single_string
+  S1803:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: 220.00000000000003
+      y: 381.07441116742353
+    name: S1803
+    type: single_string
+  S1901:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: -220.0
+      y: 381.1
+    name: S1901
+    type: single_string
+  S1902:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: -220.0
+      y: 381.1
+    name: S1902
+    type: single_string
+  S1903:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: -220.0
+      y: 381.1
+    name: S1903
+    type: single_string
+  S2001:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: -330.0
+      y: 571.6255888325766
+    name: S2001
+    type: single_string
+  S2002:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: -330.0
+      y: 571.6255888325766
+    name: S2002
+    type: single_string
+  S2003:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: -330.0
+      y: 571.6255888325766
+    name: S2003
+    type: single_string
+  S2101:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: -550.0
+      y: 571.6255888325766
+    name: S2101
+    type: single_string
+  S2102:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: -550.0
+      y: 571.6255888325766
+    name: S2102
+    type: single_string
+  S2103:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: -550.0
+      y: 571.6255888325766
+    name: S2103
+    type: single_string
+  S2201:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: -660.0
+      y: 381.1
+    name: S2201
+    type: single_string
+  S2202:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: -660.0
+      y: 381.1
+    name: S2202
+    type: single_string
+  S2203:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: -660.0
+      y: 381.1
+    name: S2203
+    type: single_string
+  S2301:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: -550.0000000000001
+      y: 190.5744111674236
+    name: S2301
+    type: single_string
+  S2302:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: -550.0000000000001
+      y: 190.5744111674236
+    name: S2302
+    type: single_string
+  S2303:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: -550.0000000000001
+      y: 190.5744111674236
+    name: S2303
+    type: single_string
+  S2401:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: -330.0
+      y: 190.57441116742353
+    name: S2401
+    type: single_string
+  S2402:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: -330.0
+      y: 190.57441116742353
+    name: S2402
+    type: single_string
+  S2403:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: -330.0
+      y: 190.57441116742353
+    name: S2403
+    type: single_string
+  S2501:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: -330.0
+      y: -190.5
+    name: S2501
+    type: single_string
+  S2502:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: -330.0
+      y: -190.5
+    name: S2502
+    type: single_string
+  S2503:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: -330.0
+      y: -190.5
+    name: S2503
+    type: single_string
+  S2601:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: -440.0
+      y: 0.025588832576488585
+    name: S2601
+    type: single_string
+  S2602:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: -440.0
+      y: 0.025588832576488585
+    name: S2602
+    type: single_string
+  S2603:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: -440.0
+      y: 0.025588832576488585
+    name: S2603
+    type: single_string
+  S2701:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: -660.0
+      y: 0.025588832576517007
+    name: S2701
+    type: single_string
+  S2702:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: -660.0
+      y: 0.025588832576517007
+    name: S2702
+    type: single_string
+  S2703:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: -660.0
+      y: 0.025588832576517007
+    name: S2703
+    type: single_string
+  S2801:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: -770.0
+      y: -190.49999999999997
+    name: S2801
+    type: single_string
+  S2802:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: -770.0
+      y: -190.49999999999997
+    name: S2802
+    type: single_string
+  S2803:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: -770.0
+      y: -190.49999999999997
+    name: S2803
+    type: single_string
+  S2901:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: -660.0000000000001
+      y: -381.02558883257643
+    name: S2901
+    type: single_string
+  S2902:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: -660.0000000000001
+      y: -381.02558883257643
+    name: S2902
+    type: single_string
+  S2903:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: -660.0000000000001
+      y: -381.02558883257643
+    name: S2903
+    type: single_string
+  S3001:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: -440.0
+      y: -381.0255888325765
+    name: S3001
+    type: single_string
+  S3002:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: -440.0
+      y: -381.0255888325765
+    name: S3002
+    type: single_string
+  S3003:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: -440.0
+      y: -381.0255888325765
+    name: S3003
+    type: single_string
+  S3101:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: 110.0
+      y: -571.6
+    name: S3101
+    type: single_string
+  S3102:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: 110.0
+      y: -571.6
+    name: S3102
+    type: single_string
+  S3103:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: 110.0
+      y: -571.6
+    name: S3103
+    type: single_string
+  S3201:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: 2.842170943040401e-14
+      y: -381.07441116742353
+    name: S3201
+    type: single_string
+  S3202:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: 2.842170943040401e-14
+      y: -381.07441116742353
+    name: S3202
+    type: single_string
+  S3203:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: 2.842170943040401e-14
+      y: -381.07441116742353
+    name: S3203
+    type: single_string
+  S3301:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: -219.99999999999994
+      y: -381.0744111674235
+    name: S3301
+    type: single_string
+  S3302:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: -219.99999999999994
+      y: -381.0744111674235
+    name: S3302
+    type: single_string
+  S3303:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: -219.99999999999994
+      y: -381.0744111674235
+    name: S3303
+    type: single_string
+  S3401:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: -330.0
+      y: -571.6
+    name: S3401
+    type: single_string
+  S3402:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: -330.0
+      y: -571.6
+    name: S3402
+    type: single_string
+  S3403:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: -330.0
+      y: -571.6
+    name: S3403
+    type: single_string
+  S3501:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: -220.0000000000001
+      y: -762.1255888325765
+    name: S3501
+    type: single_string
+  S3502:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: -220.0000000000001
+      y: -762.1255888325765
+    name: S3502
+    type: single_string
+  S3503:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: -220.0000000000001
+      y: -762.1255888325765
+    name: S3503
+    type: single_string
+  S3601:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: 2.842170943040401e-14
+      y: -762.1255888325766
+    name: S3601
+    type: single_string
+  S3602:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: 2.842170943040401e-14
+      y: -762.1255888325766
+    name: S3602
+    type: single_string
+  S3603:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: 2.842170943040401e-14
+      y: -762.1255888325766
+    name: S3603
+    type: single_string
+  S3701:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: 660.0
+      y: -381.1
+    name: S3701
+    type: single_string
+  S3702:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: 660.0
+      y: -381.1
+    name: S3702
+    type: single_string
+  S3703:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: 660.0
+      y: -381.1
+    name: S3703
+    type: single_string
+  S3801:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: 550.0
+      y: -190.57441116742353
+    name: S3801
+    type: single_string
+  S3802:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: 550.0
+      y: -190.57441116742353
+    name: S3802
+    type: single_string
+  S3803:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: 550.0
+      y: -190.57441116742353
+    name: S3803
+    type: single_string
+  S3901:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: 330.00000000000006
+      y: -190.5744111674235
+    name: S3901
+    type: single_string
+  S3902:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: 330.00000000000006
+      y: -190.5744111674235
+    name: S3902
+    type: single_string
+  S3903:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: 330.00000000000006
+      y: -190.5744111674235
+    name: S3903
+    type: single_string
+  S4001:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: 220.0
+      y: -381.1
+    name: S4001
+    type: single_string
+  S4002:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: 220.0
+      y: -381.1
+    name: S4002
+    type: single_string
+  S4003:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: 220.0
+      y: -381.1
+    name: S4003
+    type: single_string
+  S4101:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: 329.9999999999999
+      y: -571.6255888325765
+    name: S4101
+    type: single_string
+  S4102:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: 329.9999999999999
+      y: -571.6255888325765
+    name: S4102
+    type: single_string
+  S4103:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: 329.9999999999999
+      y: -571.6255888325765
+    name: S4103
+    type: single_string
+  S4201:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 0
+      x: 550.0
+      y: -571.6255888325766
+    name: S4201
+    type: single_string
+  S4202:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 1
+      x: 550.0
+      y: -571.6255888325766
+    name: S4202
+    type: single_string
+  S4203:
+    geometry:
+      tpb:
+        thickness_in_nm: 1093
+    location:
+      module_num: 2
+      x: 550.0
+      y: -571.6255888325766
+    name: S4203
+    type: single_string
 hpge_string:
   '1':
     angle_in_deg: 0

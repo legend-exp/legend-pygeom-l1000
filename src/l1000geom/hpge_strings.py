@@ -218,7 +218,6 @@ def _place_hpge_string(
             b.registry,
         )
 
-
 def _get_pen_plate(
     size: str,
     materials: materials.OpticalMaterialRegistry,

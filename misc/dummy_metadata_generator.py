@@ -35,6 +35,8 @@ ARRAY_CONFIG = {
     "angle_in_deg": [0, 60, 120, 180, 240, 300],
 }
 
+N_FIBERS_PER_STRING = 3
+
 def load_config(input_path):
     """Load configuration from a JSON file."""
     with open(input_path, "r") as f:
@@ -64,6 +66,24 @@ def generate_special_metadata(output_path: str, config: dict, string_idx: list, 
         } for name in hpge_names
     }
 
+    special_output["fibers"] = {
+        "S{:02d}{:02d}".format(string+1, n+1): {
+            "name": "S{:02d}{:02d}".format(string+1, n+1),
+            "type": "single_string",
+            "geometry": {
+                "tpb": {
+                    "thickness_in_nm": 1093
+                }
+            },
+            "location":{
+                "x": float(ARRAY_CONFIG["center"]["x_in_mm"][string//len(ARRAY_CONFIG["angle_in_deg"])] + ARRAY_CONFIG["radius_in_mm"] * np.cos(np.radians(ARRAY_CONFIG["angle_in_deg"][string%len(ARRAY_CONFIG["angle_in_deg"])]))),
+                "y": float(ARRAY_CONFIG["center"]["y_in_mm"][string//len(ARRAY_CONFIG["angle_in_deg"])] + ARRAY_CONFIG["radius_in_mm"] * np.sin(np.radians(ARRAY_CONFIG["angle_in_deg"][string%len(ARRAY_CONFIG["angle_in_deg"])]))),
+                "module_num": n
+            }
+        }
+        for string in string_idx.flatten() for n in range(N_FIBERS_PER_STRING)
+    }
+
     special_output["calibration"] = {}
 
     with open(output_path, "w") as f:
@@ -71,7 +91,7 @@ def generate_special_metadata(output_path: str, config: dict, string_idx: list, 
 
 
 
-def generate_channelmap(output_path: str, hpge_data: dict, hpge_names: list, hpge_rawid: list) -> None:
+def generate_channelmap(output_path: str, hpge_data: dict, hpge_names: list, hpge_rawid: list, string_idx: list, spms_data: dict) -> None:
     """Generate channelmap.json file."""
 
     channelmap = {}
@@ -81,6 +101,24 @@ def generate_channelmap(output_path: str, hpge_data: dict, hpge_names: list, hpg
         channelmap[name]["daq"]["rawid"] = rawid
         channelmap[name]["location"]["string"] = rawid // 100
         channelmap[name]["location"]["position"] = rawid % 100
+
+
+    for string in string_idx.flatten():
+        for n in range(N_FIBERS_PER_STRING):
+            name = "S{:02d}{:02d}T".format(string+1, n+1)
+            channelmap[name] = copy.deepcopy(spms_data)
+            channelmap[name]["name"] = name
+            channelmap[name]["location"]["fiber"] = name[:-1]
+            channelmap[name]["location"]["position"] = "top"
+            channelmap[name]["location"]["barrel"] = string + 1
+
+        for n in range(N_FIBERS_PER_STRING):
+            name = "S{:02d}{:02d}B".format(string+1, n+1)
+            channelmap[name] = copy.deepcopy(spms_data)
+            channelmap[name]["name"] = name
+            channelmap[name]["location"]["fiber"] = name[:-1]
+            channelmap[name]["location"]["position"] = "bottom"
+            channelmap[name]["location"]["barrel"] = string + 1
 
     with open(output_path, "w") as f:
         json.dump(channelmap, f, cls=NpEncoder, indent=4)
@@ -94,12 +132,14 @@ def main():
     string_idx = np.arange(len(ARRAY_CONFIG["center"]["x_in_mm"]) * len(ARRAY_CONFIG["angle_in_deg"])).reshape(len(ARRAY_CONFIG["center"]["x_in_mm"]), len(ARRAY_CONFIG["angle_in_deg"])) 
 
     chm = legendmeta.LegendMetadata().channelmap()
-    hpge_data = chm[config["hpge"]]
+    hpge_data = chm[config["dummy_dets"]["hpge"]]
     hpge_names = np.sort(np.concatenate([[ "V{:02d}{:02d}".format(i+1,j+1) for j in range(config["string"]["units"]["n"])] for i in range(string_idx.size)]))
     hpge_rawid = np.sort(np.concatenate([[ (i+1)*100 + j + 1 for j in range(config["string"]["units"]["n"])] for i in range(string_idx.size)]))
 
+    spms_data = chm[config["dummy_dets"]["spms"]]
+
     generate_special_metadata(args.output_special_metadata, config, string_idx, hpge_names)
-    generate_channelmap(args.output_channelmap, hpge_data, hpge_names, hpge_rawid)
+    generate_channelmap(args.output_channelmap, hpge_data, hpge_names, hpge_rawid, string_idx, spms_data)
 
 if __name__ == "__main__":
     main()

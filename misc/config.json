@@ -1,5 +1,8 @@
 {
-    "hpge": "V04199A",
+    "dummy_dets": {
+        "hpge": "V04199A",
+        "spms": "S060"
+    },
     "string": {
         "units":{
             "n": 8,
