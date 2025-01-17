@@ -8,7 +8,7 @@ from pyg4ometry import geant4
 from pygeomtools import detectors, geometry, visualization
 from pygeomtools.utils import load_dict_from_config
 
-from . import cryo, fibers, hpge_strings, materials
+from . import watertank, cryo, fibers, hpge_strings, materials
 
 lmeta = LegendMetadata()
 configs = TextDB(resources.files("l1000geom") / "configs")
@@ -61,14 +61,23 @@ def construct(
     reg.setWorld(world_lv)
 
     # TODO: Shift the global coordinate system that z=0 is a reasonable value for defining hit positions.
-    coordinate_z_displacement = 0
+    coordinate_z_displacement = -5000
 
+    # Create and place the water tank
+    tank_lv = watertank.construct_tank(mats.metal_steel, reg)
+    watertank.place_tank(tank_lv, world_lv, coordinate_z_displacement, reg)
+
+    # TODO: Make optical water material and use for optical volumes
+    water_material = geant4.MaterialPredefined("G4_WATER")
+    water_lv = watertank.construct_water(water_material, reg)
+    watertank.place_water(water_lv, tank_lv, reg)
     # Create basic structure with argon and cryostat.
+    cryo_z_displacement = 5000
     cryostat_lv = cryo.construct_cryostat(mats.metal_steel, reg)
-    cryo.place_cryostat(cryostat_lv, world_lv, coordinate_z_displacement, reg)
+    cryo.place_cryostat(cryostat_lv, water_lv, cryo_z_displacement, reg)
 
     lar_lv = cryo.construct_argon(mats.liquidargon, reg)
-    lar_pv = cryo.place_argon(lar_lv, cryostat_lv, coordinate_z_displacement, reg)
+    lar_pv = cryo.place_argon(lar_lv, cryostat_lv, 0, reg)
 
     # top of the top plate, this is still a dummy value!
     top_plate_z_pos = 11.1
