@@ -1261,294 +1261,294 @@ fibers:
     name: S4203
     type: single_string
 hpge_string:
-  '1':
+  "1":
     angle_in_deg: 0
     center:
       x_in_mm: 0
       y_in_mm: 0
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '10':
+  "10":
     angle_in_deg: 180
     center:
       x_in_mm: 550
       y_in_mm: 190.5
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '11':
+  "11":
     angle_in_deg: 240
     center:
       x_in_mm: 550
       y_in_mm: 190.5
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '12':
+  "12":
     angle_in_deg: 300
     center:
       x_in_mm: 550
       y_in_mm: 190.5
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '13':
+  "13":
     angle_in_deg: 0
     center:
       x_in_mm: 110
       y_in_mm: 571.6
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '14':
+  "14":
     angle_in_deg: 60
     center:
       x_in_mm: 110
       y_in_mm: 571.6
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '15':
+  "15":
     angle_in_deg: 120
     center:
       x_in_mm: 110
       y_in_mm: 571.6
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '16':
+  "16":
     angle_in_deg: 180
     center:
       x_in_mm: 110
       y_in_mm: 571.6
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '17':
+  "17":
     angle_in_deg: 240
     center:
       x_in_mm: 110
       y_in_mm: 571.6
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '18':
+  "18":
     angle_in_deg: 300
     center:
       x_in_mm: 110
       y_in_mm: 571.6
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '19':
+  "19":
     angle_in_deg: 0
     center:
       x_in_mm: -440
       y_in_mm: 381.1
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '2':
+  "2":
     angle_in_deg: 60
     center:
       x_in_mm: 0
       y_in_mm: 0
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '20':
+  "20":
     angle_in_deg: 60
     center:
       x_in_mm: -440
       y_in_mm: 381.1
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '21':
+  "21":
     angle_in_deg: 120
     center:
       x_in_mm: -440
       y_in_mm: 381.1
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '22':
+  "22":
     angle_in_deg: 180
     center:
       x_in_mm: -440
       y_in_mm: 381.1
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '23':
+  "23":
     angle_in_deg: 240
     center:
       x_in_mm: -440
       y_in_mm: 381.1
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '24':
+  "24":
     angle_in_deg: 300
     center:
       x_in_mm: -440
       y_in_mm: 381.1
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '25':
+  "25":
     angle_in_deg: 0
     center:
       x_in_mm: -550
       y_in_mm: -190.5
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '26':
+  "26":
     angle_in_deg: 60
     center:
       x_in_mm: -550
       y_in_mm: -190.5
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '27':
+  "27":
     angle_in_deg: 120
     center:
       x_in_mm: -550
       y_in_mm: -190.5
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '28':
+  "28":
     angle_in_deg: 180
     center:
       x_in_mm: -550
       y_in_mm: -190.5
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '29':
+  "29":
     angle_in_deg: 240
     center:
       x_in_mm: -550
       y_in_mm: -190.5
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '3':
+  "3":
     angle_in_deg: 120
     center:
       x_in_mm: 0
       y_in_mm: 0
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '30':
+  "30":
     angle_in_deg: 300
     center:
       x_in_mm: -550
       y_in_mm: -190.5
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '31':
+  "31":
     angle_in_deg: 0
     center:
       x_in_mm: -110
       y_in_mm: -571.6
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '32':
+  "32":
     angle_in_deg: 60
     center:
       x_in_mm: -110
       y_in_mm: -571.6
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '33':
+  "33":
     angle_in_deg: 120
     center:
       x_in_mm: -110
       y_in_mm: -571.6
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '34':
+  "34":
     angle_in_deg: 180
     center:
       x_in_mm: -110
       y_in_mm: -571.6
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '35':
+  "35":
     angle_in_deg: 240
     center:
       x_in_mm: -110
       y_in_mm: -571.6
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '36':
+  "36":
     angle_in_deg: 300
     center:
       x_in_mm: -110
       y_in_mm: -571.6
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '37':
+  "37":
     angle_in_deg: 0
     center:
       x_in_mm: 440
       y_in_mm: -381.1
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '38':
+  "38":
     angle_in_deg: 60
     center:
       x_in_mm: 440
       y_in_mm: -381.1
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '39':
+  "39":
     angle_in_deg: 120
     center:
       x_in_mm: 440
       y_in_mm: -381.1
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '4':
+  "4":
     angle_in_deg: 180
     center:
       x_in_mm: 0
       y_in_mm: 0
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '40':
+  "40":
     angle_in_deg: 180
     center:
       x_in_mm: 440
       y_in_mm: -381.1
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '41':
+  "41":
     angle_in_deg: 240
     center:
       x_in_mm: 440
       y_in_mm: -381.1
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '42':
+  "42":
     angle_in_deg: 300
     center:
       x_in_mm: 440
       y_in_mm: -381.1
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '5':
+  "5":
     angle_in_deg: 240
     center:
       x_in_mm: 0
       y_in_mm: 0
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '6':
+  "6":
     angle_in_deg: 300
     center:
       x_in_mm: 0
       y_in_mm: 0
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '7':
+  "7":
     angle_in_deg: 0
     center:
       x_in_mm: 550
       y_in_mm: 190.5
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '8':
+  "8":
     angle_in_deg: 60
     center:
       x_in_mm: 550
       y_in_mm: 190.5
     radius_in_mm: 220
     rod_radius_in_mm: 51
-  '9':
+  "9":
     angle_in_deg: 120
     center:
       x_in_mm: 550

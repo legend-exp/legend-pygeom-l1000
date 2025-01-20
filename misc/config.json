@@ -1,16 +1,16 @@
 {
-    "dummy_dets": {
-        "hpge": "V04199A",
-        "spms": "S060"
+  "dummy_dets": {
+    "hpge": "V04199A",
+    "spms": "S060"
+  },
+  "string": {
+    "units": {
+      "n": 8,
+      "l": 125.4
     },
-    "string": {
-        "units":{
-            "n": 8,
-            "l": 125.4
-        },
-        "copper_rods":{
-            "r": 1.5,
-            "r_offset_from_center": 51 
-        }
+    "copper_rods": {
+      "r": 1.5,
+      "r_offset_from_center": 51
     }
+  }
 }
