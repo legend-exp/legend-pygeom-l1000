@@ -104,7 +104,7 @@ def construct_bulge(name: str, reg: g4.Registry, v_wall: float = 0.0) -> g4.soli
     )
     bulge_semicircle = g4.solid.Tubs(
         name + "_top_bulge_semic",
-        0,
+        tank_top_bulge_width / 2 - 10,  # -10 to ensure the surfaces are not shared
         tank_top_bulge_radius + v_wall,
         tank_top_bulge_depth,
         -bulge_sc_angle,
@@ -118,7 +118,7 @@ def construct_bulge(name: str, reg: g4.Registry, v_wall: float = 0.0) -> g4.soli
     return g4.solid.Union(name + "_top_bulge", bulge_part, bulge_semicircle, [[0, 0, pi], [0, 0, 0]], reg)
 
 
-def construct_flange(separate_flange: bool, reg: g4.Registry) -> g4.solid:
+def construct_flange(reg: g4.Registry) -> g4.solid:
     """Construct the flange solid to be placed on top of the tank.
     Constructed from 6 boolean operations and therefore probably not very run-time efficient in G4.
 
@@ -176,35 +176,35 @@ def construct_flange(separate_flange: bool, reg: g4.Registry) -> g4.solid:
 
     flange_U1 = g4.solid.Union("tank_flange_step5", flange_sub2, flange_int, [[0, 0, 0], [0, 0, 0]], reg)
 
-    # If the flange should be a separate volume also cutoff the bottom part, that is inside the tank
-    if separate_flange:
-        r_cutoff = [0, tank_base_radius - (tank_top_bulge_width / 2), 0]
-        z_cutoff = [0, 0, tank_top_height - tank_base_height]
-        cutoff_pc = g4.solid.GenericPolycone("tank_flange_cutoff", 0, 2 * pi, r_cutoff, z_cutoff, reg, "mm")
-        x_offset = tank_flange_position_radius - (tank_top_bulge_width / 2)
-        flange_sub3 = g4.solid.Subtraction(
-            "tank_flange_step6", flange_U1, cutoff_pc, [[0, 0, 0], [x_offset, 0, 0]], reg
-        )
-        return g4.solid.Union("tank_flange_final", flange_sub3, flange_int2, [[0, 0, 0], [0, 0, 0]], reg)
-
     return g4.solid.Union("tank_flange_final", flange_U1, flange_int2, [[0, 0, 0], [0, 0, 0]], reg)
 
 
-def construct_tank(
-    tank_material: g4.Material, reg: g4.Registry, separate_flange: bool = False
-) -> g4.LogicalVolume:
+def construct_tank(tank_material: g4.Material, reg: g4.Registry, detail: str = "low") -> g4.LogicalVolume:
     """Construct the tank volume.
 
-    separate_flange: If true the flange will be returned as separate volume.
-    A flange has a lot of boolean operations so this might be more efficient."""
+    detail: Level of tank detail. Can be 'low', 'medium' or 'high'.
+    low: Only the base polycone of the tank is constructed.
+    medium: The base polycone and the bulge on top of the tank are constructed.
+    high: Base, Bulge, Manhole and Flanges are constructed.
+    """
 
     base = construct_base("tank", reg)
+    if detail == "low":
+        return g4.LogicalVolume(base, tank_material, "tank", reg)
+
     bulge = construct_bulge("tank", reg)
-    flange = construct_flange(separate_flange, reg)
+    tank_medium = g4.solid.Subtraction(
+        "tank_medium", base, bulge, [[0, 0, 0], [0, 0, tank_top_height - tank_top_bulge_depth / 2]], reg
+    )
+
+    if detail == "medium":
+        return g4.LogicalVolume(tank_medium, tank_material, "tank", reg)
+
+    flange = construct_flange(reg)
 
     # Construct the manhole
     curvature_safety = (
-        100  # Add some extra space to account for the curvature. Due to the union this will not matter
+        300  # Add some extra space to account for the curvature. Due to the union this will not matter
     )
     mh_depth = tank_manhole_depth + curvature_safety
     mh_box = g4.solid.Box(
@@ -226,33 +226,20 @@ def construct_tank(
     mh_x_position = -(tank_base_radius + mh_depth / 2 - curvature_safety) * np.sin(mh_rad)
     mh_y_position = (tank_base_radius + mh_depth / 2 - curvature_safety) * np.cos(mh_rad)
 
-    tank_step1 = g4.solid.Union(
-        "tank_step1", base, mh, [[pi / 2, 0, mh_rad], [mh_x_position, mh_y_position, mh_z_position]], reg
-    )
-    tank_last = g4.solid.Subtraction(
-        "tank", tank_step1, bulge, [[0, 0, 0], [0, 0, tank_top_height - tank_top_bulge_depth / 2]], reg
-    )
-
-    if separate_flange:
-        return g4.LogicalVolume(tank_last, tank_material, "tank", reg), g4.LogicalVolume(
-            flange, tank_material, "flange", reg
-        )
+    objects = [tank_medium, mh]
+    trans = [[[0, 0, 0], [0, 0, 0]], [[pi / 2, 0, mh_rad], [mh_x_position, mh_y_position, mh_z_position]]]
 
     # If flange is not separate add flanges to the tank solid
     for i in range(4):
         angle = (45 + i * 90) * pi / 180
         flange_x = tank_flange_position_radius * np.sin(angle)
         flange_y = tank_flange_position_radius * np.cos(angle)
-        tank_new = g4.solid.Union(
-            "tank_step" + str(i + 2),
-            tank_last,
-            flange,
-            [[0, 0, angle], [flange_x, flange_y, tank_base_height]],
-            reg,
-        )
-        tank_last = tank_new
 
-    return g4.LogicalVolume(tank_last, tank_material, "tank", reg)
+        objects.append(flange)
+        trans.append([[0, 0, angle], [flange_x, flange_y, tank_base_height]])
+
+    tank_high = g4.solid.MultiUnion("tank_high", objects, trans, reg)
+    return g4.LogicalVolume(tank_high, tank_material, "tank", reg)
 
 
 def place_tank(
@@ -264,8 +251,18 @@ def place_tank(
     return g4.PhysicalVolume([0, 0, 0], [0, 0, tank_displacement_z], tank_lv, "tank", wl, reg)
 
 
-def construct_water(water_material: g4.Material, reg: g4.Registry) -> g4.LogicalVolume:
+def construct_water(water_material: g4.Material, reg: g4.Registry, detail: str = "low") -> g4.LogicalVolume:
+    """Construct the water volume.
+
+    detail: Level of tank detail. Can be 'low', 'medium' or 'high'.
+    low: Only the base polycone of the water is constructed.
+    medium: The base polycone and the bulge on top of the tank are constructed.
+    high: Same as medium for water. The water volume is not affected by the flanges and manhole.
+    """
     base = construct_base("water", reg, v_wall=tank_vertical_wall, h_wall=tank_horizontal_wall)
+    if detail == "low":
+        return g4.LogicalVolume(base, water_material, "tank_water", reg)
+
     bulge = construct_bulge("water", reg, v_wall=40.0)
     water = g4.solid.Subtraction(
         "tank_water",

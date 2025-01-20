@@ -15,6 +15,8 @@ configs = TextDB(resources.files("l1000geom") / "configs")
 
 DEFINED_ASSEMBLIES = ["strings", "fibers"]
 
+TANK_DETAIL_LEVELS = ["low", "medium", "high"]
+
 
 class InstrumentationData(NamedTuple):
     mother_lv: geant4.LogicalVolume
@@ -41,6 +43,7 @@ class InstrumentationData(NamedTuple):
 
 def construct(
     assemblies: list[str] = DEFINED_ASSEMBLIES,
+    tank_detail_level: str = "low",
     use_detailed_fiber_model: bool = True,
     config: dict | None = None,
 ) -> geant4.Registry:
@@ -48,6 +51,12 @@ def construct(
     if set(assemblies) - set(DEFINED_ASSEMBLIES) != set():
         msg = "invalid geometrical assembly specified"
         raise ValueError(msg)
+    if tank_detail_level not in TANK_DETAIL_LEVELS:
+        msg = "invalid tank detail level specified"
+        raise ValueError(msg)
+
+    # FIXME: I tried, but i have no idea how to fix the Geant4 visualization with higher tank detail levels.
+    # Warning: If tank detail level is not set to low it may raise issues with Geant4 visualization.
 
     config = config if config is not None else {}
 
@@ -61,15 +70,15 @@ def construct(
     reg.setWorld(world_lv)
 
     # TODO: Shift the global coordinate system that z=0 is a reasonable value for defining hit positions.
-    coordinate_z_displacement = -5000
+    tank_z_displacement = -5000
 
     # Create and place the water tank
-    tank_lv = watertank.construct_tank(mats.metal_steel, reg)
-    watertank.place_tank(tank_lv, world_lv, coordinate_z_displacement, reg)
+    tank_lv = watertank.construct_tank(mats.metal_steel, reg, tank_detail_level)
+    watertank.place_tank(tank_lv, world_lv, tank_z_displacement, reg)
 
     # TODO: Make optical water material and use for optical volumes
     water_material = geant4.MaterialPredefined("G4_WATER")
-    water_lv = watertank.construct_water(water_material, reg)
+    water_lv = watertank.construct_water(water_material, reg, tank_detail_level)
     watertank.place_water(water_lv, tank_lv, reg)
     # Create basic structure with argon and cryostat.
     cryo_z_displacement = 5000
