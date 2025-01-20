@@ -79,7 +79,7 @@ def _place_hpge_string(
     angle_in_rad = math.pi * string_meta.angle_in_deg / 180
     x_pos = string_meta.radius_in_mm * math.cos(angle_in_rad) + string_meta.center.x_in_mm
     y_pos = -string_meta.radius_in_mm * math.sin(angle_in_rad) + string_meta.center.y_in_mm
-    # rotation angle for anything in the string. 
+    # rotation angle for anything in the string.
     string_rot = -np.pi + angle_in_rad
     string_rot_m = np.array(
         [[np.sin(string_rot), np.cos(string_rot)], [np.cos(string_rot), -np.sin(string_rot)]]
@@ -218,6 +218,7 @@ def _place_hpge_string(
             b.registry,
         )
 
+
 def _get_pen_plate(
     size: str,
     materials: materials.OpticalMaterialRegistry,
@@ -297,4 +298,3 @@ def _add_pen_surfaces(
     # between LAr and PEN we need a surface in both directions.
     geant4.BorderSurface("bsurface_lar_pen_" + pen_pv.name, mother_pv, pen_pv, mats.surfaces.lar_to_pen, reg)
     geant4.BorderSurface("bsurface_tpb_pen_" + pen_pv.name, pen_pv, mother_pv, mats.surfaces.lar_to_pen, reg)
-

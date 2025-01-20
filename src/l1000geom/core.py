@@ -73,12 +73,14 @@ def construct(
     # top of the top plate, this is still a dummy value!
     top_plate_z_pos = 11.1
 
-#    timestamp = config.get("metadata_timestamp", "20230311T235840Z")
-#    channelmap = load_dict_from_config(config, "channelmap", lambda: lmeta.channelmap(timestamp))
-#    special_metadata = load_dict_from_config(config, "special_metadata", lambda: configs.on(timestamp))
+    #    timestamp = config.get("metadata_timestamp", "20230311T235840Z")
+    #    channelmap = load_dict_from_config(config, "channelmap", lambda: lmeta.channelmap(timestamp))
+    #    special_metadata = load_dict_from_config(config, "special_metadata", lambda: configs.on(timestamp))
 
     channelmap = load_dict_from_config(config, "channelmap", lambda: AttrsDict(configs["channelmap.json"]))
-    special_metadata = load_dict_from_config(config, "special_metadata", lambda: AttrsDict(configs["special_metadata.yaml"]))
+    special_metadata = load_dict_from_config(
+        config, "special_metadata", lambda: AttrsDict(configs["special_metadata.yaml"])
+    )
 
     instr = InstrumentationData(
         lar_lv, lar_pv, mats, reg, channelmap, special_metadata, AttrsDict(config), top_plate_z_pos

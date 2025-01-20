@@ -52,9 +52,7 @@ def place_fiber_modules(
 
     z_displacement_fiber_assembly = (
         # avoid the overlap of the top SiPMs with the top plate.
-        b.top_plate_z_pos
-        - ModuleFactoryBase.SIPM_HEIGHT
-        - ModuleFactoryBase.SIPM_OUTER_EXTRA
+        b.top_plate_z_pos - ModuleFactoryBase.SIPM_HEIGHT - ModuleFactoryBase.SIPM_OUTER_EXTRA
     )
 
     # note: actually the radius is only 150mm and another short straight segment of 60mm is following after
@@ -62,23 +60,24 @@ def place_fiber_modules(
     # covered solid angle.
     # we do not add the full straight part here (this would make the radius to large), but just a tiny delta
     # that makes the bottom of the OB cover the whole area between the straight OB and IB fibers.
-    
+
     radius_in_mm = 70
-    fiber_length_mm = 1622.3 #1200.2 # 1000.2 + 200
-    
+    fiber_length_mm = 1622.3  # 1200.2 # 1000.2 + 200
+
     single_string_factory = factory(
-        radius_mm = radius_in_mm,
-        fiber_length_mm = fiber_length_mm,
-        fiber_count_per_module = 81,
-        bend_radius_mm = None,
-        number_of_modules = 3,
+        radius_mm=radius_in_mm,
+        fiber_length_mm=fiber_length_mm,
+        fiber_count_per_module=81,
+        bend_radius_mm=None,
+        number_of_modules=3,
         z_displacement_mm=z_displacement_fiber_assembly,
         registry=b.registry,
-        materials=b.materials        
+        materials=b.materials,
     )
 
     for mod in modules.values():
         single_string_factory.create_module(mod, b.mother_lv, b.mother_pv)
+
 
 @dataclass
 class FiberModuleData:
@@ -92,7 +91,6 @@ class FiberModuleData:
     x_position_mm: float = 0
     y_position_mm: float = 0
     module_num: int = 0
-
 
 
 class ModuleFactoryBase(ABC):
@@ -262,7 +260,7 @@ class ModuleFactoryBase(ABC):
         sipm_detector_id: int,
         z_displacement_straight: float,
         x_position_mm: float,
-        y_position_mm: float
+        y_position_mm: float,
     ) -> None:
         """Creates a (dummy) SiPM physical volume for use at the top/bottom of straight fiber sections."""
         z = +self.fiber_length / 2 + self.SIPM_HEIGHT / 2 + self.SIPM_GAP  # add small gap
@@ -565,10 +563,7 @@ class ModuleFactorySingleFibers(ModuleFactoryBase):
         return coating_lv
 
     def create_module(
-        self,
-        mod: FiberModuleData,
-        mother_lv: g4.LogicalVolume,
-        mother_pv: g4.PhysicalVolume
+        self, mod: FiberModuleData, mother_lv: g4.LogicalVolume, mother_pv: g4.PhysicalVolume
     ) -> None:
         module_num = mod.module_num
         if module_num < 0 or module_num >= self.number_of_modules:
@@ -663,7 +658,7 @@ class ModuleFactorySingleFibers(ModuleFactoryBase):
             mod.channel_top_rawid,
             z_displacement_straight,
             mod.x_position_mm,
-            mod.y_position_mm
+            mod.y_position_mm,
         )
         if self.bend_radius_mm is None:
             self._create_sipm(
@@ -676,7 +671,7 @@ class ModuleFactorySingleFibers(ModuleFactoryBase):
                 mod.channel_bottom_rawid,
                 z_displacement_straight,
                 mod.x_position_mm,
-                mod.y_position_mm
+                mod.y_position_mm,
             )
 
         if self.bend_radius_mm is not None:
@@ -936,10 +931,7 @@ class ModuleFactorySegment(ModuleFactoryBase):
         return coating_lv
 
     def create_module(
-        self,
-        mod: FiberModuleData,
-        mother_lv: g4.LogicalVolume,
-        mother_pv: g4.PhysicalVolume
+        self, mod: FiberModuleData, mother_lv: g4.LogicalVolume, mother_pv: g4.PhysicalVolume
     ) -> None:
         module_num = mod.module_num
         if module_num < 0 or module_num >= self.number_of_modules:
@@ -973,7 +965,11 @@ class ModuleFactorySegment(ModuleFactoryBase):
             fibers.append(
                 g4.PhysicalVolume(
                     [0, 0, -th],
-                    [mod.x_position_mm, mod.y_position_mm, z_displacement_straight - self.fiber_length / 2 - self.bend_radius_mm],
+                    [
+                        mod.x_position_mm,
+                        mod.y_position_mm,
+                        z_displacement_straight - self.fiber_length / 2 - self.bend_radius_mm,
+                    ],
                     coating_lv_bend,
                     f"fiber_bend_{mod.name}_s",
                     mother_lv,
@@ -994,7 +990,7 @@ class ModuleFactorySegment(ModuleFactoryBase):
             mod.channel_top_rawid,
             z_displacement_straight,
             mod.x_position_mm,
-            mod.y_position_mm
+            mod.y_position_mm,
         )
         if self.bend_radius_mm is None:
             self._create_sipm(
@@ -1007,7 +1003,7 @@ class ModuleFactorySegment(ModuleFactoryBase):
                 mod.channel_bottom_rawid,
                 z_displacement_straight,
                 mod.x_position_mm,
-                mod.y_position_mm
+                mod.y_position_mm,
             )
         else:
             z = z_displacement_straight - self.fiber_length / 2 - self.bend_radius_mm

@@ -52,6 +52,7 @@ repos:
       - id: mypy
         files: src|tests
         args: []
+        stages: [manual]
         additional_dependencies:
           - pytest
 
@@ -59,6 +60,8 @@ repos:
     rev: "v2.2.6"
     hooks:
       - id: codespell
+        additional_dependencies:
+          - tomli
 
   - repo: https://github.com/shellcheck-py/shellcheck-py
     rev: "v0.10.0.1"

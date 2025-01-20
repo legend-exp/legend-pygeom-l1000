@@ -99,7 +99,7 @@ log_cli_level = "info"
 testpaths = "tests"
 
 [tool.codespell]
-ignore-words-list = "manuel,tre"
+ignore-words-list = "manuel,tre,crate"
 
 [tool.ruff]
 src = ["src"]
