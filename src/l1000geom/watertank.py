@@ -2,7 +2,7 @@
 
 Dimensions from technical drawings 'Water Tank 12m Dia - Pit Version' approved by M. Busch 16 July 2024.
 
-Latest Changes: 17.01.2025 Eric Esch
+Latest Changes: 24.01.2025 Eric Esch
 """
 
 from __future__ import annotations
@@ -148,6 +148,10 @@ def construct_flange(base: g4.solid, reg: g4.Registry, n: int = 4) -> g4.solid:
     base: The base of the tank to which the flanges will be added.
     n: Number of flanges to add to the tank. Default is 4."""
 
+    if n > 32:
+        msg = "Too many flanges. This will cause overlapps."
+        raise ValueError(msg)
+
     # Parameters are directly read out of the L1000 CAD model generated 17.04.2024
     r_flange_base = [299.5, 304.5, 304.5, 390, 390, 161.5, 161.5, 222.5, 222.5, 158.5, 158.5, 299.5]
     z_flange_base = [0, 0, 923, 923, 995, 995, 1067, 1067, 1095, 1095, 923, 923]
@@ -169,7 +173,7 @@ def construct_flange(base: g4.solid, reg: g4.Registry, n: int = 4) -> g4.solid:
     flange_last = base
 
     for i in range(n):
-        angle = (45 + i * 90) * pi / 180
+        angle = (45 + i * (360 / n)) * pi / 180
         flange_x = tank_flange_position_radius * np.sin(angle)
         flange_y = tank_flange_position_radius * np.cos(angle)
         flange_new = g4.solid.Union(
