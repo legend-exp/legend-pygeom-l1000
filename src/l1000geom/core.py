@@ -67,7 +67,7 @@ def construct(
     reg.setWorld(world_lv)
 
     # Create basic structure with argon and cryostat.
-    cryo_z_displacement = 5000
+    cryo_z_displacement = 0
     cryostat_lv = cryo.construct_cryostat(mats.metal_steel, reg)
 
     if "tank" in assemblies:
@@ -83,6 +83,7 @@ def construct(
         water_lv = watertank.construct_water(water_material, reg, tank_detail_level)
         watertank.place_water(water_lv, tank_lv, reg)
 
+        cryo_z_displacement = 5000
         cryo.place_cryostat(cryostat_lv, water_lv, cryo_z_displacement, reg)
     else:
         cryo.place_cryostat(cryostat_lv, world_lv, cryo_z_displacement, reg)
