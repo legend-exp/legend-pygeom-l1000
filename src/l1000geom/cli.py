@@ -78,7 +78,7 @@ def dump_gdml_cli() -> None:
         action="store",
         choices=("low", "medium", "high"),
         default="low",
-        help="""Select the detail level for the water tank. WARNING: High crashes G4 visualization! (default: %(default)s)""",
+        help="""Select the detail level for the water tank. (default: %(default)s)""",
     )
     geom_opts.add_argument(
         "--config",
