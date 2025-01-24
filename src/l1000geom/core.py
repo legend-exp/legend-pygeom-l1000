@@ -13,7 +13,7 @@ from . import cryo, fibers, hpge_strings, materials, watertank
 lmeta = LegendMetadata()
 configs = TextDB(resources.files("l1000geom") / "configs")
 
-DEFINED_ASSEMBLIES = ["strings", "fibers"]
+DEFINED_ASSEMBLIES = ["tank", "strings", "fibers"]
 
 TANK_DETAIL_LEVELS = ["low", "medium", "high"]
 
@@ -55,9 +55,6 @@ def construct(
         msg = "invalid tank detail level specified"
         raise ValueError(msg)
 
-    # FIXME: I tried, but i have no idea how to fix the Geant4 visualization with higher tank detail levels.
-    # Warning: If tank detail level is not set to low it may raise issues with Geant4 visualization.
-
     config = config if config is not None else {}
 
     reg = geant4.Registry()
@@ -69,21 +66,26 @@ def construct(
     world_lv = geant4.LogicalVolume(world, world_material, "world", reg)
     reg.setWorld(world_lv)
 
-    # TODO: Shift the global coordinate system that z=0 is a reasonable value for defining hit positions.
-    tank_z_displacement = -5000
-
-    # Create and place the water tank
-    tank_lv = watertank.construct_tank(mats.metal_steel, reg, tank_detail_level)
-    watertank.place_tank(tank_lv, world_lv, tank_z_displacement, reg)
-
-    # TODO: Make optical water material and use for optical volumes
-    water_material = geant4.MaterialPredefined("G4_WATER")
-    water_lv = watertank.construct_water(water_material, reg, tank_detail_level)
-    watertank.place_water(water_lv, tank_lv, reg)
     # Create basic structure with argon and cryostat.
     cryo_z_displacement = 5000
     cryostat_lv = cryo.construct_cryostat(mats.metal_steel, reg)
-    cryo.place_cryostat(cryostat_lv, water_lv, cryo_z_displacement, reg)
+
+    if "tank" in assemblies:
+        # TODO: Shift the global coordinate system that z=0 is a reasonable value for defining hit positions.
+        tank_z_displacement = -5000
+
+        # Create and place the water tank
+        tank_lv = watertank.construct_tank(mats.metal_steel, reg, tank_detail_level)
+        watertank.place_tank(tank_lv, world_lv, tank_z_displacement, reg)
+
+        # TODO: Make optical water material and use for optical volumes
+        water_material = geant4.MaterialPredefined("G4_WATER")
+        water_lv = watertank.construct_water(water_material, reg, tank_detail_level)
+        watertank.place_water(water_lv, tank_lv, reg)
+
+        cryo.place_cryostat(cryostat_lv, water_lv, cryo_z_displacement, reg)
+    else:
+        cryo.place_cryostat(cryostat_lv, world_lv, cryo_z_displacement, reg)
 
     lar_lv = cryo.construct_argon(mats.liquidargon, reg)
     lar_pv = cryo.place_argon(lar_lv, cryostat_lv, 0, reg)
