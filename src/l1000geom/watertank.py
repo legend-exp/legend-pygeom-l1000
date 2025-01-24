@@ -52,6 +52,7 @@ tank_manhole_depth = 135.37  # How far the manhole extends outside the tank (fro
 def construct_base(name: str, reg: g4.Registry, v_wall: float = 0.0, h_wall: float = 0.0) -> g4.solid:
     """Construct the base shape of the tank.
 
+    name: Prefix to add to the volume name
     v_wall: The thickness of the vertical walls of the tank
     h_wall: The thickness of the horizontal walls of the tank
 
@@ -82,13 +83,17 @@ def construct_base(name: str, reg: g4.Registry, v_wall: float = 0.0, h_wall: flo
     return g4.solid.GenericPolycone(name + "_base", 0, 2 * pi, r_base, z_base, reg, "mm")
 
 
-def construct_bulge(name: str, reg: g4.Registry, v_wall: float = 0.0) -> g4.solid:
+def construct_bulge(
+    name: str, base: g4.solid, reg: g4.Registry, v_wall: float = 0.0, h_wall: float = 0.0
+) -> g4.solid:
     """Construct the bulge on top of the tank.
 
+    name: Prefix to add to the volume name
+    base: The base to which this bulge will be added (or rather subtracted)
     v_wall: The thickness of the vertical walls of the tank
+    h_wall: The thickness of the horizontal walls of the tank
 
-    No horizontal wall thickness needed, as that is already in the base shape.
-    The bulge just needs to be appropriately placed lower on the base shape."""
+    """
 
     bulge_sc_angle = np.arcsin(
         (tank_top_bulge_width / 2) / tank_top_bulge_radius
@@ -96,8 +101,8 @@ def construct_bulge(name: str, reg: g4.Registry, v_wall: float = 0.0) -> g4.soli
     bulge_y = np.cos(bulge_sc_angle) * tank_top_bulge_radius * 2
     bulge_box = g4.solid.Box(
         name + "_top_bulge_box",
-        bulge_y + v_wall,
-        tank_top_bulge_width + v_wall,
+        bulge_y + 2 * v_wall,
+        tank_top_bulge_width + 2 * v_wall,
         tank_top_bulge_depth,
         reg,
         "mm",
@@ -112,30 +117,42 @@ def construct_bulge(name: str, reg: g4.Registry, v_wall: float = 0.0) -> g4.soli
         reg,
         "mm",
     )
-    bulge_part = g4.solid.Union(
-        name + "_top_bulge_part", bulge_box, bulge_semicircle, [[0, 0, 0], [0, 0, 0]], reg
+    bulge_step1 = g4.solid.Subtraction(
+        name + "_top_bulge_step1",
+        base,
+        bulge_box,
+        [[0, 0, 0], [0, 0, tank_top_height - (tank_top_bulge_depth / 2 + h_wall)]],
+        reg,
     )
-    return g4.solid.Union(name + "_top_bulge", bulge_part, bulge_semicircle, [[0, 0, pi], [0, 0, 0]], reg)
+    bulge_step2 = g4.solid.Subtraction(
+        name + "_top_bulge_step2",
+        bulge_step1,
+        bulge_semicircle,
+        [[0, 0, 0], [0, 0, tank_top_height - (tank_top_bulge_depth / 2 + h_wall)]],
+        reg,
+    )
+
+    return g4.solid.Subtraction(
+        name + "_top_bulge",
+        bulge_step2,
+        bulge_semicircle,
+        [[0, 0, pi], [0, 0, tank_top_height - (tank_top_bulge_depth / 2 + h_wall)]],
+        reg,
+    )
 
 
-def construct_flange(reg: g4.Registry) -> g4.solid:
+def construct_flange(base: g4.solid, reg: g4.Registry, n: int = 4) -> g4.solid:
     """Construct the flange solid to be placed on top of the tank.
     Constructed from 6 boolean operations and therefore probably not very run-time efficient in G4.
 
-    separate_flange: If true the flange will have a cutoff at the bottom to be able to place it
-    as separate volume on top of the tank."""
+    base: The base of the tank to which the flanges will be added.
+    n: Number of flanges to add to the tank. Default is 4."""
 
     # Parameters are directly read out of the L1000 CAD model generated 17.04.2024
     r_flange_base = [299.5, 304.5, 304.5, 390, 390, 161.5, 161.5, 222.5, 222.5, 158.5, 158.5, 299.5]
     z_flange_base = [0, 0, 923, 923, 995, 995, 1067, 1067, 1095, 1095, 923, 923]
     flange_base = g4.solid.GenericPolycone(
         "tank_flange_base", 0, 2 * pi, r_flange_base, z_flange_base, reg, "mm"
-    )
-
-    # flange with huge outer radius for intersections with the horizontal thingis
-    r_flange_base2 = [299.5, 1000, 1000, 390, 390, 161.5, 161.5, 222.5, 222.5, 158.5, 158.5, 299.5]
-    flange_base2 = g4.solid.GenericPolycone(
-        "tank_flange_base2", 0, 2 * pi, r_flange_base2, z_flange_base, reg, "mm"
     )
 
     # The horizontal flange thingis
@@ -146,37 +163,89 @@ def construct_flange(reg: g4.Registry) -> g4.solid:
         "tank_flange_extras", 0, 2 * pi, r_flange_extras, z_flange_extras, reg, "mm"
     )
 
-    # Deletus tube to delete walls where they shouldn't be
-    flange_removal_tube = g4.solid.Tubs(
-        "tank_flange_removal_tube", 0, 205.5, flange_extra_height, 0, 2 * pi, reg, "mm"
-    )
-
     # This is where the fun begins
-    z_offset = 544
-    flange_int = g4.solid.Intersection(
-        "tank_flange_step1",
-        flange_base2,
-        flange_extras,
-        [[pi / 2, 0, 0], [0, flange_extra_height / 2, z_offset]],
-        reg,
-    )
-    flange_int2 = g4.solid.Intersection(
-        "tank_flange_step2",
-        flange_base2,
-        flange_extras,
-        [[0, pi / 2, 0], [-flange_extra_height / 2, 0, z_offset]],
-        reg,
-    )
-    flange_sub1 = g4.solid.Subtraction(
-        "tank_flange_step3", flange_base, flange_removal_tube, [[pi / 2, 0, 0], [0, 0, z_offset]], reg
-    )
-    flange_sub2 = g4.solid.Subtraction(
-        "tank_flange_step4", flange_sub1, flange_removal_tube, [[0, pi / 2, 0], [0, 0, z_offset]], reg
+    z_offset = tank_base_height + 544
+
+    flange_last = base
+
+    for i in range(n):
+        angle = (45 + i * 90) * pi / 180
+        flange_x = tank_flange_position_radius * np.sin(angle)
+        flange_y = tank_flange_position_radius * np.cos(angle)
+        flange_new = g4.solid.Union(
+            "tank_flange_step" + str(i) + "1",
+            flange_last,
+            flange_base,
+            [[0, 0, angle], [flange_x, flange_y, tank_base_height]],
+            reg,
+        )
+        y_offset = flange_extra_height / 2 * np.cos(angle)
+        x_offset = flange_extra_height / 2 * np.sin(angle)
+        flange_last = g4.solid.Union(
+            "tank_flange_step" + str(i) + "2",
+            flange_new,
+            flange_extras,
+            [[pi / 2, 0, angle], [flange_x - x_offset, flange_y + y_offset, z_offset]],
+            reg,
+        )
+
+        flange_new = g4.solid.Union(
+            "tank_flange_step1" + str(i) + "3",
+            flange_last,
+            flange_extras,
+            [[0, pi / 2, angle], [flange_x - y_offset, flange_y - x_offset, z_offset]],
+            reg,
+        )
+        flange_last = flange_new
+
+    return flange_last
+
+
+def construct_manhole(base: g4.solid, reg: g4.Registry):
+    """Construct the manhole solid.
+
+    base: The base of the tank to which the manhole will be added.
+    """
+    curvature_safety = (
+        200  # Add some extra space to account for the curvature. Due to the union this will not matter
     )
 
-    flange_U1 = g4.solid.Union("tank_flange_step5", flange_sub2, flange_int, [[0, 0, 0], [0, 0, 0]], reg)
+    mh_depth = tank_manhole_depth + curvature_safety
+    mh_box = g4.solid.Box(
+        "tank_manhole_box", tank_manhole_square_inner_width, tank_manhole_square_height, mh_depth, reg, "mm"
+    )
 
-    return g4.solid.Union("tank_flange_final", flange_U1, flange_int2, [[0, 0, 0], [0, 0, 0]], reg)
+    mh_semicircle = g4.solid.Tubs(
+        "tank_manhole_semic", 0, tank_manhole_inner_radius, mh_depth, 0, 2 * pi, reg, "mm"
+    )
+
+    mh_z_position = tank_manhole_square_height + tank_pit_height + tank_manhole_square_height / 2
+    mh_rad = tank_manhole_angle * pi / 180
+    mh_x_position = -(tank_base_radius + mh_depth / 2 - curvature_safety) * np.sin(mh_rad)
+    mh_y_position = (tank_base_radius + mh_depth / 2 - curvature_safety) * np.cos(mh_rad)
+
+    tank_high_step2 = g4.solid.Union(
+        "tank_manhole_step1",
+        base,
+        mh_box,
+        [[pi / 2, 0, mh_rad], [mh_x_position, mh_y_position, mh_z_position]],
+        reg,
+    )
+    tank_high_step3 = g4.solid.Union(
+        "tank_manhole_step2",
+        tank_high_step2,
+        mh_semicircle,
+        [[pi / 2, 0, mh_rad], [mh_x_position, mh_y_position, mh_z_position + tank_manhole_square_height / 2]],
+        reg,
+    )
+
+    return g4.solid.Union(
+        "tank_manhole_step3",
+        tank_high_step3,
+        mh_semicircle,
+        [[pi / 2, 0, mh_rad], [mh_x_position, mh_y_position, mh_z_position - tank_manhole_square_height / 2]],
+        reg,
+    )
 
 
 def construct_tank(tank_material: g4.Material, reg: g4.Registry, detail: str = "low") -> g4.LogicalVolume:
@@ -192,54 +261,19 @@ def construct_tank(tank_material: g4.Material, reg: g4.Registry, detail: str = "
     if detail == "low":
         return g4.LogicalVolume(base, tank_material, "tank", reg)
 
-    bulge = construct_bulge("tank", reg)
-    tank_medium = g4.solid.Subtraction(
-        "tank_medium", base, bulge, [[0, 0, 0], [0, 0, tank_top_height - tank_top_bulge_depth / 2]], reg
-    )
+    tank_medium = construct_bulge("tank", base, reg)
 
     if detail == "medium":
         return g4.LogicalVolume(tank_medium, tank_material, "tank", reg)
 
-    flange = construct_flange(reg)
+    if detail != "high":
+        msg = "invalid tank detail level specified"
+        raise ValueError(msg)
 
-    # Construct the manhole
-    curvature_safety = (
-        300  # Add some extra space to account for the curvature. Due to the union this will not matter
-    )
-    mh_depth = tank_manhole_depth + curvature_safety
-    mh_box = g4.solid.Box(
-        "tank_manhole_box", tank_manhole_square_inner_width, tank_manhole_square_height, mh_depth, reg, "mm"
-    )
-    mh_semicircle = g4.solid.Tubs(
-        "tank_manhole_semic", 0, tank_manhole_inner_radius, mh_depth, 0, 2 * pi, reg, "mm"
-    )
-    mh_part = g4.solid.Union(
-        "tank_manhole_part", mh_box, mh_semicircle, [[0, 0, 0], [0, tank_manhole_square_height / 2, 0]], reg
-    )
-    mh = g4.solid.Union(
-        "tank_manhole", mh_part, mh_semicircle, [[0, 0, 0], [0, -tank_manhole_square_height / 2, 0]], reg
-    )
+    tank_high_flange = construct_flange(tank_medium, reg)
+    tank_high_final = construct_manhole(tank_high_flange, reg)
 
-    # Attach extras to the base tank
-    mh_z_position = tank_manhole_square_height + tank_pit_height + tank_manhole_square_height / 2
-    mh_rad = tank_manhole_angle * pi / 180
-    mh_x_position = -(tank_base_radius + mh_depth / 2 - curvature_safety) * np.sin(mh_rad)
-    mh_y_position = (tank_base_radius + mh_depth / 2 - curvature_safety) * np.cos(mh_rad)
-
-    objects = [tank_medium, mh]
-    trans = [[[0, 0, 0], [0, 0, 0]], [[pi / 2, 0, mh_rad], [mh_x_position, mh_y_position, mh_z_position]]]
-
-    # If flange is not separate add flanges to the tank solid
-    for i in range(4):
-        angle = (45 + i * 90) * pi / 180
-        flange_x = tank_flange_position_radius * np.sin(angle)
-        flange_y = tank_flange_position_radius * np.cos(angle)
-
-        objects.append(flange)
-        trans.append([[0, 0, angle], [flange_x, flange_y, tank_base_height]])
-
-    tank_high = g4.solid.MultiUnion("tank_high", objects, trans, reg)
-    return g4.LogicalVolume(tank_high, tank_material, "tank", reg)
+    return g4.LogicalVolume(tank_high_final, tank_material, "tank", reg)
 
 
 def place_tank(
@@ -263,14 +297,7 @@ def construct_water(water_material: g4.Material, reg: g4.Registry, detail: str =
     if detail == "low":
         return g4.LogicalVolume(base, water_material, "tank_water", reg)
 
-    bulge = construct_bulge("water", reg, v_wall=40.0)
-    water = g4.solid.Subtraction(
-        "tank_water",
-        base,
-        bulge,
-        [[0, 0, 0], [0, 0, tank_top_height - (tank_top_bulge_depth / 2 + tank_horizontal_wall)]],
-        reg,
-    )
+    water = construct_bulge("water", base, reg, v_wall=tank_vertical_wall, h_wall=tank_horizontal_wall)
     return g4.LogicalVolume(water, water_material, "tank_water", reg)
 
 
