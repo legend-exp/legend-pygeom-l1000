@@ -8,12 +8,14 @@ from pyg4ometry import geant4
 from pygeomtools import detectors, geometry, visualization
 from pygeomtools.utils import load_dict_from_config
 
-from . import cryo, fibers, hpge_strings, materials
+from . import cryo, fibers, hpge_strings, materials, watertank
 
 lmeta = LegendMetadata()
 configs = TextDB(resources.files("l1000geom") / "configs")
 
-DEFINED_ASSEMBLIES = ["strings", "fibers"]
+DEFINED_ASSEMBLIES = ["tank", "strings", "fibers"]
+
+TANK_DETAIL_LEVELS = ["low", "medium", "high"]
 
 
 class InstrumentationData(NamedTuple):
@@ -41,12 +43,16 @@ class InstrumentationData(NamedTuple):
 
 def construct(
     assemblies: list[str] = DEFINED_ASSEMBLIES,
+    tank_detail_level: str = "low",
     use_detailed_fiber_model: bool = True,
     config: dict | None = None,
 ) -> geant4.Registry:
     """Construct the LEGEND-1000 geometry and return the pyg4ometry Registry containing the world volume."""
     if set(assemblies) - set(DEFINED_ASSEMBLIES) != set():
         msg = "invalid geometrical assembly specified"
+        raise ValueError(msg)
+    if tank_detail_level not in TANK_DETAIL_LEVELS:
+        msg = "invalid tank detail level specified"
         raise ValueError(msg)
 
     config = config if config is not None else {}
@@ -60,15 +66,30 @@ def construct(
     world_lv = geant4.LogicalVolume(world, world_material, "world", reg)
     reg.setWorld(world_lv)
 
-    # TODO: Shift the global coordinate system that z=0 is a reasonable value for defining hit positions.
-    coordinate_z_displacement = 0
-
     # Create basic structure with argon and cryostat.
+    cryo_z_displacement = 0
     cryostat_lv = cryo.construct_cryostat(mats.metal_steel, reg)
-    cryo.place_cryostat(cryostat_lv, world_lv, coordinate_z_displacement, reg)
+
+    if "tank" in assemblies:
+        # TODO: Shift the global coordinate system that z=0 is a reasonable value for defining hit positions.
+        tank_z_displacement = -5000
+
+        # Create and place the water tank
+        tank_lv = watertank.construct_tank(mats.metal_steel, reg, tank_detail_level)
+        watertank.place_tank(tank_lv, world_lv, tank_z_displacement, reg)
+
+        # TODO: Make optical water material and use for optical volumes
+        water_material = geant4.MaterialPredefined("G4_WATER")
+        water_lv = watertank.construct_water(water_material, reg, tank_detail_level)
+        watertank.place_water(water_lv, tank_lv, reg)
+
+        cryo_z_displacement = 5000
+        cryo.place_cryostat(cryostat_lv, water_lv, cryo_z_displacement, reg)
+    else:
+        cryo.place_cryostat(cryostat_lv, world_lv, cryo_z_displacement, reg)
 
     lar_lv = cryo.construct_argon(mats.liquidargon, reg)
-    lar_pv = cryo.place_argon(lar_lv, cryostat_lv, coordinate_z_displacement, reg)
+    lar_pv = cryo.place_argon(lar_lv, cryostat_lv, 0, reg)
 
     # top of the top plate, this is still a dummy value!
     top_plate_z_pos = 11.1
