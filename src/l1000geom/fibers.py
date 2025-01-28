@@ -280,7 +280,7 @@ class ModuleFactoryBase(ABC):
             mother_lv,
             self.registry,
         )
-        sipm_pv.pygeom_active_dector = RemageDetectorInfo("optical", sipm_detector_id)
+        sipm_pv.pygeom_active_detector = RemageDetectorInfo("optical", sipm_detector_id)
         # Add border surface to mother volume.
         g4.BorderSurface(
             f"bsurface_lar_{sipm_name}",
@@ -688,7 +688,7 @@ class ModuleFactorySingleFibers(ModuleFactoryBase):
                 mother_lv,
                 self.registry,
             )
-            sipm_pv.pygeom_active_dector = RemageDetectorInfo("optical", mod.channel_bottom_rawid)
+            sipm_pv.pygeom_active_detector = RemageDetectorInfo("optical", mod.channel_bottom_rawid)
             # Add border surface to mother volume.
             g4.BorderSurface(
                 f"bsurface_lar_{mod.channel_bottom_name}",

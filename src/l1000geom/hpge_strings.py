@@ -124,7 +124,7 @@ def _place_hpge_string(
             b.mother_lv,
             b.registry,
         )
-        det_pv.pygeom_active_dector = RemageDetectorInfo("germanium", det_unit.rawid, det_unit.meta)
+        det_pv.pygeom_active_detector = RemageDetectorInfo("germanium", det_unit.rawid, det_unit.meta)
         det_unit.lv.pygeom_color_rgba = (0, 1, 1, 1)
 
         # add germanium reflective surface.
