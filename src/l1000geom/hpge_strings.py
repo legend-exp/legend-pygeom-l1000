@@ -87,9 +87,8 @@ def _place_hpge_string(
 
     # offset the height of the string by the length of the string support rod.
     # z0_string is the upper z coordinate of the topmost detector unit.
-    # TODO: real measurements (slides of M. Bush on 2024-07-08) show an additional offset -0.6 mm.
-    # TODO: this is also still a warm length.
-    z0_string = b.top_plate_z_pos - 410.1 - 12  # from CAD model.
+    # TODO: REQUIRES XCHECK
+    z0_string = b.top_plate_z_pos - 410.1 - 12
 
     # deliberately use max and range here. The code does not support sparse strings (i.e. with
     # unpopulated slots, that are _not_ at the end. In those cases it should produce a KeyError.
@@ -100,21 +99,20 @@ def _place_hpge_string(
 
         # convert the "warm" length of the rod to the (shorter) length in the cooled down state.
         total_rod_length += det_unit.rodlength * 0.997
+        unit_length = det_unit.rodlength * 0.997
 
         z_unit_bottom = z0_string - total_rod_length
-        # - notes for those comparing this to MaGe (those offsets are not from there, but from the
-        #   CAD model): the detector unit (DU)-local z coordinates are inverted in comparison to
-        #   the coordinates here, as well as to the string coordinates in MaGe.
-        # - In MaGe, the end of the three support rods is at +11.1 mm, the PEN plate at +4 mm, the
-        #   diode at -diodeHeight/2-0.025 mm, so that the crystal contact is at DU-z 0 mm.
-        pen_thickness = 1.5  #  mm
-        # 3.7 mm from CAD model; the offset 1.3 mm is from updated slides of M. Bush on 2024-07-08.
-        z_unit_pen = z_unit_bottom + 3.7 + 1.3 + pen_thickness / 2
 
-        # - note from CAD model: the distance between PEN plate top and detector bottom face varies
-        #   a lot between different diodes (i.e. BEGe's/IC's all(?) use a single standard insulator
-        #   type, and have a distance of 2.1 mm; for PPCs this varies between ca. 2.5 and 4 mm.)
-        z_pos_det = z_unit_pen + pen_thickness / 2 + (2.1 if not det_unit.name.startswith("P") else 3)
+        # - note from CAD model: the distance between PEN plate top and detector bottom is 2.4 mm.
+        pen_thickness = 2.4  #  mm
+        clamp_thickness = 1.8  # mm
+        cable_thickness = 0.076
+        distance_det_to_pen = 2.4  # mm
+
+        z_pos_clamp = z_unit_bottom + clamp_thickness / 2
+        z_pos_cable = z_pos_clamp + clamp_thickness / 2 + cable_thickness / 2
+        z_pos_pen = z_pos_cable + cable_thickness / 2 + pen_thickness / 2
+        z_pos_det = z_pos_pen + pen_thickness / 2 + distance_det_to_pen
 
         det_pv = geant4.PhysicalVolume(
             [0, 0, 0],
@@ -156,7 +154,7 @@ def _place_hpge_string(
         pen_rot = Rotation.from_euler("XZ", [-math.pi, string_rot]).as_euler("xyz")
         pen_pv = geant4.PhysicalVolume(
             list(pen_rot),
-            [x_pos, y_pos, z_unit_pen],
+            [x_pos, y_pos, z_pos_pen],
             pen_plate,
             det_unit.name + "_pen",
             b.mother_lv,
@@ -164,19 +162,74 @@ def _place_hpge_string(
         )
         _add_pen_surfaces(pen_pv, b.mother_pv, b.materials, b.registry)
 
-        # (Majorana) PPC detectors have a top PEN ring.
-        if det_unit.name.startswith("P"):
-            assert det_unit.baseplate == "small"
-            pen_plate = _get_pen_plate("ppc_small", b.materials, b.registry)
-            pen_pv = geant4.PhysicalVolume(
-                [0, 0, string_rot],
-                [x_pos, y_pos, z_pos_det + det_unit.height + 1.5 / 2],
-                pen_plate,
-                det_unit.name + "_pen_top",
-                b.mother_lv,
-                b.registry,
-            )
-            _add_pen_surfaces(pen_pv, b.mother_pv, b.materials, b.registry)
+        # add cable and clamp
+        signal_cable, signal_clamp, signal_asic = _get_signal_cable_insulator_and_asic(
+            det_unit.name, cable_thickness, clamp_thickness, unit_length, b.materials, b.mother_lv, b.registry
+        )
+
+        angle_signal = math.pi * 1 / 2.0 - string_rot
+        clamp_to_origin = 2.5 + 4.0 + 1.5 + 5 / 2
+        cable_to_origin = 2.5 + 4.0 + 16 / 2
+        asic_to_origin = 2.5 + 4.0 + 11 + 1 / 2.0
+        x_clamp = x_pos + clamp_to_origin * np.sin(string_rot)
+        y_clamp = y_pos + clamp_to_origin * np.cos(string_rot)
+        x_cable = x_pos + cable_to_origin * np.sin(string_rot)
+        y_cable = y_pos + cable_to_origin * np.cos(string_rot)
+        x_asic = x_pos + asic_to_origin * np.sin(string_rot)
+        y_asic = y_pos + asic_to_origin * np.cos(string_rot)
+        geant4.PhysicalVolume(
+            [math.pi, 0, angle_signal],
+            [x_cable, y_cable, z_pos_cable],  # this offset of 12 is measured from the CAD file.
+            signal_cable,
+            signal_cable.name + "_string_" + string_id,
+            b.mother_lv,
+            b.registry,
+        )
+        geant4.PhysicalVolume(
+            [math.pi, 0, angle_signal],
+            [x_clamp, y_clamp, z_pos_clamp],  # this offset of 12 is measured from the CAD file.
+            signal_clamp,
+            signal_clamp.name + "_string_" + string_id,
+            b.mother_lv,
+            b.registry,
+        )
+        geant4.PhysicalVolume(
+            [math.pi, 0, angle_signal],
+            [x_asic, y_asic, z_pos_cable + 0.5],  # this offset of 12 is measured from the CAD file.
+            signal_asic,
+            signal_asic.name + "_string_" + string_id,
+            b.mother_lv,
+            b.registry,
+        )
+
+        hv_cable, hv_clamp = _get_hv_cable_and_insulator(
+            det_unit.name, cable_thickness, clamp_thickness, unit_length, b.materials, b.mother_lv, b.registry
+        )
+
+        angle_hv = math.pi * 1 / 2.0 + string_rot
+        clamp_to_origin = 2.5 + 29.5 + 3.5 + 5 / 2
+        cable_to_origin = 2.5 + 29.5 + 2.0 + 8 / 2
+        x_clamp = x_pos - clamp_to_origin * np.sin(string_rot)
+        y_clamp = y_pos - clamp_to_origin * np.cos(string_rot)
+        x_cable = x_pos - cable_to_origin * np.sin(string_rot)
+        y_cable = y_pos - cable_to_origin * np.cos(string_rot)
+
+        geant4.PhysicalVolume(
+            [0, 0, angle_hv],
+            [x_clamp, y_clamp, z_pos_cable],
+            hv_cable,
+            hv_cable.name + "_string_" + string_id,
+            b.mother_lv,
+            b.registry,
+        )
+        geant4.PhysicalVolume(
+            [0, 0, angle_hv],
+            [x_clamp, y_clamp, z_pos_clamp],
+            hv_clamp,
+            hv_clamp.name + "_string_" + string_id,
+            b.mother_lv,
+            b.registry,
+        )
 
     # the copper rod is slightly longer after the last detector.
     copper_rod_length_from_z0 = total_rod_length + 3.5
@@ -298,3 +351,209 @@ def _add_pen_surfaces(
     # between LAr and PEN we need a surface in both directions.
     geant4.BorderSurface("bsurface_lar_pen_" + pen_pv.name, mother_pv, pen_pv, mats.surfaces.lar_to_pen, reg)
     geant4.BorderSurface("bsurface_tpb_pen_" + pen_pv.name, pen_pv, mother_pv, mats.surfaces.lar_to_pen, reg)
+
+
+def _get_hv_cable_and_insulator(
+    name: str,
+    cable_thickness: float,
+    clamp_thickness: float,
+    cable_length: float,
+    materials: materials.OpticalMaterialRegistry,
+    mother_pv: geant4.LogicalVolume,
+    reg: geant4.Registry,
+):
+    hv_cable_under_clamp = geant4.solid.Box(
+        name + "_hv_cable_under_clamp",
+        8,
+        13,
+        cable_thickness,
+        reg,
+        "mm",
+    )
+    hv_cable_clamp_to_curve = geant4.solid.Box(
+        name + "_hv_cable_clamp_to_curve",
+        5.5,
+        2,
+        cable_thickness,
+        reg,
+        "mm",
+    )
+    hv_cable_curve = geant4.solid.Tubs(
+        name + "_hv_cable_curve", 3.08 - cable_thickness, 3.08, 2.0, 0, math.pi / 2.0, reg, "mm"
+    )
+    hv_cable_along_unit = geant4.solid.Box(
+        name + "_hv_along_unit",
+        cable_thickness,
+        2.0,
+        cable_length,
+        reg,
+        "mm",
+    )
+    hv_cable_part1 = geant4.solid.Union(
+        name + "_hv_cable_part1",
+        hv_cable_under_clamp,
+        hv_cable_clamp_to_curve,
+        [[0, 0, 0], [8 / 2.0 + 5.5 / 2.0, 0, 0]],
+        reg,
+    )
+    hv_cable_part2 = geant4.solid.Union(
+        name + "_hv_cable_part2",
+        hv_cable_part1,
+        hv_cable_curve,
+        [[-np.pi / 2, 0, 0], [8 / 2.0 + 5.5, 0, 3.08]],
+        reg,
+    )
+    hv_cable = geant4.solid.Union(
+        name + "_hv_cable",
+        hv_cable_part2,
+        hv_cable_along_unit,
+        [[0, 0, 0], [8 / 2.0 + 5.5 + 3.08 - cable_thickness, 0, cable_length / 2.0]],
+        reg,
+    )
+
+    hv_clamp = geant4.solid.Box(
+        name + "_hv_clamp",
+        5,
+        13,
+        clamp_thickness,
+        reg,
+        "mm",
+    )
+
+    hv_cable_lv = geant4.LogicalVolume(
+        hv_cable,
+        materials.metal_copper,
+        name + "_hv_cable",
+        reg,
+    )
+
+    hv_clamp_lv = geant4.LogicalVolume(
+        hv_clamp,
+        materials.ultem,
+        name + "_hv_clamp",
+        reg,
+    )
+
+    return hv_cable_lv, hv_clamp_lv
+
+
+def _get_signal_cable_insulator_and_asic(
+    name: str,
+    cable_thickness: float,
+    clamp_thickness: float,
+    cable_length: float,
+    materials: materials.OpticalMaterialRegistry,
+    mother_pv: geant4.LogicalVolume,
+    reg: geant4.Registry,
+):
+    signal_cable_under_clamp = geant4.solid.Box(
+        name + "_signal_cable_under_clamp",
+        16,
+        13,
+        cable_thickness,
+        reg,
+        "mm",
+    )
+    signal_cable_clamp_to_curve = geant4.solid.Box(
+        name + "_signal_cable_clamp_to_curve",
+        23.25,
+        2,
+        cable_thickness,
+        reg,
+        "mm",
+    )
+    signal_cable_curve = geant4.solid.Tubs(
+        name + "_signal_cable_curve", 3.08 - cable_thickness, 3.08, 2.0, 0, math.pi / 2.0, reg, "mm"
+    )
+    signal_cable_along_unit = geant4.solid.Box(
+        name + "_signal_along_unit",
+        cable_thickness,
+        2.0,
+        cable_length,
+        reg,
+        "mm",
+    )
+    signal_cable_part1 = geant4.solid.Union(
+        name + "_signal_cable_part1",
+        signal_cable_under_clamp,
+        signal_cable_clamp_to_curve,
+        [[0, 0, 0], [16 / 2.0 + 23.25 / 2.0, 0, 0]],
+        reg,
+    )
+    signal_cable_part2 = geant4.solid.Union(
+        name + "_signal_cable_part2",
+        signal_cable_part1,
+        signal_cable_curve,
+        [[np.pi / 2, 0, 0], [16 / 2.0 + 23.25, 0, -3.08]],
+        reg,
+    )
+    signal_cable = geant4.solid.Union(
+        name + "_signal_cable",
+        signal_cable_part2,
+        signal_cable_along_unit,
+        [[0, 0, 0], [16 / 2.0 + 23.25 + 3.08 - cable_thickness, 0, -3.08 - cable_length / 2.0]],
+        reg,
+    )
+
+    signal_clamp_part1 = geant4.solid.Box(
+        name + "_signal_clamp_part1",
+        5,
+        13,
+        clamp_thickness,
+        reg,
+        "mm",
+    )
+    signal_clamp_part2 = geant4.solid.Box(
+        name + "_signal_clamp_part2",
+        9,
+        2.5,
+        clamp_thickness,
+        reg,
+        "mm",
+    )
+    signal_clamp_part3 = geant4.solid.Union(
+        name + "_signal_clamp_part3",
+        signal_clamp_part1,
+        signal_clamp_part2,
+        [[0, 0, 0], [5 / 2.0 + 9 / 2.0, 13 / 2.0 - 2.5 / 2.0, 0]],
+        reg,
+    )
+    signal_clamp = geant4.solid.Union(
+        name + "_signal_clamp",
+        signal_clamp_part3,
+        signal_clamp_part2,
+        [[0, 0, 0], [5 / 2.0 + 9 / 2.0, -13 / 2.0 + 2.5 / 2.0, 0]],
+        reg,
+    )
+
+    signal_asic = geant4.solid.Box(
+        name + "_signal_asic",
+        1,
+        1,
+        0.5,
+        reg,
+        "mm",
+    )
+
+    signal_cable_lv = geant4.LogicalVolume(
+        signal_cable,
+        materials.metal_copper,
+        name + "_signal_cable",
+        reg,
+    )
+
+    signal_clamp_lv = geant4.LogicalVolume(
+        signal_clamp,
+        materials.ultem,
+        name + "_signal_clamp",
+        reg,
+    )
+
+    signal_asic_lv = geant4.LogicalVolume(
+        signal_asic,
+        materials.silica,
+        name + "_signal_asic",
+        reg,
+    )
+
+    return signal_cable_lv, signal_clamp_lv, signal_asic_lv

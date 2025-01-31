@@ -396,3 +396,39 @@ class OpticalMaterialRegistry:
         legendoptics.pen.pyg4_pen_attach_scintillation(self._pen, self.g4_registry)
 
         return self._pen
+
+    @property
+    def ultem(self) -> g4.Material:
+        """Ultem for the cable insulator."""
+        if hasattr(self, "_ultem"):
+            return self._ultem
+
+        self._ultem = g4.Material(
+            name="ultem",
+            density=1.27,
+            number_of_components=4,
+            registry=self.g4_registry,
+        )
+        self._ultem.add_element_natoms(self.get_element("C"), natoms=37)
+        self._ultem.add_element_natoms(self.get_element("H"), natoms=24)
+        self._ultem.add_element_natoms(self.get_element("O"), natoms=6)
+        self._ultem.add_element_natoms(self.get_element("N"), natoms=2)
+
+        return self._ultem
+
+    @property
+    def silica(self) -> g4.Material:
+        """Silica for the fiber core."""
+        if hasattr(self, "_silica"):
+            return self._silica
+
+        self._silica = g4.Material(
+            name="silica",
+            density=2.2,
+            number_of_components=2,
+            registry=self.g4_registry,
+        )
+        self._silica.add_element_natoms(self.get_element("Si"), natoms=1)
+        self._silica.add_element_natoms(self.get_element("O"), natoms=2)
+
+        return self._silica
