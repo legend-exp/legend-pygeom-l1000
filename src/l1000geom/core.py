@@ -8,7 +8,7 @@ from pyg4ometry import geant4
 from pygeomtools import detectors, geometry, visualization
 from pygeomtools.utils import load_dict_from_config
 
-from . import cryo, fibers, hpge_strings, materials, watertank
+from . import cryo, fibers, hpge_strings, materials, watertank, watertank_instrumentation
 
 lmeta = LegendMetadata()
 configs = TextDB(resources.files("l1000geom") / "configs")

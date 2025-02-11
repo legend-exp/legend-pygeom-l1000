@@ -1,7 +1,8 @@
 {
   "dummy_dets": {
     "hpge": "V04199A",
-    "spms": "S060"
+    "spms": "S060",
+    "pmts": "PMT202"
   },
   "string": {
     "units": {
@@ -39,6 +40,35 @@
       "front-end_and_insulators": "place",
       "PEN_plates": "stl",
       "HPGe_dets": "metadata"
+    }
+  },
+  "pmts": {
+    "floor": {
+      "row1": {
+        "id": 1,
+        "n": 50,
+        "r": 4400
+      },
+      "row2": {
+        "id": 2,
+        "n": 30,
+        "r": 3000
+      },
+      "row3": {
+        "id": 3,
+        "n": 15,
+        "r": 1800
+      },
+      "row4": {
+        "id": 4,
+        "n": 8,
+        "r": 800
+      },
+      "row5": {
+        "id": 5,
+        "n": 1,
+        "r": 0
+      }
     }
   }
 }

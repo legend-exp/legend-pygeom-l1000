@@ -70474,5 +70474,2397 @@
       "processable": true,
       "usability": "on"
     }
+  },
+  "PMT0101": {
+    "name": "PMT0101",
+    "system": "pmts",
+    "location": {
+      "x": 4400.0,
+      "y": 0.0,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0102": {
+    "name": "PMT0102",
+    "system": "pmts",
+    "location": {
+      "x": 4365.304685783703,
+      "y": 551.4662276829388,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0103": {
+    "name": "PMT0103",
+    "system": "pmts",
+    "location": {
+      "x": 4261.765908965976,
+      "y": 1094.235503525361,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0104": {
+    "name": "PMT0104",
+    "system": "pmts",
+    "location": {
+      "x": 4091.016537908306,
+      "y": 1619.7480318125831,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0105": {
+    "name": "PMT0105",
+    "system": "pmts",
+    "location": {
+      "x": 3855.749392193,
+      "y": 2119.7161660475476,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0106": {
+    "name": "PMT0106",
+    "system": "pmts",
+    "location": {
+      "x": 3559.6747752497686,
+      "y": 2586.255110086882,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0107": {
+    "name": "PMT0107",
+    "system": "pmts",
+    "location": {
+      "x": 3207.461960654211,
+      "y": 3012.00726608623,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0108": {
+    "name": "PMT0108",
+    "system": "pmts",
+    "location": {
+      "x": 2804.665554894235,
+      "y": 3390.2582682134725,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0109": {
+    "name": "PMT0109",
+    "system": "pmts",
+    "location": {
+      "x": 2357.637897907585,
+      "y": 3715.0428722088664,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0110": {
+    "name": "PMT0110",
+    "system": "pmts",
+    "location": {
+      "x": 1873.4288828863198,
+      "y": 3981.239030850486,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0111": {
+    "name": "PMT0111",
+    "system": "pmts",
+    "location": {
+      "x": 1359.6747752497688,
+      "y": 4184.648671698676,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0112": {
+    "name": "PMT0112",
+    "system": "pmts",
+    "location": {
+      "x": 824.4777841771879,
+      "y": 4322.06390320623,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0113": {
+    "name": "PMT0113",
+    "system": "pmts",
+    "location": {
+      "x": 276.27828592897856,
+      "y": 4391.317605084395,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0114": {
+    "name": "PMT0114",
+    "system": "pmts",
+    "location": {
+      "x": -276.27828592897896,
+      "y": 4391.317605084395,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0115": {
+    "name": "PMT0115",
+    "system": "pmts",
+    "location": {
+      "x": -824.4777841771883,
+      "y": 4322.06390320623,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0116": {
+    "name": "PMT0116",
+    "system": "pmts",
+    "location": {
+      "x": -1359.6747752497683,
+      "y": 4184.6486716986765,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0117": {
+    "name": "PMT0117",
+    "system": "pmts",
+    "location": {
+      "x": -1873.42888288632,
+      "y": 3981.2390308504855,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0118": {
+    "name": "PMT0118",
+    "system": "pmts",
+    "location": {
+      "x": -2357.637897907586,
+      "y": 3715.042872208866,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0119": {
+    "name": "PMT0119",
+    "system": "pmts",
+    "location": {
+      "x": -2804.665554894235,
+      "y": 3390.2582682134725,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0120": {
+    "name": "PMT0120",
+    "system": "pmts",
+    "location": {
+      "x": -3207.4619606542115,
+      "y": 3012.0072660862293,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0121": {
+    "name": "PMT0121",
+    "system": "pmts",
+    "location": {
+      "x": -3559.674775249768,
+      "y": 2586.2551100868823,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0122": {
+    "name": "PMT0122",
+    "system": "pmts",
+    "location": {
+      "x": -3855.749392193,
+      "y": 2119.7161660475467,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0123": {
+    "name": "PMT0123",
+    "system": "pmts",
+    "location": {
+      "x": -4091.0165379083064,
+      "y": 1619.7480318125822,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0124": {
+    "name": "PMT0124",
+    "system": "pmts",
+    "location": {
+      "x": -4261.765908965976,
+      "y": 1094.2355035253613,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0125": {
+    "name": "PMT0125",
+    "system": "pmts",
+    "location": {
+      "x": -4365.304685783703,
+      "y": 551.466227682938,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0126": {
+    "name": "PMT0126",
+    "system": "pmts",
+    "location": {
+      "x": -4400.0,
+      "y": 5.388445916248355e-13,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0127": {
+    "name": "PMT0127",
+    "system": "pmts",
+    "location": {
+      "x": -4365.304685783703,
+      "y": -551.4662276829389,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0128": {
+    "name": "PMT0128",
+    "system": "pmts",
+    "location": {
+      "x": -4261.765908965976,
+      "y": -1094.235503525362,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0129": {
+    "name": "PMT0129",
+    "system": "pmts",
+    "location": {
+      "x": -4091.0165379083064,
+      "y": -1619.748031812583,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0130": {
+    "name": "PMT0130",
+    "system": "pmts",
+    "location": {
+      "x": -3855.7493921929995,
+      "y": -2119.7161660475476,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0131": {
+    "name": "PMT0131",
+    "system": "pmts",
+    "location": {
+      "x": -3559.6747752497695,
+      "y": -2586.2551100868814,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0132": {
+    "name": "PMT0132",
+    "system": "pmts",
+    "location": {
+      "x": -3207.461960654211,
+      "y": -3012.00726608623,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0133": {
+    "name": "PMT0133",
+    "system": "pmts",
+    "location": {
+      "x": -2804.665554894234,
+      "y": -3390.258268213473,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0134": {
+    "name": "PMT0134",
+    "system": "pmts",
+    "location": {
+      "x": -2357.637897907587,
+      "y": -3715.0428722088654,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0135": {
+    "name": "PMT0135",
+    "system": "pmts",
+    "location": {
+      "x": -1873.4288828863175,
+      "y": -3981.2390308504873,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0136": {
+    "name": "PMT0136",
+    "system": "pmts",
+    "location": {
+      "x": -1359.6747752497693,
+      "y": -4184.648671698676,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0137": {
+    "name": "PMT0137",
+    "system": "pmts",
+    "location": {
+      "x": -824.4777841771884,
+      "y": -4322.06390320623,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0138": {
+    "name": "PMT0138",
+    "system": "pmts",
+    "location": {
+      "x": -276.2782859289781,
+      "y": -4391.317605084395,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0139": {
+    "name": "PMT0139",
+    "system": "pmts",
+    "location": {
+      "x": 276.2782859289804,
+      "y": -4391.317605084395,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0140": {
+    "name": "PMT0140",
+    "system": "pmts",
+    "location": {
+      "x": 824.4777841771905,
+      "y": -4322.06390320623,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0141": {
+    "name": "PMT0141",
+    "system": "pmts",
+    "location": {
+      "x": 1359.674775249768,
+      "y": -4184.6486716986765,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0142": {
+    "name": "PMT0142",
+    "system": "pmts",
+    "location": {
+      "x": 1873.4288828863196,
+      "y": -3981.239030850486,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0143": {
+    "name": "PMT0143",
+    "system": "pmts",
+    "location": {
+      "x": 2357.6378979075857,
+      "y": -3715.042872208866,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0144": {
+    "name": "PMT0144",
+    "system": "pmts",
+    "location": {
+      "x": 2804.665554894236,
+      "y": -3390.2582682134716,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0145": {
+    "name": "PMT0145",
+    "system": "pmts",
+    "location": {
+      "x": 3207.4619606542124,
+      "y": -3012.0072660862284,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0146": {
+    "name": "PMT0146",
+    "system": "pmts",
+    "location": {
+      "x": 3559.674775249768,
+      "y": -2586.2551100868827,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0147": {
+    "name": "PMT0147",
+    "system": "pmts",
+    "location": {
+      "x": 3855.749392193,
+      "y": -2119.7161660475476,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0148": {
+    "name": "PMT0148",
+    "system": "pmts",
+    "location": {
+      "x": 4091.0165379083064,
+      "y": -1619.7480318125827,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0149": {
+    "name": "PMT0149",
+    "system": "pmts",
+    "location": {
+      "x": 4261.765908965977,
+      "y": -1094.2355035253597,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0150": {
+    "name": "PMT0150",
+    "system": "pmts",
+    "location": {
+      "x": 4365.304685783703,
+      "y": -551.4662276829366,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0201": {
+    "name": "PMT0201",
+    "system": "pmts",
+    "location": {
+      "x": 3000.0,
+      "y": 0.0,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0202": {
+    "name": "PMT0202",
+    "system": "pmts",
+    "location": {
+      "x": 2934.442802201417,
+      "y": 623.735072453278,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0203": {
+    "name": "PMT0203",
+    "system": "pmts",
+    "location": {
+      "x": 2740.6363729278028,
+      "y": 1220.2099292274006,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0204": {
+    "name": "PMT0204",
+    "system": "pmts",
+    "location": {
+      "x": 2427.0509831248423,
+      "y": 1763.3557568774195,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0205": {
+    "name": "PMT0205",
+    "system": "pmts",
+    "location": {
+      "x": 2007.3918190765746,
+      "y": 2229.4344764321827,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0206": {
+    "name": "PMT0206",
+    "system": "pmts",
+    "location": {
+      "x": 1500.0000000000002,
+      "y": 2598.076211353316,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0207": {
+    "name": "PMT0207",
+    "system": "pmts",
+    "location": {
+      "x": 927.0509831248423,
+      "y": 2853.1695488854607,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0208": {
+    "name": "PMT0208",
+    "system": "pmts",
+    "location": {
+      "x": 313.5853898029604,
+      "y": 2983.56568610482,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0209": {
+    "name": "PMT0209",
+    "system": "pmts",
+    "location": {
+      "x": -313.58538980296066,
+      "y": 2983.56568610482,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0210": {
+    "name": "PMT0210",
+    "system": "pmts",
+    "location": {
+      "x": -927.050983124842,
+      "y": 2853.169548885461,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0211": {
+    "name": "PMT0211",
+    "system": "pmts",
+    "location": {
+      "x": -1499.9999999999993,
+      "y": 2598.076211353316,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0212": {
+    "name": "PMT0212",
+    "system": "pmts",
+    "location": {
+      "x": -2007.3918190765746,
+      "y": 2229.4344764321827,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0213": {
+    "name": "PMT0213",
+    "system": "pmts",
+    "location": {
+      "x": -2427.050983124842,
+      "y": 1763.3557568774197,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0214": {
+    "name": "PMT0214",
+    "system": "pmts",
+    "location": {
+      "x": -2740.6363729278023,
+      "y": 1220.2099292274013,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0215": {
+    "name": "PMT0215",
+    "system": "pmts",
+    "location": {
+      "x": -2934.442802201417,
+      "y": 623.7350724532779,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0216": {
+    "name": "PMT0216",
+    "system": "pmts",
+    "location": {
+      "x": -3000.0,
+      "y": 3.6739403974420595e-13,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0217": {
+    "name": "PMT0217",
+    "system": "pmts",
+    "location": {
+      "x": -2934.4428022014167,
+      "y": -623.7350724532786,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0218": {
+    "name": "PMT0218",
+    "system": "pmts",
+    "location": {
+      "x": -2740.6363729278028,
+      "y": -1220.2099292274006,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0219": {
+    "name": "PMT0219",
+    "system": "pmts",
+    "location": {
+      "x": -2427.050983124843,
+      "y": -1763.355756877419,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0220": {
+    "name": "PMT0220",
+    "system": "pmts",
+    "location": {
+      "x": -2007.3918190765744,
+      "y": -2229.434476432183,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0221": {
+    "name": "PMT0221",
+    "system": "pmts",
+    "location": {
+      "x": -1500.0000000000014,
+      "y": -2598.076211353315,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0222": {
+    "name": "PMT0222",
+    "system": "pmts",
+    "location": {
+      "x": -927.0509831248427,
+      "y": -2853.1695488854607,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0223": {
+    "name": "PMT0223",
+    "system": "pmts",
+    "location": {
+      "x": -313.5853898029601,
+      "y": -2983.56568610482,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0224": {
+    "name": "PMT0224",
+    "system": "pmts",
+    "location": {
+      "x": 313.58538980295896,
+      "y": -2983.56568610482,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0225": {
+    "name": "PMT0225",
+    "system": "pmts",
+    "location": {
+      "x": 927.0509831248417,
+      "y": -2853.169548885461,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0226": {
+    "name": "PMT0226",
+    "system": "pmts",
+    "location": {
+      "x": 1500.0000000000002,
+      "y": -2598.076211353316,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0227": {
+    "name": "PMT0227",
+    "system": "pmts",
+    "location": {
+      "x": 2007.3918190765735,
+      "y": -2229.4344764321836,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0228": {
+    "name": "PMT0228",
+    "system": "pmts",
+    "location": {
+      "x": 2427.050983124842,
+      "y": -1763.3557568774202,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0229": {
+    "name": "PMT0229",
+    "system": "pmts",
+    "location": {
+      "x": 2740.6363729278028,
+      "y": -1220.2099292274004,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0230": {
+    "name": "PMT0230",
+    "system": "pmts",
+    "location": {
+      "x": 2934.4428022014167,
+      "y": -623.7350724532796,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0301": {
+    "name": "PMT0301",
+    "system": "pmts",
+    "location": {
+      "x": 1800.0,
+      "y": 0.0,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0302": {
+    "name": "PMT0302",
+    "system": "pmts",
+    "location": {
+      "x": 1644.3818237566816,
+      "y": 732.1259575364404,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0303": {
+    "name": "PMT0303",
+    "system": "pmts",
+    "location": {
+      "x": 1204.4350914459449,
+      "y": 1337.6606858593098,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0304": {
+    "name": "PMT0304",
+    "system": "pmts",
+    "location": {
+      "x": 556.2305898749054,
+      "y": 1711.9017293312763,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0305": {
+    "name": "PMT0305",
+    "system": "pmts",
+    "location": {
+      "x": -188.1512338817764,
+      "y": 1790.139411662892,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0306": {
+    "name": "PMT0306",
+    "system": "pmts",
+    "location": {
+      "x": -899.9999999999995,
+      "y": 1558.8457268119896,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0307": {
+    "name": "PMT0307",
+    "system": "pmts",
+    "location": {
+      "x": -1456.2305898749053,
+      "y": 1058.0134541264517,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0308": {
+    "name": "PMT0308",
+    "system": "pmts",
+    "location": {
+      "x": -1760.6656813208501,
+      "y": 374.24104347196675,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0309": {
+    "name": "PMT0309",
+    "system": "pmts",
+    "location": {
+      "x": -1760.6656813208501,
+      "y": -374.2410434719671,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0310": {
+    "name": "PMT0310",
+    "system": "pmts",
+    "location": {
+      "x": -1456.2305898749057,
+      "y": -1058.0134541264515,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0311": {
+    "name": "PMT0311",
+    "system": "pmts",
+    "location": {
+      "x": -900.0000000000008,
+      "y": -1558.8457268119892,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0312": {
+    "name": "PMT0312",
+    "system": "pmts",
+    "location": {
+      "x": -188.15123388177605,
+      "y": -1790.1394116628921,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0313": {
+    "name": "PMT0313",
+    "system": "pmts",
+    "location": {
+      "x": 556.230589874905,
+      "y": -1711.9017293312766,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0314": {
+    "name": "PMT0314",
+    "system": "pmts",
+    "location": {
+      "x": 1204.435091445944,
+      "y": -1337.6606858593102,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0315": {
+    "name": "PMT0315",
+    "system": "pmts",
+    "location": {
+      "x": 1644.3818237566818,
+      "y": -732.1259575364403,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0401": {
+    "name": "PMT0401",
+    "system": "pmts",
+    "location": {
+      "x": 800.0,
+      "y": 0.0,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0402": {
+    "name": "PMT0402",
+    "system": "pmts",
+    "location": {
+      "x": 565.685424949238,
+      "y": 565.6854249492379,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0403": {
+    "name": "PMT0403",
+    "system": "pmts",
+    "location": {
+      "x": 4.898587196589413e-14,
+      "y": 800.0,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0404": {
+    "name": "PMT0404",
+    "system": "pmts",
+    "location": {
+      "x": -565.6854249492379,
+      "y": 565.685424949238,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0405": {
+    "name": "PMT0405",
+    "system": "pmts",
+    "location": {
+      "x": -800.0,
+      "y": 9.797174393178826e-14,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0406": {
+    "name": "PMT0406",
+    "system": "pmts",
+    "location": {
+      "x": -565.6854249492382,
+      "y": -565.6854249492379,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0407": {
+    "name": "PMT0407",
+    "system": "pmts",
+    "location": {
+      "x": -1.4695761589768238e-13,
+      "y": -800.0,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0408": {
+    "name": "PMT0408",
+    "system": "pmts",
+    "location": {
+      "x": 565.6854249492379,
+      "y": -565.6854249492382,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
+  },
+  "PMT0501": {
+    "name": "PMT0501",
+    "system": "pmts",
+    "location": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0
+    },
+    "daq": {
+      "crate": 3,
+      "card": {
+        "id": 1,
+        "address": "0x20",
+        "serialno": null
+      },
+      "channel": 1,
+      "rawid": 2003201
+    },
+    "analysis": {
+      "processable": true,
+      "usability": "on"
+    }
   }
 }

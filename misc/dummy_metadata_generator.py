@@ -110,7 +110,14 @@ def generate_special_metadata(output_path: str, config: dict, string_idx: list, 
 
 
 def generate_channelmap(
-    output_path: str, hpge_data: dict, hpge_names: list, hpge_rawid: list, string_idx: list, spms_data: dict
+    output_path: str,
+    hpge_data: dict,
+    hpge_names: list,
+    hpge_rawid: list,
+    string_idx: list,
+    spms_data: dict,
+    pmts_meta: dict,
+    pmts_pos: dict,
 ) -> None:
     """Generate channelmap.json file."""
 
@@ -138,6 +145,21 @@ def generate_channelmap(
             channelmap[name]["location"]["fiber"] = name[:-1]
             channelmap[name]["location"]["position"] = "bottom"
             channelmap[name]["location"]["barrel"] = string + 1
+
+    for row in pmts_pos["floor"].values():
+        row_index = row["id"]
+        pmts_in_row = row["n"]
+        radius = row["r"]
+
+        for i in range(pmts_in_row):
+            name = f"PMT0{row_index}{i+1:02d}"
+            x = radius * np.cos(np.radians(360 / pmts_in_row * i))
+            y = radius * np.sin(np.radians(360 / pmts_in_row * i))
+            z = 0.0
+
+            channelmap[name] = copy.deepcopy(pmts_meta)
+            channelmap[name]["name"] = name
+            channelmap[name]["location"] = {"x": x, "y": y, "z": z}
 
     with Path(output_path).open("w") as f:
         json.dump(channelmap, f, cls=NpEncoder, indent=4)
@@ -172,8 +194,13 @@ def main():
 
     spms_data = chm[config["dummy_dets"]["spms"]]
 
+    pmts_meta = chm[config["dummy_dets"]["pmts"]]
+    pmts_pos = config["pmts"]
+
     generate_special_metadata(args.output_special_metadata, config, string_idx, hpge_names)
-    generate_channelmap(args.output_channelmap, hpge_data, hpge_names, hpge_rawid, string_idx, spms_data)
+    generate_channelmap(
+        args.output_channelmap, hpge_data, hpge_names, hpge_rawid, string_idx, spms_data, pmts_meta, pmts_pos
+    )
 
 
 if __name__ == "__main__":
