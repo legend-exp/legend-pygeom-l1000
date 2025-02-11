@@ -67,18 +67,11 @@ def dump_gdml_cli() -> None:
         help="""Select the assemblies to generate in the output. (default: %(default)s)""",
     )
     geom_opts.add_argument(
-        "--fiber-modules",
+        "--detail",
         action="store",
-        choices=("segmented", "detailed"),
-        default="segmented",
-        help="""Select the fiber shroud model, either coarse segments or single fibers. (default: %(default)s)""",
-    )
-    geom_opts.add_argument(
-        "--tank-detail",
-        action="store",
-        choices=("low", "medium", "high"),
-        default="low",
-        help="""Select the detail level for the water tank. (default: %(default)s)""",
+        choices=("cosmogenic", "close_detector"),
+        default="cosmogenic",
+        help="""Select the detail level for the setup. (default: %(default)s)""",
     )
     geom_opts.add_argument(
         "--config",
@@ -111,8 +104,7 @@ def dump_gdml_cli() -> None:
 
     registry = core.construct(
         assemblies=args.assemblies.split(","),
-        tank_detail_level=args.tank_detail,
-        use_detailed_fiber_model=args.fiber_modules == "detailed",
+        detail_level=args.detail,
         config=config,
     )
 

@@ -15,8 +15,6 @@ configs = TextDB(resources.files("l1000geom") / "configs")
 
 DEFINED_ASSEMBLIES = ["tank", "strings", "fibers"]
 
-TANK_DETAIL_LEVELS = ["low", "medium", "high"]
-
 
 class InstrumentationData(NamedTuple):
     mother_lv: geant4.LogicalVolume
@@ -40,22 +38,30 @@ class InstrumentationData(NamedTuple):
     top_plate_z_pos: float
     """The z coordinate of the top face of the array top plate."""
 
+    detail_level: str
+    """The chosen detail level by the user. Used to navigate to the corresponding entry in the special metadata."""
+
 
 def construct(
     assemblies: list[str] = DEFINED_ASSEMBLIES,
-    tank_detail_level: str = "low",
-    use_detailed_fiber_model: bool = True,
+    detail_level: str = "cosmogenic",
     config: dict | None = None,
 ) -> geant4.Registry:
     """Construct the LEGEND-1000 geometry and return the pyg4ometry Registry containing the world volume."""
     if set(assemblies) - set(DEFINED_ASSEMBLIES) != set():
         msg = "invalid geometrical assembly specified"
         raise ValueError(msg)
-    if tank_detail_level not in TANK_DETAIL_LEVELS:
-        msg = "invalid tank detail level specified"
-        raise ValueError(msg)
 
     config = config if config is not None else {}
+
+    channelmap = load_dict_from_config(config, "channelmap", lambda: AttrsDict(configs["channelmap.json"]))
+    special_metadata = load_dict_from_config(
+        config, "special_metadata", lambda: AttrsDict(configs["special_metadata.yaml"])
+    )
+
+    if detail_level not in special_metadata["detail"]:
+        msg = "invalid detail level specified"
+        raise ValueError(msg)
 
     reg = geant4.Registry()
     mats = materials.OpticalMaterialRegistry(reg)
@@ -70,17 +76,21 @@ def construct(
     cryo_z_displacement = 0
     cryostat_lv = cryo.construct_cryostat(mats.metal_steel, reg)
 
-    if "tank" in assemblies:
+    if ("tank" in assemblies) and (special_metadata["detail"][detail_level]["watertank"] != "omit"):
         # TODO: Shift the global coordinate system that z=0 is a reasonable value for defining hit positions.
         tank_z_displacement = -5000
 
         # Create and place the water tank
-        tank_lv = watertank.construct_tank(mats.metal_steel, reg, tank_detail_level)
+        tank_lv = watertank.construct_tank(
+            mats.metal_steel, reg, special_metadata["detail"][detail_level]["watertank"]
+        )
         watertank.place_tank(tank_lv, world_lv, tank_z_displacement, reg)
 
         # TODO: Make optical water material and use for optical volumes
         water_material = geant4.MaterialPredefined("G4_WATER")
-        water_lv = watertank.construct_water(water_material, reg, tank_detail_level)
+        water_lv = watertank.construct_water(
+            water_material, reg, special_metadata["detail"][detail_level]["watertank"]
+        )
         watertank.place_water(water_lv, tank_lv, reg)
 
         cryo_z_displacement = 5000
@@ -98,20 +108,27 @@ def construct(
     #    channelmap = load_dict_from_config(config, "channelmap", lambda: lmeta.channelmap(timestamp))
     #    special_metadata = load_dict_from_config(config, "special_metadata", lambda: configs.on(timestamp))
 
-    channelmap = load_dict_from_config(config, "channelmap", lambda: AttrsDict(configs["channelmap.json"]))
-    special_metadata = load_dict_from_config(
-        config, "special_metadata", lambda: AttrsDict(configs["special_metadata.yaml"])
-    )
-
     instr = InstrumentationData(
-        lar_lv, lar_pv, mats, reg, channelmap, special_metadata, AttrsDict(config), top_plate_z_pos
+        lar_lv,
+        lar_pv,
+        mats,
+        reg,
+        channelmap,
+        special_metadata,
+        AttrsDict(config),
+        top_plate_z_pos,
+        detail_level,
     )
 
     # Place all other instrumentation into the liquid argon
     if "strings" in assemblies:
         hpge_strings.place_hpge_strings(instr)
     if "fibers" in assemblies:
-        fibers.place_fiber_modules(special_metadata["fibers"], instr, use_detailed_fiber_model)
+        fibers.place_fiber_modules(
+            special_metadata["fibers"],
+            instr,
+            special_metadata["detail"][detail_level]["fiber_curtain"] == "detailed",
+        )
 
     _assign_common_copper_surface(instr)
 

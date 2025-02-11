@@ -252,25 +252,21 @@ def construct_manhole(base: g4.solid, reg: g4.Registry):
     )
 
 
-def construct_tank(tank_material: g4.Material, reg: g4.Registry, detail: str = "low") -> g4.LogicalVolume:
+def construct_tank(tank_material: g4.Material, reg: g4.Registry, detail: str = "simple") -> g4.LogicalVolume:
     """Construct the tank volume.
 
-    detail: Level of tank detail. Can be 'low', 'medium' or 'high'.
-    low: Only the base polycone of the tank is constructed.
-    medium: The base polycone and the bulge on top of the tank are constructed.
-    high: Base, Bulge, Manhole and Flanges are constructed.
+    detail: Level of tank detail. Can be 'simple' or 'detailed'.
+    simple: Only the base polycone of the tank is constructed.
+    detailed: Base, Bulge, Manhole and Flanges are constructed.
     """
 
     base = construct_base("tank", reg)
-    if detail == "low":
+    if detail == "simple":
         return g4.LogicalVolume(base, tank_material, "tank", reg)
 
     tank_medium = construct_bulge("tank", base, reg)
 
-    if detail == "medium":
-        return g4.LogicalVolume(tank_medium, tank_material, "tank", reg)
-
-    if detail != "high":
+    if detail != "detailed":
         msg = "invalid tank detail level specified"
         raise ValueError(msg)
 
@@ -289,16 +285,17 @@ def place_tank(
     return g4.PhysicalVolume([0, 0, 0], [0, 0, tank_displacement_z], tank_lv, "tank", wl, reg)
 
 
-def construct_water(water_material: g4.Material, reg: g4.Registry, detail: str = "low") -> g4.LogicalVolume:
+def construct_water(
+    water_material: g4.Material, reg: g4.Registry, detail: str = "simple"
+) -> g4.LogicalVolume:
     """Construct the water volume.
 
-    detail: Level of tank detail. Can be 'low', 'medium' or 'high'.
-    low: Only the base polycone of the water is constructed.
-    medium: The base polycone and the bulge on top of the tank are constructed.
-    high: Same as medium for water. The water volume is not affected by the flanges and manhole.
+    detail: Level of tank detail. Can be 'simple' or 'detailed'.
+    simple: Only the base polycone of the water is constructed.
+    detailed: The base polycone and the bulge on top of the tank are constructed.
     """
     base = construct_base("water", reg, v_wall=tank_vertical_wall, h_wall=tank_horizontal_wall)
-    if detail == "low":
+    if detail == "simple":
         return g4.LogicalVolume(base, water_material, "tank_water", reg)
 
     water = construct_bulge("water", base, reg, v_wall=tank_vertical_wall, h_wall=tank_horizontal_wall)

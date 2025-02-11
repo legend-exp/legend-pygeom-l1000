@@ -12,5 +12,31 @@
       "r": 1.5,
       "r_offset_from_center": 51
     }
+  },
+  "detail": {
+    "cosmogenic": {
+      "cavern": "omit",
+      "labs": "omit",
+      "watertank": "simple",
+      "scaffolding": "omit",
+      "nm_plastic": "simple",
+      "nm_holding_structure": "omit",
+      "fiber_curtain": "simple",
+      "front-end_electronics": "place",
+      "PEN_plates": "stl",
+      "HPGe_dets": "metadata"
+    },
+    "close_detector": {
+      "cavern": "omit",
+      "labs": "omit",
+      "watertank": "omit",
+      "scaffolding": "omit",
+      "nm_plastic": "stl",
+      "nm_holding_structure": "simple",
+      "fiber_curtain": "detailed",
+      "front-end_electronics": "place",
+      "PEN_plates": "stl",
+      "HPGe_dets": "metadata"
+    }
   }
 }
