@@ -104,15 +104,17 @@ def _place_hpge_string(
         z_unit_bottom = z0_string - total_rod_length
 
         # - note from CAD model: the distance between PEN plate top and detector bottom is 2.4 mm.
-        pen_thickness = 2.4  #  mm
+        pen_thickness = 1.5  # mm
+        pen_offset = -0.2
         clamp_thickness = 1.8  # mm
         cable_thickness = 0.076
         distance_det_to_pen = 2.4  # mm
+        safety_margin = 0.001  # 0.001 # 1 micro meter
 
-        z_pos_clamp = z_unit_bottom + clamp_thickness / 2
-        z_pos_cable = z_pos_clamp + clamp_thickness / 2 + cable_thickness / 2
-        z_pos_pen = z_pos_cable + cable_thickness / 2 + pen_thickness / 2
-        z_pos_det = z_pos_pen + pen_thickness / 2 + distance_det_to_pen
+        z_pos_clamp = z_unit_bottom + clamp_thickness / 2.0
+        z_pos_cable = z_pos_clamp + clamp_thickness / 2.0 + cable_thickness / 2.0 + safety_margin
+        z_pos_pen = z_pos_cable + cable_thickness / 2.0 + pen_thickness / 2.0 - pen_offset + safety_margin
+        z_pos_det = z_pos_pen + pen_thickness / 2.0 + distance_det_to_pen + safety_margin
 
         det_pv = geant4.PhysicalVolume(
             [0, 0, 0],
@@ -195,7 +197,7 @@ def _place_hpge_string(
         )
         geant4.PhysicalVolume(
             [math.pi, 0, angle_signal],
-            [x_asic, y_asic, z_pos_cable + 0.5],  # this offset of 12 is measured from the CAD file.
+            [x_asic, y_asic, z_pos_cable - 0.5],  # this offset of 12 is measured from the CAD file.
             signal_asic,
             signal_asic.name + "_string_" + string_id,
             b.mother_lv,
@@ -362,6 +364,9 @@ def _get_hv_cable_and_insulator(
     mother_pv: geant4.LogicalVolume,
     reg: geant4.Registry,
 ):
+    safety_margin = 1  # mm
+    cable_length -= safety_margin
+
     hv_cable_under_clamp = geant4.solid.Box(
         name + "_hv_cable_under_clamp",
         8,
@@ -378,9 +383,11 @@ def _get_hv_cable_and_insulator(
         reg,
         "mm",
     )
+
     hv_cable_curve = geant4.solid.Tubs(
-        name + "_hv_cable_curve", 3.08 - cable_thickness, 3.08, 2.0, 0, math.pi / 2.0, reg, "mm"
+        name + "_hv_cable_curve", 3.08, 3.08 + cable_thickness, 2.0, 0, math.pi / 2.0, reg, "mm"
     )
+
     hv_cable_along_unit = geant4.solid.Box(
         name + "_hv_along_unit",
         cable_thickness,
@@ -389,6 +396,7 @@ def _get_hv_cable_and_insulator(
         reg,
         "mm",
     )
+
     hv_cable_part1 = geant4.solid.Union(
         name + "_hv_cable_part1",
         hv_cable_under_clamp,
@@ -396,18 +404,20 @@ def _get_hv_cable_and_insulator(
         [[0, 0, 0], [8 / 2.0 + 5.5 / 2.0, 0, 0]],
         reg,
     )
+
     hv_cable_part2 = geant4.solid.Union(
         name + "_hv_cable_part2",
         hv_cable_part1,
         hv_cable_curve,
-        [[-np.pi / 2, 0, 0], [8 / 2.0 + 5.5, 0, 3.08]],
+        [[-np.pi / 2, 0, 0], [8 / 2.0 + 5.5, 0, 3.08 + cable_thickness / 2.0]],
         reg,
     )
+
     hv_cable = geant4.solid.Union(
         name + "_hv_cable",
         hv_cable_part2,
         hv_cable_along_unit,
-        [[0, 0, 0], [8 / 2.0 + 5.5 + 3.08 - cable_thickness, 0, cable_length / 2.0]],
+        [[0, 0, 0], [8 / 2.0 + 5.5 + 3.08 + cable_thickness / 2.0, 0, 3.08 + cable_length / 2.0]],
         reg,
     )
 
@@ -446,6 +456,9 @@ def _get_signal_cable_insulator_and_asic(
     mother_pv: geant4.LogicalVolume,
     reg: geant4.Registry,
 ):
+    safety_margin = 1  # mm
+    cable_length -= safety_margin
+
     signal_cable_under_clamp = geant4.solid.Box(
         name + "_signal_cable_under_clamp",
         16,
@@ -463,7 +476,7 @@ def _get_signal_cable_insulator_and_asic(
         "mm",
     )
     signal_cable_curve = geant4.solid.Tubs(
-        name + "_signal_cable_curve", 3.08 - cable_thickness, 3.08, 2.0, 0, math.pi / 2.0, reg, "mm"
+        name + "_signal_cable_curve", 3.08, 3.08 + cable_thickness, 2.0, 0, math.pi / 2.0, reg, "mm"
     )
     signal_cable_along_unit = geant4.solid.Box(
         name + "_signal_along_unit",
@@ -484,14 +497,14 @@ def _get_signal_cable_insulator_and_asic(
         name + "_signal_cable_part2",
         signal_cable_part1,
         signal_cable_curve,
-        [[np.pi / 2, 0, 0], [16 / 2.0 + 23.25, 0, -3.08]],
+        [[np.pi / 2, 0, 0], [16 / 2.0 + 23.25, 0, -3.08 - cable_thickness / 2.0]],
         reg,
     )
     signal_cable = geant4.solid.Union(
         name + "_signal_cable",
         signal_cable_part2,
         signal_cable_along_unit,
-        [[0, 0, 0], [16 / 2.0 + 23.25 + 3.08 - cable_thickness, 0, -3.08 - cable_length / 2.0]],
+        [[0, 0, 0], [16 / 2.0 + 23.25 + 3.08 + cable_thickness / 2.0, 0, -3.08 - cable_length / 2.0]],
         reg,
     )
 
