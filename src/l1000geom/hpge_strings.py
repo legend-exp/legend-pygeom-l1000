@@ -94,6 +94,7 @@ def _place_hpge_string(
     # unpopulated slots, that are _not_ at the end. In those cases it should produce a KeyError.
     max_unit_id = max(string_slots.keys())
     total_rod_length = 0
+
     for hpge_unit_id_in_string in range(1, max_unit_id + 1):
         det_unit = string_slots[hpge_unit_id_in_string]
 
@@ -264,7 +265,7 @@ def _place_hpge_string(
                 @ np.array([np.cos(copper_rod_th), np.sin(copper_rod_th)])
             )
             delta_insulator = (
-                (string_meta.rod_radius_in_mm - (16.5 / 2.0 - 1.43 / 2.0))
+                (string_meta.rod_radius_in_mm - (16.5 / 2.0 - 1.5))
                 * string_rot_m
                 @ np.array([np.cos(copper_rod_th), np.sin(copper_rod_th)])
             )
@@ -310,7 +311,7 @@ def _place_hpge_string(
     copper_rod_r = string_meta.rod_radius_in_mm
     copper_rod_name = f"string_{string_id}_cu_rod"
     # the rod has a radius of 1.5 mm, but this would overlap with the coarse model of the PPC top PEN ring.
-    copper_rod = geant4.solid.Tubs(copper_rod_name, 0, 1.43, copper_rod_length, 0, 2 * math.pi, b.registry)
+    copper_rod = geant4.solid.Tubs(copper_rod_name, 0, 1.5, copper_rod_length, 0, 2 * math.pi, b.registry)
     copper_rod = geant4.LogicalVolume(copper_rod, b.materials.metal_copper, copper_rod_name, b.registry)
     copper_rod.pygeom_color_rgba = (0.72, 0.45, 0.2, 1)
     for i in range(3):
@@ -663,7 +664,7 @@ def _get_click_and_insulator(
     click_top_carving_hole = geant4.solid.Tubs(
         name + "_click_top_carving_hole",
         0,
-        1.43 + safety_margin,
+        1.5 + safety_margin,
         2 * (click_top_flap_thickness + 2.2),
         0,
         math.pi * 2,
@@ -719,8 +720,8 @@ def _get_click_and_insulator(
     insulator_du_holder_carving_hole = geant4.solid.Tubs(
         name + "_insulator_du_holder_carving_hole",
         0,
-        1.43 + safety_margin,
-        2 * 5.5,
+        1.5 + safety_margin,
+        3 * 5.5,
         0,
         math.pi * 2,
         reg,
@@ -732,7 +733,7 @@ def _get_click_and_insulator(
         name + "_insulator_du_holder",
         insulator_du_holder_without_hole,
         insulator_du_holder_carving_hole,
-        [[0, 0, 0], [16.5 / 2.0 - 1.43 / 2.0, 0, 5.5 / 2.0]],  # Adjust the position of the hole as needed
+        [[0, 0, 0], [16.5 / 2.0 - 1.5, 0, 0]],  # Adjust the position of the hole as needed
         reg,
     )
 
