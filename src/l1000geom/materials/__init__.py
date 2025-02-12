@@ -432,3 +432,20 @@ class OpticalMaterialRegistry:
         self._silica.add_element_natoms(self.get_element("O"), natoms=2)
 
         return self._silica
+
+    @property
+    def teflon(self) -> g4.Material:
+        """Teflon for the click and du holder."""
+        if hasattr(self, "_teflon"):
+            return self._teflon
+
+        self._teflon = g4.Material(
+            name="teflon",
+            density=2.2,
+            number_of_components=2,
+            registry=self.g4_registry,
+        )
+        self._teflon.add_element_natoms(self.get_element("F"), natoms=4)
+        self._teflon.add_element_natoms(self.get_element("C"), natoms=2)
+
+        return self._teflon

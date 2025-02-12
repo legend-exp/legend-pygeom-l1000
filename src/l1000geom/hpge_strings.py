@@ -101,20 +101,26 @@ def _place_hpge_string(
         total_rod_length += det_unit.rodlength * 0.997
         unit_length = det_unit.rodlength * 0.997
 
-        z_unit_bottom = z0_string - total_rod_length
+        z_unit_bottom = z0_string - total_rod_length  # defined as the bottom of the clap at the moment.
+
+        safety_margin = 0.001  # 0.001 # 1 micro meter
 
         # - note from CAD model: the distance between PEN plate top and detector bottom is 2.4 mm.
         pen_thickness = 1.5  # mm
         pen_offset = -0.2
         clamp_thickness = 1.8  # mm
         cable_thickness = 0.076
-        distance_det_to_pen = 2.4  # mm
-        safety_margin = 0.001  # 0.001 # 1 micro meter
+        click_top_flap_thickness = 1.5
+        insulator_du_holder_flap_thickness = 2.4  # mm
 
         z_pos_clamp = z_unit_bottom + clamp_thickness / 2.0
         z_pos_cable = z_pos_clamp + clamp_thickness / 2.0 + cable_thickness / 2.0 + safety_margin
         z_pos_pen = z_pos_cable + cable_thickness / 2.0 + pen_thickness / 2.0 - pen_offset + safety_margin
-        z_pos_det = z_pos_pen + pen_thickness / 2.0 + distance_det_to_pen + safety_margin
+        z_pos_click = z_pos_pen - pen_thickness / 2.0 - click_top_flap_thickness / 2.0 - safety_margin
+        z_pos_insulator = (
+            z_pos_pen + pen_thickness / 2.0 + insulator_du_holder_flap_thickness / 2.0 + safety_margin
+        )
+        z_pos_det = z_pos_insulator + insulator_du_holder_flap_thickness / 2.0 + safety_margin
 
         det_pv = geant4.PhysicalVolume(
             [0, 0, 0],
@@ -165,9 +171,12 @@ def _place_hpge_string(
         _add_pen_surfaces(pen_pv, b.mother_pv, b.materials, b.registry)
 
         # add cable and clamp
-        signal_cable, signal_clamp, signal_asic = _get_signal_cable_insulator_and_asic(
+        signal_cable, signal_clamp, signal_asic = _get_signal_cable_and_asic(
             det_unit.name, cable_thickness, clamp_thickness, unit_length, b.materials, b.mother_lv, b.registry
         )
+        signal_cable.pygeom_color_rgba = (0.72, 0.45, 0.2, 1)
+        signal_clamp.pygeom_color_rgba = (0.3, 0.3, 0.3, 1)
+        signal_asic.pygeom_color_rgba = (0.73, 0.33, 0.4, 1)
 
         angle_signal = math.pi * 1 / 2.0 - string_rot
         clamp_to_origin = 2.5 + 4.0 + 1.5 + 5 / 2
@@ -204,9 +213,11 @@ def _place_hpge_string(
             b.registry,
         )
 
-        hv_cable, hv_clamp = _get_hv_cable_and_insulator(
+        hv_cable, hv_clamp = _get_hv_cable(
             det_unit.name, cable_thickness, clamp_thickness, unit_length, b.materials, b.mother_lv, b.registry
         )
+        hv_cable.pygeom_color_rgba = (0.72, 0.45, 0.2, 1)
+        hv_clamp.pygeom_color_rgba = (0.3, 0.3, 0.3, 1)
 
         angle_hv = math.pi * 1 / 2.0 + string_rot
         clamp_to_origin = 2.5 + 29.5 + 3.5 + 5 / 2
@@ -232,6 +243,47 @@ def _place_hpge_string(
             b.mother_lv,
             b.registry,
         )
+
+        click, insulator = _get_click_and_insulator(
+            det_unit.name,
+            click_top_flap_thickness,
+            insulator_du_holder_flap_thickness,
+            b.materials,
+            b.mother_lv,
+            b.registry,
+        )
+        click.pygeom_color_rgba = (0.6, 0.6, 0.6, 1)
+        insulator.pygeom_color_rgba = (0.6, 0.6, 0.6, 1)
+
+        for i in range(3):
+            copper_rod_th = np.deg2rad(-30 - i * 120)
+            pieces_th = string_rot + np.deg2rad(-(i + 1) * 120)
+            delta_click = (
+                (string_meta.rod_radius_in_mm - 5.6)
+                * string_rot_m
+                @ np.array([np.cos(copper_rod_th), np.sin(copper_rod_th)])
+            )
+            delta_insulator = (
+                (string_meta.rod_radius_in_mm - (16.5 / 2.0 - 1.43 / 2.0))
+                * string_rot_m
+                @ np.array([np.cos(copper_rod_th), np.sin(copper_rod_th)])
+            )
+            geant4.PhysicalVolume(
+                [0, 0, pieces_th],
+                [x_pos + delta_click[0], y_pos + delta_click[1], z_pos_click],
+                click,
+                f"{click.name}_{i}",
+                b.mother_lv,
+                b.registry,
+            )
+            geant4.PhysicalVolume(
+                [0, 0, pieces_th],
+                [x_pos + delta_insulator[0], y_pos + delta_insulator[1], z_pos_insulator],
+                insulator,
+                f"{insulator.name}_{i}",
+                b.mother_lv,
+                b.registry,
+            )
 
     # the copper rod is slightly longer after the last detector.
     copper_rod_length_from_z0 = total_rod_length + 3.5
@@ -355,7 +407,7 @@ def _add_pen_surfaces(
     geant4.BorderSurface("bsurface_tpb_pen_" + pen_pv.name, pen_pv, mother_pv, mats.surfaces.lar_to_pen, reg)
 
 
-def _get_hv_cable_and_insulator(
+def _get_hv_cable(
     name: str,
     cable_thickness: float,
     clamp_thickness: float,
@@ -447,7 +499,7 @@ def _get_hv_cable_and_insulator(
     return hv_cable_lv, hv_clamp_lv
 
 
-def _get_signal_cable_insulator_and_asic(
+def _get_signal_cable_and_asic(
     name: str,
     cable_thickness: float,
     clamp_thickness: float,
@@ -570,3 +622,132 @@ def _get_signal_cable_insulator_and_asic(
     )
 
     return signal_cable_lv, signal_clamp_lv, signal_asic_lv
+
+
+def _get_click_and_insulator(
+    name: str,
+    click_top_flap_thickness: float,
+    insulator_du_holder_flap_thickness: float,
+    materials: materials.OpticalMaterialRegistry,
+    mother_pv: geant4.LogicalVolume,
+    reg: geant4.Registry,
+):
+    safety_margin = 0.1
+    click_top_flap = geant4.solid.Box(
+        name + "_click_top_flap",
+        20.8,
+        5,
+        click_top_flap_thickness,
+        reg,
+        "mm",
+    )
+
+    click_top_clamp = geant4.solid.Box(
+        name + "_click_top_clamp",
+        7.8,
+        5,
+        2.2,
+        reg,
+        "mm",
+    )
+
+    # Union the flap and clamp
+    click_top_without_hole = geant4.solid.Union(
+        name + "_click_top_without_hole",
+        click_top_flap,
+        click_top_clamp,
+        [[0, 0, 0], [20.8 / 2.0 - 7.8 / 2.0, 0, -2.2 / 2.0 - click_top_flap_thickness / 2.0]],
+        reg,
+    )
+
+    click_top_carving_hole = geant4.solid.Tubs(
+        name + "_click_top_carving_hole",
+        0,
+        1.43 + safety_margin,
+        2 * (click_top_flap_thickness + 2.2),
+        0,
+        math.pi * 2,
+        reg,
+        "mm",
+    )
+
+    # Perform subtraction only once
+    click_top = geant4.solid.Subtraction(
+        name + "_click_top",
+        click_top_without_hole,
+        click_top_carving_hole,
+        [[0, 0, 0], [5.60, 0, 0]],  # Adjust the position of the hole as needed
+        reg,
+    )
+
+    insulator_du_holder_flap = geant4.solid.Box(
+        name + "_insulator_du_holder_flap",
+        16.5,
+        7,
+        insulator_du_holder_flap_thickness,
+        reg,
+        "mm",
+    )
+
+    safety_margin_touching_detector = 1
+
+    insulator_du_holder_clamp = geant4.solid.Box(
+        name + "_insulator_du_holder_clamp",
+        10.5 - safety_margin_touching_detector,
+        7,
+        5.5 - insulator_du_holder_flap_thickness,
+        reg,
+        "mm",
+    )
+
+    # Union the flap and clamp
+    insulator_du_holder_without_hole = geant4.solid.Union(
+        name + "_insulator_du_holder_without_hole",
+        insulator_du_holder_flap,
+        insulator_du_holder_clamp,
+        [
+            [0, 0, 0],
+            [
+                16.5 / 2.0 - (10.5 - safety_margin_touching_detector) / 2.0,
+                0,
+                (5.5 - insulator_du_holder_flap_thickness) / 2.0 + insulator_du_holder_flap_thickness / 2.0,
+            ],
+        ],
+        reg,
+    )
+
+    insulator_du_holder_carving_hole = geant4.solid.Tubs(
+        name + "_insulator_du_holder_carving_hole",
+        0,
+        1.43 + safety_margin,
+        2 * 5.5,
+        0,
+        math.pi * 2,
+        reg,
+        "mm",
+    )
+
+    # Perform subtraction only once
+    insulator_du_holder = geant4.solid.Subtraction(
+        name + "_insulator_du_holder",
+        insulator_du_holder_without_hole,
+        insulator_du_holder_carving_hole,
+        [[0, 0, 0], [16.5 / 2.0 - 1.43 / 2.0, 0, 5.5 / 2.0]],  # Adjust the position of the hole as needed
+        reg,
+    )
+
+    click_top_lv = geant4.LogicalVolume(
+        click_top,
+        materials.teflon,
+        name + "_click_top",
+        reg,
+    )
+
+    insulator_du_holder_lv = geant4.LogicalVolume(
+        insulator_du_holder,
+        materials.teflon,
+        name + "_insulator_du_holder",
+        reg,
+    )
+
+    return click_top_lv, insulator_du_holder_lv
