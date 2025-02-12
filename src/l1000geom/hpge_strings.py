@@ -738,14 +738,14 @@ def _get_click_and_insulator(
 
     click_top_lv = geant4.LogicalVolume(
         click_top,
-        materials.teflon,
+        materials.ultem,
         name + "_click_top",
         reg,
     )
 
     insulator_du_holder_lv = geant4.LogicalVolume(
         insulator_du_holder,
-        materials.teflon,
+        materials.ultem,
         name + "_insulator_du_holder",
         reg,
     )
