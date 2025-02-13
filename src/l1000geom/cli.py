@@ -63,8 +63,8 @@ def dump_gdml_cli() -> None:
     geom_opts.add_argument(
         "--assemblies",
         action="store",
-        default=",".join(core.DEFINED_ASSEMBLIES),
-        help="""Select the assemblies to generate in the output. (default: %(default)s)""",
+        default=None,
+        help="""Select the assemblies to generate in the output. If specified, changes all unspecified assemblies to 'omit'.""",
     )
     geom_opts.add_argument(
         "--detail",
@@ -103,7 +103,7 @@ def dump_gdml_cli() -> None:
         config = utils.load_dict(args.config)
 
     registry = core.construct(
-        assemblies=args.assemblies.split(","),
+        assemblies=args.assemblies.split(",") if args.assemblies else None,
         detail_level=args.detail,
         config=config,
     )

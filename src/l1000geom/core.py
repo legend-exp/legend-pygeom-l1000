@@ -13,8 +13,6 @@ from . import cryo, fibers, hpge_strings, materials, watertank
 lmeta = LegendMetadata()
 configs = TextDB(resources.files("l1000geom") / "configs")
 
-DEFINED_ASSEMBLIES = ["watertank", "cryostat", "HPGe_dets", "fiber_curtain"]
-
 
 class InstrumentationData(NamedTuple):
     mother_lv: geant4.LogicalVolume
@@ -42,14 +40,11 @@ class InstrumentationData(NamedTuple):
 
 
 def construct(
-    assemblies: list[str] = DEFINED_ASSEMBLIES,
+    assemblies: list[str] | None = None,
     detail_level: str = "close_detector",
     config: dict | None = None,
 ) -> geant4.Registry:
     """Construct the LEGEND-1000 geometry and return the pyg4ometry Registry containing the world volume."""
-    if set(assemblies) - set(DEFINED_ASSEMBLIES) != set():
-        msg = "invalid geometrical assembly specified"
-        raise ValueError(msg)
 
     config = config if config is not None else {}
 
@@ -63,15 +58,23 @@ def construct(
         raise ValueError(msg)
 
     detail = special_metadata["detail"][detail_level]
+    if assemblies is not None:
+        if set(assemblies) - set(detail) != set():
+            msg = "invalid geometrical assembly specified"
+            raise ValueError(msg)
 
-    if "cryostat" not in assemblies and {"HPGe_dets", "fiber_curtain"} & set(assemblies):
-        msg = "invalid geometrical assembly specified. Cryostat must be included if HPGe_dets or fiber_curtain are included"
-        raise ValueError(msg)
+        if "cryostat" not in assemblies and {"HPGe_dets", "fiber_curtain"} & set(assemblies):
+            msg = "invalid geometrical assembly specified. Cryostat must be included if HPGe_dets or fiber_curtain are included"
+            raise ValueError(msg)
 
-    # If the user does not specify anything the assemblies will be the default list, so a check is not necessary
-    for system in detail:
-        if system not in assemblies:
-            detail[system] = "omit"
+        for system in detail:
+            if system not in assemblies:
+                detail[system] = "omit"
+
+        # Enable systems that have been specified but are not in the detail level
+        for system in assemblies:
+            if detail[system] == "omit":
+                detail[system] = "simple"
 
     reg = geant4.Registry()
     mats = materials.OpticalMaterialRegistry(reg)
