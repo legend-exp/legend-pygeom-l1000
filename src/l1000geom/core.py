@@ -64,6 +64,10 @@ def construct(
 
     detail = special_metadata["detail"][detail_level]
 
+    if "cryostat" not in assemblies and {"HPGe_dets", "fiber_curtain"} & set(assemblies):
+        msg = "invalid geometrical assembly specified. Cryostat must be included if HPGe_dets or fiber_curtain are included"
+        raise ValueError(msg)
+
     # If the user does not specify anything the assemblies will be the default list, so a check is not necessary
     for system in detail:
         if system not in assemblies:
