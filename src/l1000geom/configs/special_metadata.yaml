@@ -4,6 +4,7 @@ detail:
     HPGe_dets: metadata
     PEN_plates: stl
     cavern: omit
+    cryostat: simple
     fiber_curtain: detailed
     front-end_electronics: place
     labs: omit
@@ -15,6 +16,7 @@ detail:
     HPGe_dets: metadata
     PEN_plates: stl
     cavern: omit
+    cryostat: simple
     fiber_curtain: simple
     front-end_electronics: place
     labs: omit

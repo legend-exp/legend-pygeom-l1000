@@ -17,10 +17,20 @@ from . import core, materials
 
 log = logging.getLogger(__name__)
 
+# top of the top plate, this is still a dummy value! (Moved here from core)
+top_plate_z_pos = 11.1
+
 
 def place_hpge_strings(b: core.InstrumentationData) -> None:
     """Construct LEGEND-1000 HPGe strings."""
     # derive the strings from the channelmap.
+    if b.detail["HPGe_dets"] == "omit":
+        return
+
+    if b.detail["HPGe_dets"] == "simple":
+        msg = "simple HPGe_dets not implemented yet. Can build only from Legendmetadata. (Implement me!)"
+        raise ValueError(msg)
+
     ch_map = b.channelmap.map("system", unique=False).geds.values()
     strings_to_build = {}
 
@@ -89,7 +99,7 @@ def _place_hpge_string(
     # z0_string is the upper z coordinate of the topmost detector unit.
     # TODO: real measurements (slides of M. Bush on 2024-07-08) show an additional offset -0.6 mm.
     # TODO: this is also still a warm length.
-    z0_string = b.top_plate_z_pos - 410.1 - 12  # from CAD model.
+    z0_string = top_plate_z_pos - 410.1 - 12  # from CAD model.
 
     # deliberately use max and range here. The code does not support sparse strings (i.e. with
     # unpopulated slots, that are _not_ at the end. In those cases it should produce a KeyError.

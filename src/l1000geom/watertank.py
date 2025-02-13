@@ -12,6 +12,8 @@ from math import pi
 import numpy as np
 import pyg4ometry.geant4 as g4
 
+from . import core
+
 # Everything in mm
 # Basic tank
 tank_pit_radius = 9950.0 / 2  # Radius of the outer tank wall inside icarus pit
@@ -276,13 +278,21 @@ def construct_tank(tank_material: g4.Material, reg: g4.Registry, detail: str = "
     return g4.LogicalVolume(tank_high_final, tank_material, "tank", reg)
 
 
-def place_tank(
-    tank_lv: g4.LogicalVolume,
-    wl: g4.LogicalVolume,
-    tank_displacement_z: float,
-    reg: g4.Registry,
-) -> g4.PhysicalVolume:
-    return g4.PhysicalVolume([0, 0, 0], [0, 0, tank_displacement_z], tank_lv, "tank", wl, reg)
+def construct_and_place_tank(instr: core.InstrumentationData) -> g4.PhysicalVolume:
+    if instr.detail["watertank"] == "omit":
+        return instr
+    tank_lv = construct_tank(instr.materials.metal_steel, instr.registry, instr.detail["watertank"])
+    tank_z_displacement = -5000
+    g4.PhysicalVolume(
+        [0, 0, 0], [0, 0, tank_z_displacement], tank_lv, "tank", instr.mother_lv, instr.registry
+    )
+
+    water_mat = g4.MaterialPredefined("G4_WATER")  # Will be changed to use instr.mats later
+    water_lv = construct_water(water_mat, instr.registry, instr.detail["watertank"])
+    water_pv = g4.PhysicalVolume([0, 0, 0], [0, 0, 0], water_lv, "water", tank_lv, instr.registry)
+
+    # NamedTuples are immutable, so we need to create a copy
+    return instr._replace(mother_lv=water_lv, mother_pv=water_pv, mother_z_displacement=tank_z_displacement)
 
 
 def construct_water(
@@ -300,11 +310,3 @@ def construct_water(
 
     water = construct_bulge("water", base, reg, v_wall=tank_vertical_wall, h_wall=tank_horizontal_wall)
     return g4.LogicalVolume(water, water_material, "tank_water", reg)
-
-
-def place_water(
-    water_lv: g4.LogicalVolume,
-    tank_lv: g4.LogicalVolume,
-    reg: g4.Registry,
-) -> g4.PhysicalVolume:
-    return g4.PhysicalVolume([0, 0, 0], [0, 0, 0], water_lv, "water", tank_lv, reg)

@@ -5,26 +5,26 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 import numpy as np
-from legendmeta import TextDB
 from pyg4ometry import geant4 as g4
 from pygeomtools import RemageDetectorInfo
 
-from . import core, materials
+from . import core, hpge_strings, materials
 
 
-def place_fiber_modules(
-    fiber_metadata: TextDB,
-    b: core.InstrumentationData,
-    use_detailed_fiber_model: bool = False,
-) -> None:
+def place_fiber_modules(b: core.InstrumentationData) -> None:
     """Construct LEGEND-1000 HPGe strings.
 
-    Parameters
+    detail options:
     ----------
-    use_detailed_fiber_model
+    "segmented" or "detailed"
         Switch between an implementation of single fibers (“detailed”) or
         slabs of fiber material (“segmented”).
     """
+    if b.detail["fiber_curtain"] == "omit":
+        return
+
+    use_detailed_fiber_model = b.detail["fiber_curtain"] == "detailed"
+    fiber_metadata = b.special_metadata["fibers"]
     # Unroll the provided metadata into a structure better suited for the next steps.
     # The geometry here is based on physical modules and not on channels.
     modules = {}
@@ -52,7 +52,7 @@ def place_fiber_modules(
 
     z_displacement_fiber_assembly = (
         # avoid the overlap of the top SiPMs with the top plate.
-        b.top_plate_z_pos - ModuleFactoryBase.SIPM_HEIGHT - ModuleFactoryBase.SIPM_OUTER_EXTRA
+        hpge_strings.top_plate_z_pos - ModuleFactoryBase.SIPM_HEIGHT - ModuleFactoryBase.SIPM_OUTER_EXTRA
     )
 
     # note: actually the radius is only 150mm and another short straight segment of 60mm is following after

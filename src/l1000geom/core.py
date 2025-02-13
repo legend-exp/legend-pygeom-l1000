@@ -13,7 +13,7 @@ from . import cryo, fibers, hpge_strings, materials, watertank
 lmeta = LegendMetadata()
 configs = TextDB(resources.files("l1000geom") / "configs")
 
-DEFINED_ASSEMBLIES = ["tank", "strings", "fibers"]
+DEFINED_ASSEMBLIES = ["watertank", "cryostat", "HPGe_dets", "fiber_curtain"]
 
 
 class InstrumentationData(NamedTuple):
@@ -21,6 +21,8 @@ class InstrumentationData(NamedTuple):
     """Argon LogicalVolume instance in which all components are to be placed."""
     mother_pv: geant4.PhysicalVolume
     """Argon PhysicalVolume instance in which all components are to be placed."""
+    mother_z_displacement: float
+    """The z-displacement of the mother volume."""
     materials: materials.OpticalMaterialRegistry
     """Material properties for common materials"""
     registry: geant4.Registry
@@ -35,16 +37,13 @@ class InstrumentationData(NamedTuple):
     runtime_config: AttrsDict
     """Volatile runtime config, settings that are not tied to a specific detector configuration."""
 
-    top_plate_z_pos: float
-    """The z coordinate of the top face of the array top plate."""
-
-    detail_level: str
+    detail: AttrsDict
     """The chosen detail level by the user. Used to navigate to the corresponding entry in the special metadata."""
 
 
 def construct(
     assemblies: list[str] = DEFINED_ASSEMBLIES,
-    detail_level: str = "cosmogenic",
+    detail_level: str = "close_detector",
     config: dict | None = None,
 ) -> geant4.Registry:
     """Construct the LEGEND-1000 geometry and return the pyg4ometry Registry containing the world volume."""
@@ -63,6 +62,13 @@ def construct(
         msg = "invalid detail level specified"
         raise ValueError(msg)
 
+    detail = special_metadata["detail"][detail_level]
+
+    # If the user does not specify anything the assemblies will be the default list, so a check is not necessary
+    for system in detail:
+        if system not in assemblies:
+            detail[system] = "omit"
+
     reg = geant4.Registry()
     mats = materials.OpticalMaterialRegistry(reg)
 
@@ -72,63 +78,16 @@ def construct(
     world_lv = geant4.LogicalVolume(world, world_material, "world", reg)
     reg.setWorld(world_lv)
 
-    # Create basic structure with argon and cryostat.
-    cryo_z_displacement = 0
-    cryostat_lv = cryo.construct_cryostat(mats.metal_steel, reg)
-
-    if ("tank" in assemblies) and (special_metadata["detail"][detail_level]["watertank"] != "omit"):
-        # TODO: Shift the global coordinate system that z=0 is a reasonable value for defining hit positions.
-        tank_z_displacement = -5000
-
-        # Create and place the water tank
-        tank_lv = watertank.construct_tank(
-            mats.metal_steel, reg, special_metadata["detail"][detail_level]["watertank"]
-        )
-        watertank.place_tank(tank_lv, world_lv, tank_z_displacement, reg)
-
-        # TODO: Make optical water material and use for optical volumes
-        water_material = geant4.MaterialPredefined("G4_WATER")
-        water_lv = watertank.construct_water(
-            water_material, reg, special_metadata["detail"][detail_level]["watertank"]
-        )
-        watertank.place_water(water_lv, tank_lv, reg)
-
-        cryo_z_displacement = 5000
-        cryo.place_cryostat(cryostat_lv, water_lv, cryo_z_displacement, reg)
-    else:
-        cryo.place_cryostat(cryostat_lv, world_lv, cryo_z_displacement, reg)
-
-    lar_lv = cryo.construct_argon(mats.liquidargon, reg)
-    lar_pv = cryo.place_argon(lar_lv, cryostat_lv, 0, reg)
-
-    # top of the top plate, this is still a dummy value!
-    top_plate_z_pos = 11.1
-
-    #    timestamp = config.get("metadata_timestamp", "20230311T235840Z")
-    #    channelmap = load_dict_from_config(config, "channelmap", lambda: lmeta.channelmap(timestamp))
-    #    special_metadata = load_dict_from_config(config, "special_metadata", lambda: configs.on(timestamp))
-
+    # This object will be used and edited by all subsystems and then passed to the next subsystem
     instr = InstrumentationData(
-        lar_lv,
-        lar_pv,
-        mats,
-        reg,
-        channelmap,
-        special_metadata,
-        AttrsDict(config),
-        top_plate_z_pos,
-        detail_level,
+        world_lv, None, 0, mats, reg, channelmap, special_metadata, AttrsDict(config), detail
     )
-
-    # Place all other instrumentation into the liquid argon
-    if "strings" in assemblies:
-        hpge_strings.place_hpge_strings(instr)
-    if "fibers" in assemblies:
-        fibers.place_fiber_modules(
-            special_metadata["fibers"],
-            instr,
-            special_metadata["detail"][detail_level]["fiber_curtain"] == "detailed",
-        )
+    # Create and place the structures
+    # NamedTuples are immutable, so we need to take copies of instr
+    instr = watertank.construct_and_place_tank(instr)
+    instr = cryo.construct_and_place_cryostat(instr)
+    hpge_strings.place_hpge_strings(instr)  # Does not edit InstrumentationData
+    fibers.place_fiber_modules(instr)
 
     _assign_common_copper_surface(instr)
 
