@@ -69,7 +69,6 @@ def dump_gdml_cli() -> None:
     geom_opts.add_argument(
         "--detail",
         action="store",
-        choices=("cosmogenic", "close_detector"),
         default="close_detector",
         help="""Select the detail level for the setup. (default: %(default)s)""",
     )

@@ -279,6 +279,10 @@ def construct_tank(tank_material: g4.Material, reg: g4.Registry, detail: str = "
 
 
 def construct_and_place_tank(instr: core.InstrumentationData) -> g4.PhysicalVolume:
+    if "watertank" not in instr.detail:
+        msg = "No 'watertank' detail specified in the special metadata."
+        raise ValueError(msg)
+
     if instr.detail["watertank"] == "omit":
         return instr
     tank_lv = construct_tank(instr.materials.metal_steel, instr.registry, instr.detail["watertank"])

@@ -77,6 +77,10 @@ def construct_cryostat(cryostat_material: g4.Material, reg: g4.Registry) -> g4.L
 
 
 def construct_and_place_cryostat(instr: core.InstrumentationData) -> g4.PhysicalVolume:
+    if "cryostat" not in instr.detail:
+        msg = "No 'cryostat' detail specified in the special metadata."
+        raise ValueError(msg)
+
     if instr.detail["cryostat"] == "omit":
         return instr
     cryostat_lv = construct_cryostat(instr.materials.metal_steel, instr.registry)

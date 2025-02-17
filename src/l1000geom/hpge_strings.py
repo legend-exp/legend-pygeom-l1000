@@ -24,6 +24,10 @@ top_plate_z_pos = 11.1
 def place_hpge_strings(b: core.InstrumentationData) -> None:
     """Construct LEGEND-1000 HPGe strings."""
     # derive the strings from the channelmap.
+    if "HPGe_dets" not in b.detail:
+        msg = "No 'HPGe_dets' detail specified in the special metadata."
+        raise ValueError(msg)
+
     if b.detail["HPGe_dets"] == "omit":
         return
 

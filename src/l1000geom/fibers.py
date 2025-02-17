@@ -20,6 +20,10 @@ def place_fiber_modules(b: core.InstrumentationData) -> None:
         Switch between an implementation of single fibers (“detailed”) or
         slabs of fiber material (“segmented”).
     """
+    if "fiber_curtain" not in b.detail:
+        msg = "No 'fiber_curtain' detail specified in the special metadata."
+        raise ValueError(msg)
+
     if b.detail["fiber_curtain"] == "omit":
         return
 
