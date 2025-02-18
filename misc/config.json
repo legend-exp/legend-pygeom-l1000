@@ -23,7 +23,7 @@
       "nm_plastic": "simple",
       "nm_holding_structure": "omit",
       "fiber_curtain": "simple",
-      "front-end_electronics": "place",
+      "front-end_and_insulators": "place",
       "PEN_plates": "stl",
       "HPGe_dets": "metadata"
     },
@@ -36,7 +36,7 @@
       "nm_plastic": "stl",
       "nm_holding_structure": "simple",
       "fiber_curtain": "detailed",
-      "front-end_electronics": "place",
+      "front-end_and_insulators": "place",
       "PEN_plates": "stl",
       "HPGe_dets": "metadata"
     }
