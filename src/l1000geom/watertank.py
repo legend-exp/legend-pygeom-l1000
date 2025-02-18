@@ -12,6 +12,8 @@ from math import pi
 import numpy as np
 import pyg4ometry.geant4 as g4
 
+from . import core
+
 # Everything in mm
 # Basic tank
 tank_pit_radius = 9950.0 / 2  # Radius of the outer tank wall inside icarus pit
@@ -252,25 +254,21 @@ def construct_manhole(base: g4.solid, reg: g4.Registry):
     )
 
 
-def construct_tank(tank_material: g4.Material, reg: g4.Registry, detail: str = "low") -> g4.LogicalVolume:
+def construct_tank(tank_material: g4.Material, reg: g4.Registry, detail: str = "simple") -> g4.LogicalVolume:
     """Construct the tank volume.
 
-    detail: Level of tank detail. Can be 'low', 'medium' or 'high'.
-    low: Only the base polycone of the tank is constructed.
-    medium: The base polycone and the bulge on top of the tank are constructed.
-    high: Base, Bulge, Manhole and Flanges are constructed.
+    detail: Level of tank detail. Can be 'simple' or 'detailed'.
+    simple: Only the base polycone of the tank is constructed.
+    detailed: Base, Bulge, Manhole and Flanges are constructed.
     """
 
     base = construct_base("tank", reg)
-    if detail == "low":
+    if detail == "simple":
         return g4.LogicalVolume(base, tank_material, "tank", reg)
 
     tank_medium = construct_bulge("tank", base, reg)
 
-    if detail == "medium":
-        return g4.LogicalVolume(tank_medium, tank_material, "tank", reg)
-
-    if detail != "high":
+    if detail != "detailed":
         msg = "invalid tank detail level specified"
         raise ValueError(msg)
 
@@ -280,34 +278,39 @@ def construct_tank(tank_material: g4.Material, reg: g4.Registry, detail: str = "
     return g4.LogicalVolume(tank_high_final, tank_material, "tank", reg)
 
 
-def place_tank(
-    tank_lv: g4.LogicalVolume,
-    wl: g4.LogicalVolume,
-    tank_displacement_z: float,
-    reg: g4.Registry,
-) -> g4.PhysicalVolume:
-    return g4.PhysicalVolume([0, 0, 0], [0, 0, tank_displacement_z], tank_lv, "tank", wl, reg)
+def construct_and_place_tank(instr: core.InstrumentationData) -> g4.PhysicalVolume:
+    if "watertank" not in instr.detail:
+        msg = "No 'watertank' detail specified in the special metadata."
+        raise ValueError(msg)
+
+    if instr.detail["watertank"] == "omit":
+        return instr
+    tank_lv = construct_tank(instr.materials.metal_steel, instr.registry, instr.detail["watertank"])
+    tank_z_displacement = -5000
+    g4.PhysicalVolume(
+        [0, 0, 0], [0, 0, tank_z_displacement], tank_lv, "tank", instr.mother_lv, instr.registry
+    )
+
+    water_mat = g4.MaterialPredefined("G4_WATER")  # Will be changed to use instr.mats later
+    water_lv = construct_water(water_mat, instr.registry, instr.detail["watertank"])
+    water_pv = g4.PhysicalVolume([0, 0, 0], [0, 0, 0], water_lv, "water", tank_lv, instr.registry)
+
+    # NamedTuples are immutable, so we need to create a copy
+    return instr._replace(mother_lv=water_lv, mother_pv=water_pv, mother_z_displacement=tank_z_displacement)
 
 
-def construct_water(water_material: g4.Material, reg: g4.Registry, detail: str = "low") -> g4.LogicalVolume:
+def construct_water(
+    water_material: g4.Material, reg: g4.Registry, detail: str = "simple"
+) -> g4.LogicalVolume:
     """Construct the water volume.
 
-    detail: Level of tank detail. Can be 'low', 'medium' or 'high'.
-    low: Only the base polycone of the water is constructed.
-    medium: The base polycone and the bulge on top of the tank are constructed.
-    high: Same as medium for water. The water volume is not affected by the flanges and manhole.
+    detail: Level of tank detail. Can be 'simple' or 'detailed'.
+    simple: Only the base polycone of the water is constructed.
+    detailed: The base polycone and the bulge on top of the tank are constructed.
     """
     base = construct_base("water", reg, v_wall=tank_vertical_wall, h_wall=tank_horizontal_wall)
-    if detail == "low":
+    if detail == "simple":
         return g4.LogicalVolume(base, water_material, "tank_water", reg)
 
     water = construct_bulge("water", base, reg, v_wall=tank_vertical_wall, h_wall=tank_horizontal_wall)
     return g4.LogicalVolume(water, water_material, "tank_water", reg)
-
-
-def place_water(
-    water_lv: g4.LogicalVolume,
-    tank_lv: g4.LogicalVolume,
-    reg: g4.Registry,
-) -> g4.PhysicalVolume:
-    return g4.PhysicalVolume([0, 0, 0], [0, 0, 0], water_lv, "water", tank_lv, reg)
