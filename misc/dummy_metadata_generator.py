@@ -103,6 +103,8 @@ def generate_special_metadata(output_path: str, config: dict, string_idx: list, 
 
     special_output["calibration"] = {}
 
+    special_output["detail"] = config["detail"]
+
     with Path(output_path).open("w") as f:
         yaml.dump(special_output, f)
 

@@ -13,6 +13,8 @@ from math import pi
 
 import pyg4ometry.geant4 as g4
 
+from . import core
+
 cryo_radius = 3976 / 2
 cryo_wall = 12
 cryo_tub_height = 3900
@@ -74,17 +76,31 @@ def construct_cryostat(cryostat_material: g4.Material, reg: g4.Registry) -> g4.L
     return g4.LogicalVolume(cryo, cryostat_material, "cryostat", reg)
 
 
-def place_cryostat(
-    cryostat_lv: g4.LogicalVolume,
-    wl: g4.LogicalVolume,
-    cryostat_displacement_z: float,
-    reg: g4.Registry,
-) -> g4.PhysicalVolume:
-    cryostat_pv = g4.PhysicalVolume(
-        [0, 0, 0], [0, 0, cryostat_displacement_z], cryostat_lv, "cryostat", wl, reg
+def construct_and_place_cryostat(instr: core.InstrumentationData) -> g4.PhysicalVolume:
+    if "cryostat" not in instr.detail:
+        msg = "No 'cryostat' detail specified in the special metadata."
+        raise ValueError(msg)
+
+    if instr.detail["cryostat"] == "omit":
+        return instr
+    cryostat_lv = construct_cryostat(instr.materials.metal_steel, instr.registry)
+    # Move the cryostat back in a central position
+    g4.PhysicalVolume(
+        [0, 0, 0],
+        [0, 0, -instr.mother_z_displacement],
+        cryostat_lv,
+        "cryostat",
+        instr.mother_lv,
+        instr.registry,
     )
+
     cryostat_lv.pygeom_color_rgba = False
-    return cryostat_pv
+    lar_lv = construct_argon(instr.materials.liquidargon, instr.registry)
+    lar_pv = g4.PhysicalVolume([0, 0, 0], [0, 0, 0], lar_lv, "lar", cryostat_lv, instr.registry)
+    lar_lv.pygeom_color_rgba = [0, 0, 0, 0.1]
+
+    # NamedTuples are immutable, so we need to create a copy
+    return instr._replace(mother_lv=lar_lv, mother_pv=lar_pv, mother_z_displacement=0)
 
 
 def construct_argon(lar_material: g4.Material, reg: g4.Registry) -> g4.LogicalVolume:
@@ -135,14 +151,3 @@ def construct_argon(lar_material: g4.Material, reg: g4.Registry) -> g4.LogicalVo
     )
 
     return g4.LogicalVolume(lar, lar_material, "lar", reg)
-
-
-def place_argon(
-    lar_lv: g4.LogicalVolume,
-    cryostat_lv: g4.LogicalVolume,
-    cryostat_displacement_z: float,
-    reg: g4.Registry,
-) -> g4.PhysicalVolume:
-    lar_pv = g4.PhysicalVolume([0, 0, 0], [0, 0, cryostat_displacement_z], lar_lv, "lar", cryostat_lv, reg)
-    lar_lv.pygeom_color_rgba = [0, 0, 0, 0.1]
-    return lar_pv

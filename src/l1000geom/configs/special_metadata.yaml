@@ -1,4 +1,29 @@
 calibration: {}
+detail:
+  close_detector:
+    HPGe_dets: metadata
+    PEN_plates: stl
+    cavern: omit
+    cryostat: simple
+    fiber_curtain: detailed
+    front-end_electronics: place
+    labs: omit
+    nm_holding_structure: simple
+    nm_plastic: stl
+    scaffolding: omit
+    watertank: omit
+  cosmogenic:
+    HPGe_dets: metadata
+    PEN_plates: stl
+    cavern: omit
+    cryostat: simple
+    fiber_curtain: simple
+    front-end_electronics: place
+    labs: omit
+    nm_holding_structure: omit
+    nm_plastic: simple
+    scaffolding: omit
+    watertank: simple
 fibers:
   S0101:
     geometry:
