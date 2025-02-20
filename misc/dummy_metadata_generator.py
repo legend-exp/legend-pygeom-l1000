@@ -151,7 +151,8 @@ def main():
         len(ARRAY_CONFIG["center"]["x_in_mm"]) * len(ARRAY_CONFIG["angle_in_deg"])
     ).reshape(len(ARRAY_CONFIG["center"]["x_in_mm"]), len(ARRAY_CONFIG["angle_in_deg"]))
 
-    chm = legendmeta.LegendMetadata().channelmap()
+    timestamp = "20230125T212014Z"
+    chm = legendmeta.LegendMetadata().channelmap(on=timestamp)
     hpge_data = chm[config["dummy_dets"]["hpge"]]
     hpge_names = np.sort(
         np.concatenate(
