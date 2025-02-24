@@ -8,7 +8,7 @@ from pyg4ometry import geant4
 from pygeomtools import detectors, geometry, visualization
 from pygeomtools.utils import load_dict_from_config
 
-from . import cryo, fibers, hpge_strings, materials, watertank
+from . import cavern_and_labs, cryo, fibers, hpge_strings, materials, watertank
 
 lmeta = LegendMetadata()
 configs = TextDB(resources.files("l1000geom") / "configs")
@@ -81,7 +81,7 @@ def construct(
 
     # Create the world volume
     world_material = geant4.MaterialPredefined("G4_Galactic")
-    world = geant4.solid.Box("world", 30, 30, 30, reg, "m")
+    world = geant4.solid.Box("world", 44, 44, 44, reg, "m")
     world_lv = geant4.LogicalVolume(world, world_material, "world", reg)
     reg.setWorld(world_lv)
 
@@ -91,6 +91,7 @@ def construct(
     )
     # Create and place the structures
     # NamedTuples are immutable, so we need to take copies of instr
+    cavern_and_labs.construct_and_place_cavern_and_labs(instr)
     instr = watertank.construct_and_place_tank(instr)
     instr = cryo.construct_and_place_cryostat(instr)
     hpge_strings.place_hpge_strings(instr)  # Does not edit InstrumentationData

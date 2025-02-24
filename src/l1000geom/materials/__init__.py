@@ -449,3 +449,20 @@ class OpticalMaterialRegistry:
         self._teflon.add_element_natoms(self.get_element("C"), natoms=2)
 
         return self._teflon
+
+    @property
+    def rock(self) -> g4.Material:
+        """Rock for the LNGS cavern."""
+        if hasattr(self, "_rock"):
+            return self._rock
+
+        self._rock = g4.Material(
+            name="rock",
+            density=2.6,
+            number_of_components=2,
+            registry=self.g4_registry,
+        )
+        self._rock.add_element_natoms(self.get_element("Si"), natoms=1)
+        self._rock.add_element_natoms(self.get_element("O"), natoms=2)
+
+        return self._rock
