@@ -70,7 +70,7 @@ def generate_special_metadata(output_path: str, config: dict, string_idx: list, 
     }
 
     special_output["hpges"] = {
-        f"{name}": {"rodlength_in_mm": config["string"]["units"]["l"], "baseplate": "large"}
+        f"{name}": {"rodlength_in_mm": config["string"]["units"]["l"], "baseplate": "xlarge"}
         for name in hpge_names
     }
 
