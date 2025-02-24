@@ -286,7 +286,9 @@ def construct_and_place_tank(instr: core.InstrumentationData) -> core.Instrument
     if instr.detail["watertank"] == "omit":
         return instr
     tank_lv = construct_tank(instr.materials.metal_steel, instr.registry, instr.detail["watertank"])
-    tank_z_displacement = -(800.0 + 8877.6/2.) # (tank_pit_height + tank_base_height/2.) The tank is placed with the center of main volume at z = 0
+    tank_z_displacement = -(
+        800.0 + 8877.6 / 2.0
+    )  # (tank_pit_height + tank_base_height/2.) The tank is placed with the center of main volume at z = 0
     g4.PhysicalVolume(
         [0, 0, 0], [0, 0, tank_z_displacement], tank_lv, "tank", instr.mother_lv, instr.registry
     )

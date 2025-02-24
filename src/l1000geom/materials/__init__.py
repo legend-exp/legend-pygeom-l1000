@@ -464,5 +464,5 @@ class OpticalMaterialRegistry:
         )
         self._rock.add_element_natoms(self.get_element("Si"), natoms=1)
         self._rock.add_element_natoms(self.get_element("O"), natoms=2)
-        
+
         return self._rock
