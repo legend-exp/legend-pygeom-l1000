@@ -92,6 +92,7 @@ def construct(
     # Create and place the structures
     # NamedTuples are immutable, so we need to take copies of instr
     instr = watertank.construct_and_place_tank(instr)
+    instr = watertank_instrumentation.construct_and_place_instrumentation(instr)
     instr = cryo.construct_and_place_cryostat(instr)
     hpge_strings.place_hpge_strings(instr)  # Does not edit InstrumentationData
     fibers.place_fiber_modules(instr)

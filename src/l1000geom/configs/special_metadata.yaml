@@ -10,8 +10,8 @@ detail:
     labs: omit
     nm_holding_structure: simple
     nm_plastic: stl
-    scaffolding: omit
     watertank: omit
+    watertank_instrumentation: omit
   cosmogenic:
     HPGe_dets: metadata
     PEN_plates: stl
@@ -22,8 +22,8 @@ detail:
     labs: omit
     nm_holding_structure: omit
     nm_plastic: simple
-    scaffolding: omit
     watertank: simple
+    watertank_instrumentation: simple
 fibers:
   S0101:
     geometry:
@@ -2589,3 +2589,7 @@ hpges:
   V4208:
     baseplate: xlarge
     rodlength_in_mm: 125.4
+watertank_instrumentation:
+  teflon:
+    faces: 15
+    r: 4800
