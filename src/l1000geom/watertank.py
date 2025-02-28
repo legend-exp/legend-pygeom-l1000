@@ -286,13 +286,14 @@ def construct_and_place_tank(instr: core.InstrumentationData) -> g4.PhysicalVolu
     if instr.detail["watertank"] == "omit":
         return instr
     tank_lv = construct_tank(instr.materials.metal_steel, instr.registry, instr.detail["watertank"])
+    tank_lv.pygeom_color_rgba = False
     tank_z_displacement = -5000
     g4.PhysicalVolume(
         [0, 0, 0], [0, 0, tank_z_displacement], tank_lv, "tank", instr.mother_lv, instr.registry
     )
 
-    water_mat = g4.MaterialPredefined("G4_WATER")  # Will be changed to use instr.mats later
-    water_lv = construct_water(water_mat, instr.registry, instr.detail["watertank"])
+    water_lv = construct_water(instr.materials.water, instr.registry, instr.detail["watertank"])
+    water_lv.pygeom_color_rgba = [0, 0, 1, 0.2]
     water_pv = g4.PhysicalVolume([0, 0, 0], [0, 0, 0], water_lv, "water", tank_lv, instr.registry)
 
     # NamedTuples are immutable, so we need to create a copy

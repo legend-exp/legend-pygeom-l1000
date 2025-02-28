@@ -60,8 +60,10 @@ def construct_PMT_front(window_mat: g4.Material, vac_mat: g4.Material, reg: g4.R
     )
 
     pmt_window_lv = g4.LogicalVolume(pmt_window, window_mat, "PMT_window", reg)
+    pmt_window_lv.pygeom_color_rgba = [0.9, 0.8, 0.5, 0.5]
     pmt_vacuum_lv = g4.LogicalVolume(pmt_vacuum, vac_mat, "PMT_vacuum", reg)
     pmt_cathode_lv = g4.LogicalVolume(pmt_cathode, vac_mat, "PMT_cathode", reg)
+    pmt_cathode_lv.pygeom_color_rgba = [0.545, 0.271, 0.074, 1]
 
     # Already place all of the daughters in the Mother.
     # This has to be taken into considerations when specifying them as detectors,
@@ -201,17 +203,16 @@ def construct_and_place_instrumentation(instr: core.InstrumentationData) -> g4.P
 
     # Construct the instrumentation
     # Materials are temporary here
-    teflon_mat = g4.MaterialPredefined("G4_TEFLON")
-    glass_mat = g4.MaterialPredefined("G4_Pyrex_Glass")
     vac_mat = g4.MaterialPredefined("G4_Galactic")
-    base_mat = g4.MaterialPredefined("G4_SILICON_DIOXIDE")
 
-    teflon_lv = construct_teflon_foil(teflon_mat, instr)
+    teflon_lv = construct_teflon_foil(instr.materials.teflon, instr)
+    teflon_lv.pygeom_color_rgba = [0, 0, 0, 0.20]
     g4.PhysicalVolume(
         [0, 0, 0], [0, 0, 2 * offset], teflon_lv, "teflon_foil", instr.mother_lv, instr.registry
     )
-    pmt_window_lv = construct_PMT_front(glass_mat, vac_mat, instr.registry)
-    pmt_base_lv = construct_PMT_back(base_mat, instr.registry)
+    pmt_window_lv = construct_PMT_front(instr.materials.borosilicate, vac_mat, instr.registry)
+    pmt_base_lv = construct_PMT_back(instr.materials.epoxy, instr.registry)
+    pmt_base_lv.pygeom_color_rgba = [0, 0, 0, 1]
 
     place_floor_pmts(pmt_window_lv, pmt_base_lv, instr)
     place_wall_pmts(pmt_window_lv, instr)
