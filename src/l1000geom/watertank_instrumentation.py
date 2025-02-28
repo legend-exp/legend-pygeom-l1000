@@ -5,6 +5,7 @@ Dimensions from latest CAD from 2025-01-24.
 
 from __future__ import annotations
 
+import warnings
 from math import pi
 
 import numpy as np
@@ -126,7 +127,9 @@ def get_euler_angles(target_direction: np.array):
     rotation = R.from_rotvec(rotation_axis * angle)
 
     # Get the rotation matrix or Euler angles
-    euler_angles = rotation.as_euler("xyz")
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        euler_angles = rotation.as_euler("xyz")
     return [euler_angles[0], euler_angles[1], euler_angles[2]]
 
 
@@ -206,7 +209,7 @@ def construct_and_place_instrumentation(instr: core.InstrumentationData) -> g4.P
     vac_mat = g4.MaterialPredefined("G4_Galactic")
 
     teflon_lv = construct_teflon_foil(instr.materials.teflon, instr)
-    teflon_lv.pygeom_color_rgba = [0, 0, 0, 0.20]
+    teflon_lv.pygeom_color_rgba = [1, 1, 1, 0.20]
     g4.PhysicalVolume(
         [0, 0, 0], [0, 0, 2 * offset], teflon_lv, "teflon_foil", instr.mother_lv, instr.registry
     )
