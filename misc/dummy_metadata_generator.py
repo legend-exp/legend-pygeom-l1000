@@ -70,9 +70,9 @@ def calculate_and_place_pmts(channelmap: dict, pmts_meta: dict, pmts_pos: dict) 
             channelmap[name]["location"]["direction"] = {"nx": 0, "ny": 0, "nz": 1}
 
     # The wall PMTs require some polygon math
-    faces = pmts_pos["teflon"]["faces"]
+    faces = pmts_pos["tyvek"]["faces"]
     # Geant4 uses r as inscribe radius, but we need the circumradius
-    radius = pmts_pos["teflon"]["r"] / np.cos(np.pi / faces)
+    radius = pmts_pos["tyvek"]["r"] / np.cos(np.pi / faces)
 
     # Compute vertices of the polygon
     vertices = [
@@ -202,9 +202,9 @@ def generate_special_metadata(output_path: str, config: dict, string_idx: list, 
     special_output["calibration"] = {}
 
     special_output["watertank_instrumentation"] = {
-        "teflon": {
-            "r": config["pmts"]["teflon"]["r"],
-            "faces": config["pmts"]["teflon"]["faces"],
+        "tyvek": {
+            "r": config["pmts"]["tyvek"]["r"],
+            "faces": config["pmts"]["tyvek"]["faces"],
         },
     }
 

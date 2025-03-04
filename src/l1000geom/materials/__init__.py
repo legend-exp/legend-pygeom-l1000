@@ -441,9 +441,7 @@ class OpticalMaterialRegistry:
 
     @property
     def teflon(self) -> g4.Material:
-        """Teflon for the click and du holder.
-        Also used for the teflon foil in the water tank.
-        """
+        """Teflon for the click and du holder."""
         if hasattr(self, "_teflon"):
             return self._teflon
 
@@ -457,6 +455,23 @@ class OpticalMaterialRegistry:
         self._teflon.add_element_natoms(self.get_element("C"), natoms=2)
 
         return self._teflon
+
+    @property
+    def tyvek(self) -> g4.Material:
+        """Tyvek material."""
+        if hasattr(self, "_tyvek"):
+            return self._tyvek
+
+        self._tyvek = g4.Material(
+            name="tyvek",
+            density=0.38,  # https://www.dupont.com/content/dam/dupont/amer/us/en/microsites/tyvek-design/images/documents/EN-NA-Tyvek(r)-Graphics-Printing&Technical-Guide-2018.pdf
+            number_of_components=2,
+            registry=self.g4_registry,
+        )
+        self._tyvek.add_element_natoms(self.get_element("C"), natoms=2)
+        self._tyvek.add_element_natoms(self.get_element("H"), natoms=4)
+
+        return self._tyvek
 
     @property
     def water(self) -> g4.Material:

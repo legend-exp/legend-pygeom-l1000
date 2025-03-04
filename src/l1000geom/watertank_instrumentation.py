@@ -12,18 +12,18 @@ import numpy as np
 import pyg4ometry.geant4 as g4
 from scipy.spatial.transform import Rotation as R
 
-from . import core, watertank
+from . import core, materials, watertank
 
-# The reflective Teflon foil that separates the active optical volume
-teflon_outer_radius = 5000  # rough estimation, the real radius should be smaller than this value
-# Some trygonometry to get the effective height of the teflon foil
+# The reflective tyvek foil that separates the active optical volume
+tyvek_outer_radius = 5000  # rough estimation, the real radius should be smaller than this value
+# Some trygonometry to get the effective height of the tyvek foil
 offset = (
     watertank.tank_horizontal_wall
 )  # The water is shifted this much up in z-direction, as the tank wall starts at z=0.
-out = watertank.tank_base_radius - watertank.tank_vertical_wall - teflon_outer_radius
+out = watertank.tank_base_radius - watertank.tank_vertical_wall - tyvek_outer_radius
 h_diff = watertank.tank_top_height - watertank.tank_base_height
 inner = watertank.tank_base_radius - offset - watertank.tank_top_bulge_width / 2
-teflon_effective_height = (
+tyvek_effective_height = (
     watertank.tank_base_height - 4 * offset + out * h_diff / inner
 )  # Accurate would be 2*offset, to be safe we take 4*offset
 
@@ -39,7 +39,12 @@ cathode_cutoff = 65  # cutoff such that the effective cathode radius is 220mm.
 pmt_base_height = 145
 
 
-def construct_PMT_front(window_mat: g4.Material, vac_mat: g4.Material, reg: g4.Registry) -> g4.LogicalVolume:
+def construct_PMT_front(
+    window_mat: g4.Material,
+    vac_mat: g4.Material,
+    surfaces: materials.surfaces.OpticalSurfaceRegistry,
+    reg: g4.Registry,
+) -> g4.LogicalVolume:
     """Construct the solids for the front part of the PMT.
     Consists of glass window, vacuum and cathode.
     These solids should be placed as mother-to-daughter: window <- vacuum <- cathode
@@ -65,6 +70,7 @@ def construct_PMT_front(window_mat: g4.Material, vac_mat: g4.Material, reg: g4.R
     pmt_vacuum_lv = g4.LogicalVolume(pmt_vacuum, vac_mat, "PMT_vacuum", reg)
     pmt_cathode_lv = g4.LogicalVolume(pmt_cathode, vac_mat, "PMT_cathode", reg)
     pmt_cathode_lv.pygeom_color_rgba = [0.545, 0.271, 0.074, 1]
+    g4.SkinSurface("pmt_cathode_surface", pmt_cathode_lv, surfaces.to_photocathode, reg)
 
     # Already place all of the daughters in the Mother.
     # This has to be taken into considerations when specifying them as detectors,
@@ -83,22 +89,22 @@ def construct_PMT_back(base_mat: g4.Material, reg: g4.Registry) -> g4.LogicalVol
     return g4.LogicalVolume(pmt_base, base_mat, "PMT_base", reg)
 
 
-def construct_teflon_foil(mat: g4.Material, instr: core.InstrumentationData) -> g4.LogicalVolume:
-    teflon_metadata = instr.special_metadata["watertank_instrumentation"]["teflon"]
+def construct_tyvek_foil(mat: g4.Material, instr: core.InstrumentationData) -> g4.LogicalVolume:
+    tyvek_metadata = instr.special_metadata["watertank_instrumentation"]["tyvek"]
 
-    teflon_solid = g4.solid.Polyhedra(
-        "teflon_foil",
+    tyvek_solid = g4.solid.Polyhedra(
+        "tyvek_foil",
         0,
         2 * pi,
-        teflon_metadata["faces"],
+        tyvek_metadata["faces"],
         1,
-        [0, teflon_effective_height],
-        [teflon_metadata["r"], teflon_metadata["r"]],
-        [teflon_metadata["r"] + 3, teflon_metadata["r"] + 3],  # 3mm thickness?
+        [0, tyvek_effective_height],
+        [tyvek_metadata["r"], tyvek_metadata["r"]],
+        [tyvek_metadata["r"] + 3, tyvek_metadata["r"] + 3],  # 3mm thickness?
         instr.registry,
         "mm",
     )
-    return g4.LogicalVolume(teflon_solid, mat, "teflon_foil", instr.registry)
+    return g4.LogicalVolume(tyvek_solid, mat, "tyvek_foil", instr.registry)
 
 
 def get_euler_angles(target_direction: np.array):
@@ -208,14 +214,16 @@ def construct_and_place_instrumentation(instr: core.InstrumentationData) -> g4.P
     # Materials are temporary here
     vac_mat = g4.MaterialPredefined("G4_Galactic")
 
-    teflon_lv = construct_teflon_foil(instr.materials.teflon, instr)
-    teflon_lv.pygeom_color_rgba = [1, 1, 1, 0.20]
-    g4.PhysicalVolume(
-        [0, 0, 0], [0, 0, 2 * offset], teflon_lv, "teflon_foil", instr.mother_lv, instr.registry
+    tyvek_lv = construct_tyvek_foil(instr.materials.tyvek, instr)
+    tyvek_lv.pygeom_color_rgba = [1, 1, 1, 0.20]
+    g4.SkinSurface("tyvek_surface", tyvek_lv, instr.materials.surfaces.to_tyvek, instr.registry)
+    g4.PhysicalVolume([0, 0, 0], [0, 0, 2 * offset], tyvek_lv, "tyvek_foil", instr.mother_lv, instr.registry)
+    pmt_window_lv = construct_PMT_front(
+        instr.materials.borosilicate, vac_mat, instr.materials.surfaces, instr.registry
     )
-    pmt_window_lv = construct_PMT_front(instr.materials.borosilicate, vac_mat, instr.registry)
     pmt_base_lv = construct_PMT_back(instr.materials.epoxy, instr.registry)
     pmt_base_lv.pygeom_color_rgba = [0, 0, 0, 1]
+    g4.SkinSurface("pmt_back_surface", pmt_base_lv, instr.materials.surfaces.to_steel, instr.registry)
 
     place_floor_pmts(pmt_window_lv, pmt_base_lv, instr)
     place_wall_pmts(pmt_window_lv, instr)

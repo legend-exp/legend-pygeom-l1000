@@ -287,6 +287,7 @@ def construct_and_place_tank(instr: core.InstrumentationData) -> g4.PhysicalVolu
         return instr
     tank_lv = construct_tank(instr.materials.metal_steel, instr.registry, instr.detail["watertank"])
     tank_lv.pygeom_color_rgba = False
+    g4.SkinSurface("tank_steel_surface", tank_lv, instr.materials.surfaces.to_steel, instr.registry)
     tank_z_displacement = -5000
     g4.PhysicalVolume(
         [0, 0, 0], [0, 0, tank_z_displacement], tank_lv, "tank", instr.mother_lv, instr.registry

@@ -2590,6 +2590,6 @@ hpges:
     baseplate: xlarge
     rodlength_in_mm: 125.4
 watertank_instrumentation:
-  teflon:
+  tyvek:
     faces: 15
     r: 4800
