@@ -10,6 +10,7 @@ from math import pi
 
 import numpy as np
 import pyg4ometry.geant4 as g4
+from pygeomtools import RemageDetectorInfo
 from scipy.spatial.transform import Rotation as R
 
 from . import core, materials, watertank
@@ -40,7 +41,6 @@ pmt_base_height = 145
 
 
 def construct_PMT_front(
-    window_mat: g4.Material,
     vac_mat: g4.Material,
     surfaces: materials.surfaces.OpticalSurfaceRegistry,
     reg: g4.Registry,
@@ -65,9 +65,6 @@ def construct_PMT_front(
         "PMT_cathode", vacuum_radius, vacuum_radius, vacuum_height, cathode_cutoff, 200, reg, "mm"
     )
 
-    pmt_window_lv = g4.LogicalVolume(pmt_window, window_mat, "PMT_window", reg)
-    pmt_window_lv.pygeom_color_rgba = [0.9, 0.8, 0.5, 0.5]
-    pmt_vacuum_lv = g4.LogicalVolume(pmt_vacuum, vac_mat, "PMT_vacuum", reg)
     pmt_cathode_lv = g4.LogicalVolume(pmt_cathode, vac_mat, "PMT_cathode", reg)
     pmt_cathode_lv.pygeom_color_rgba = [0.545, 0.271, 0.074, 1]
     g4.SkinSurface("pmt_cathode_surface", pmt_cathode_lv, surfaces.to_photocathode, reg)
@@ -75,9 +72,8 @@ def construct_PMT_front(
     # Already place all of the daughters in the Mother.
     # This has to be taken into considerations when specifying them as detectors,
     # As only one physical volume instance of the sensitive detector is created.
-    g4.PhysicalVolume([0, 0, 0], [0, 0, 0], pmt_vacuum_lv, "PMT_vacuum", pmt_window_lv, reg)
-    g4.PhysicalVolume([0, 0, 0], [0, 0, 0], pmt_cathode_lv, "PMT_cathode", pmt_vacuum_lv, reg)
-    return pmt_window_lv
+
+    return [pmt_window, pmt_vacuum, pmt_cathode_lv]
 
 
 def construct_PMT_back(base_mat: g4.Material, reg: g4.Registry) -> g4.LogicalVolume:
@@ -139,30 +135,56 @@ def get_euler_angles(target_direction: np.array):
     return [euler_angles[0], euler_angles[1], euler_angles[2]]
 
 
-def place_floor_pmts(
-    pmt_window_lv: g4.LogicalVolume, pmt_base_lv: g4.LogicalVolume, instr: core.InstrumentationData
-):
+def place_PMT_front(
+    rotation: list,
+    translation: list,
+    pmt_volumes: list,
+    name: str,
+    mother_lv: g4.LogicalVolume,
+    reg: g4.Registry,
+    instr: core.InstrumentationData,
+    rawid: int,
+) -> g4.PhysicalVolume:
+    """
+    Since the PMT is a compound volume, we need to place the PMT window, vacuum and cathode separately.
+    Due to the Geant4 handles copies of Logical Volumes, we need to create new Logical Volumes for each sensitive PMT.
+    """
+    # In order to have unique PMT physical volumes, we need to re-create the mother logical volumes.
+    pmt_window_lv = g4.LogicalVolume(pmt_volumes[0], instr.materials.borosilicate, name + "_window", reg)
+    pmt_window_lv.pygeom_color_rgba = [0.9, 0.8, 0.5, 0.5]
+    pmt_vacuum_lv = g4.LogicalVolume(pmt_volumes[1], instr.materials.vac, name + "_vacuum", reg)
+
+    # We have to place the new logical volumes for every single PMT
+    g4.PhysicalVolume([0, 0, 0], [0, 0, 0], pmt_vacuum_lv, name + "_vacuum", pmt_window_lv, reg)
+    pmt_pv = g4.PhysicalVolume([0, 0, 0], [0, 0, 0], pmt_volumes[2], name, pmt_vacuum_lv, reg)
+    pmt_pv.pygeom_active_detector = RemageDetectorInfo("optical", rawid)
+
+    return g4.PhysicalVolume(rotation, translation, pmt_window_lv, name + "_window", mother_lv, reg)
+
+
+def place_floor_pmts(pmt_volumes: list, pmt_base_lv: g4.LogicalVolume, instr: core.InstrumentationData):
     for key, value in instr.channelmap.items():
         if "pmt" in key.lower() and value["location"]["name"] == "floor":
             loc = value["location"]
             target_direction = np.array(
                 [loc["direction"]["nx"], loc["direction"]["ny"], loc["direction"]["nz"]]
             )
-            g4.PhysicalVolume(
+            rawid = value["daq"]["rawid"]
+            place_PMT_front(
                 get_euler_angles(target_direction),
                 [
                     loc["x"],
                     loc["y"],
                     loc["z"] + offset + pmt_base_height - cutoff,
                 ],  # Move the window up above the base
-                pmt_window_lv,
+                pmt_volumes,
                 value["name"],
                 instr.mother_lv,
                 instr.registry,
+                instr,
+                rawid,
             )
-            target_direction = np.array(
-                [loc["direction"]["nx"], loc["direction"]["ny"], loc["direction"]["nz"]]
-            )
+
             g4.PhysicalVolume(
                 get_euler_angles(target_direction),
                 [loc["x"], loc["y"], loc["z"] + offset],
@@ -173,7 +195,7 @@ def place_floor_pmts(
             )
 
 
-def place_wall_pmts(pmt_window_lv: g4.LogicalVolume, instr: core.InstrumentationData):
+def place_wall_pmts(pmt_volumes: list, instr: core.InstrumentationData):
     for key, value in instr.channelmap.items():
         if "pmt" in key.lower() and value["location"]["name"] == "wall":
             loc = value["location"]
@@ -185,13 +207,16 @@ def place_wall_pmts(pmt_window_lv: g4.LogicalVolume, instr: core.Instrumentation
             target_direction = np.array(
                 [loc["direction"]["nx"], loc["direction"]["ny"], loc["direction"]["nz"]]
             )
-            g4.PhysicalVolume(
+            rawid = value["daq"]["rawid"]
+            place_PMT_front(
                 get_euler_angles(target_direction),
                 [x, y, z],
-                pmt_window_lv,
+                pmt_volumes,
                 value["name"],
                 instr.mother_lv,
                 instr.registry,
+                instr,
+                rawid,
             )
 
 
@@ -212,20 +237,17 @@ def construct_and_place_instrumentation(instr: core.InstrumentationData) -> g4.P
 
     # Construct the instrumentation
     # Materials are temporary here
-    vac_mat = g4.MaterialPredefined("G4_Galactic")
 
     tyvek_lv = construct_tyvek_foil(instr.materials.tyvek, instr)
     tyvek_lv.pygeom_color_rgba = [1, 1, 1, 0.20]
     g4.SkinSurface("tyvek_surface", tyvek_lv, instr.materials.surfaces.to_tyvek, instr.registry)
     g4.PhysicalVolume([0, 0, 0], [0, 0, 2 * offset], tyvek_lv, "tyvek_foil", instr.mother_lv, instr.registry)
-    pmt_window_lv = construct_PMT_front(
-        instr.materials.borosilicate, vac_mat, instr.materials.surfaces, instr.registry
-    )
+    pmt_volumes = construct_PMT_front(instr.materials.vac, instr.materials.surfaces, instr.registry)
     pmt_base_lv = construct_PMT_back(instr.materials.epoxy, instr.registry)
     pmt_base_lv.pygeom_color_rgba = [0, 0, 0, 1]
     g4.SkinSurface("pmt_back_surface", pmt_base_lv, instr.materials.surfaces.to_steel, instr.registry)
 
-    place_floor_pmts(pmt_window_lv, pmt_base_lv, instr)
-    place_wall_pmts(pmt_window_lv, instr)
+    place_floor_pmts(pmt_volumes, pmt_base_lv, instr)
+    place_wall_pmts(pmt_volumes, instr)
 
     return instr

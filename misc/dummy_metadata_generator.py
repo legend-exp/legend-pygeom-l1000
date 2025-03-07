@@ -53,6 +53,7 @@ def load_config(input_path):
 
 def calculate_and_place_pmts(channelmap: dict, pmts_meta: dict, pmts_pos: dict) -> None:
     # Floor PMTs are pretty trivial to place
+    rawid = pmts_meta["daq"]["rawid"]
     for row in pmts_pos["floor"].values():
         row_index = row["id"]
         pmts_in_row = row["n"]
@@ -65,6 +66,8 @@ def calculate_and_place_pmts(channelmap: dict, pmts_meta: dict, pmts_pos: dict) 
             z = 0.0
 
             channelmap[name] = copy.deepcopy(pmts_meta)
+            channelmap[name]["daq"]["rawid"] = rawid
+            rawid += 1
             channelmap[name]["name"] = name
             channelmap[name]["location"] = {"name": "floor", "x": x, "y": y, "z": z}
             channelmap[name]["location"]["direction"] = {"nx": 0, "ny": 0, "nz": 1}
@@ -134,6 +137,8 @@ def calculate_and_place_pmts(channelmap: dict, pmts_meta: dict, pmts_pos: dict) 
                 y = y1 * (1 - t) + y2 * t
 
                 channelmap[name] = copy.deepcopy(pmts_meta)
+                channelmap[name]["daq"]["rawid"] = rawid
+                rawid += 1
                 channelmap[name]["name"] = name
                 channelmap[name]["location"] = {"name": "wall", "x": x, "y": y, "z": z}
                 channelmap[name]["location"]["direction"] = {"nx": normal_x, "ny": normal_y, "nz": normal_z}

@@ -538,3 +538,21 @@ class OpticalMaterialRegistry:
         self._epoxy.add_element_massfraction(self.get_element("O"), 0.5)
 
         return self._epoxy
+
+    @property
+    def vac(self) -> g4.Material:
+        """Vacuum material with refractive index."""
+        if hasattr(self, "_vac"):
+            return self._vac
+
+        self._vac = g4.Material(
+            name="vacuum",
+            density=1e-25,
+            number_of_components=1,
+            registry=self.g4_registry,
+        )
+        self._vac.add_element_natoms(self.get_element("H"), natoms=1)
+        # Vacuum has refractive index of 1.0, air also is defined as 1.0 for optical properties.
+        legendoptics.pmts.pyg4_pmt_attach_air_rindex(self._vac, self.g4_registry)
+
+        return self._vac
