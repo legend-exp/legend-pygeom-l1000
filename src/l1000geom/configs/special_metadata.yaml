@@ -14,7 +14,7 @@ detail:
     watertank: omit
     moderator: simple
   cosmogenic:
-    HPGe_dets: omit#~metadata
+    HPGe_dets: omit
     PEN_plates: stl
     cavern: omit
     cryostat: simple
