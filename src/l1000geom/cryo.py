@@ -1,5 +1,15 @@
 from __future__ import annotations
 
+from math import pi
+
+import pyg4ometry
+
+import pyg4ometry.geant4 as g4
+
+from . import core
+
+from importlib import resources
+
 """
 
 The cryostat consists of three main pieces:
@@ -46,16 +56,6 @@ Feel free to change any of the values as you see fit - the script can handle it,
 All units in mm.
 """
 
-from math import pi
-
-import pyg4ometry
-
-import pyg4ometry.geant4 as g4
-
-from . import core
-
-from importlib import resources
-
 def make_z_and_r(totalheight,neckheight,bodyheight,neckradius,barrelradius,shoulderfraction,bottomfraction):
 
     #The definitions of each variable, even when they seem obvious:
@@ -90,8 +90,8 @@ def make_z_and_r(totalheight,neckheight,bodyheight,neckradius,barrelradius,shoul
     shoulderzfractions = [98.30,97.20,93.91,91.28,88.43,86.90,83.17,80.10,76.59,73.52,70.01,66.72,63.21,59.05,56.20,51.81,46.98,42.38,36.46,30.32,23.96,17.38,10.58,0.05]
 
     for i in shoulderzfractions:
-        i = i*0.01
-        z.append(round(totalheight - neckheight - ((1 - i)*shoulderfraction*bodyheight),2))
+        j = i*0.01
+        z.append(round(totalheight - neckheight - ((1 - j)*shoulderfraction*bodyheight),2))
 
     #One last point for good measure, to put us right at the top of the barrel/bottom of the shoulder
     z.append(totalheight - neckheight - (shoulderfraction*bodyheight))
@@ -103,8 +103,8 @@ def make_z_and_r(totalheight,neckheight,bodyheight,neckradius,barrelradius,shoul
     bottomzfractions = [16.39,26.23,33.61,40.98,47.54,53.28,55.74,59.02,64.75,67.21,70.49,74.59,78.69,80.33,82.79,86.07,88.52,90.98,92.62,94.26,95.90,97.54,99.18,99.88]
     
     for i in bottomzfractions:
-        i = i*0.01
-        z.append(round(skirtheight - (i*bottomfraction*bodyheight),2))
+        j = i*0.01
+        z.append(round(skirtheight - (j*bottomfraction*bodyheight),2))
         
     #And finally, cap the cryostat's bottom z value
     z.append(round(skirtheight - (bottomfraction*bodyheight),2))
@@ -124,8 +124,8 @@ def make_z_and_r(totalheight,neckheight,bodyheight,neckradius,barrelradius,shoul
     shouldertotalr = barrelradius - neckradius
 
     for i in shoulderrfractions:
-        i = i*0.01
-        r.append(round((1-i)*shouldertotalr+neckradius,2))
+        j = i*0.01
+        r.append(round((1-j)*shouldertotalr+neckradius,2))
 
     #Next, the point at the meeting of the shoulder and the barrel
     r.append(barrelradius)
@@ -136,8 +136,8 @@ def make_z_and_r(totalheight,neckheight,bodyheight,neckradius,barrelradius,shoul
     bottomrfractions = [1.89,4.17,6.82,10.23,14.02,18.56,21.21,23.86,28.79,31.82,34.47,39.39,44.32,46.97,49.62,54.55,59.47,64.39,68.56,73.11,76.52,82.58,88.64,93.94]
 
     for i in bottomrfractions:
-        i = i*0.01
-        r.append(round((1-i)*barrelradius,2))
+        j = i*0.01
+        r.append(round((1-j)*barrelradius,2))
 
     #The bottom closes to a single point as well, of course
     r.append(0)
@@ -181,8 +181,8 @@ def make_z_and_r_inner_volumes(neckradius, tubeheight, totalheight, curvefractio
     curvezfractions = [16.39,26.23,33.61,40.98,47.54,53.28,55.74,59.02,64.75,67.21,70.49,74.59,78.69,80.33,82.79,86.07,88.52,90.98,92.62,94.26,95.90,97.54,99.18,99.88]
 
     for i in curvezfractions:
-        i = i*0.01
-        z.append(round(nowheight - (i*curvefraction*tubeheight),2))
+        j = i*0.01
+        z.append(round(nowheight - (j*curvefraction*tubeheight),2))
 
     #Final point where r = 0
     z.append(totalheight - tubeheight)
@@ -197,8 +197,8 @@ def make_z_and_r_inner_volumes(neckradius, tubeheight, totalheight, curvefractio
     curverfractions = [1.89,4.17,6.82,10.23,14.02,18.56,21.21,23.86,28.79,31.82,34.47,39.39,44.32,46.97,49.62,54.55,59.47,64.39,68.56,73.11,76.52,82.58,88.64,93.94]
 
     for i in curverfractions:
-        i = i*0.01
-        r.append(neckradius*(1-i))
+        j = i*0.01
+        r.append(neckradius*(1-j))
 
     #Final point where r = 0
     r.append(0)
@@ -251,9 +251,9 @@ def make_moderator_z_r_r(modheight, modradius, modthickness, tuberadius):
     r_inner.append(0)
     r_inner.append(0)
 
-    print(z)
-    print(r_inner)
-    print(r_outer)
+    #print(z)
+    #print(r_inner)
+    #print(r_outer)
     
     return z, r_inner, r_outer
 
@@ -475,11 +475,6 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> g4.Physical
     vac_pv = g4.PhysicalVolume([0, 0, 0], [0, 0, 0], vac_lv, "vacuumgap", outercryo_lv, instr.registry)
     icryo_pv = g4.PhysicalVolume([0, 0, 0], [0, 0, 0], icryo_lv, "innercryostat", vac_lv, instr.registry)
     atmlar_pv = g4.PhysicalVolume([0, 0, 0], [0, 0, 0], atmlar_lv, "atmosphericlar", icryo_lv, instr.registry)
-    #if instr.detail["moderator"] == "simple":
-    #    mod_pv = g4.PhysicalVolume([0, 0, 0], [0, 0, -bodyheight/2.*(1-bottomfraction)], mod_lv, "neutronmoderator", atmlar_lv, instr.registry)
-    #if instr.detail["moderator"] == "stl":
-        #Add stl
-    #    print("stl")
     tube_pv = g4.PhysicalVolume([0, 0, 0], [0, 0, 0], tube_lv, "reentrancetube", atmlar_lv, instr.registry)
     uglar_pv = g4.PhysicalVolume([0, 0, 0], [0, 0, 0], uglar_lv, "undergroundlar", tube_lv, instr.registry)
     
