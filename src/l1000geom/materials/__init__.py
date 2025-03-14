@@ -112,6 +112,22 @@ class OpticalMaterialRegistry:
         return self._metal_steel
 
     @property
+    def vacuum(self) -> g4.Material:
+        """Vacuum-equivalent material - extremely diffuse hydrogen."""
+        if hasattr(self, "_vacuum"):
+            return self._vacuum
+
+        self._vacuum = g4.Material(
+            name="vacuum",
+            density=0.00000000001,
+            number_of_components=1,
+            registry=self.g4_registry,
+        )
+        self._vacuum.add_element_massfraction(self.get_element("H"), massfraction=1.)
+
+        return self._vacuum
+
+    @property
     def metal_silicon(self) -> g4.Material:
         """Silicon."""
         if hasattr(self, "_metal_silicon"):
