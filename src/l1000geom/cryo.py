@@ -56,7 +56,14 @@ Feel free to change any of the values as you see fit - the script can handle it,
 All units in mm.
 """
 
-def make_z_and_r(totalheight,neckheight,bodyheight,neckradius,barrelradius,shoulderfraction,bottomfraction):
+def make_z_and_r(
+        totalheight:float,
+        neckheight:float,
+        bodyheight:float,
+        neckradius:float,
+        barrelradius:float,
+        shoulderfraction:float,
+        bottomfraction:float) -> Tuple[list,list]:
 
     #The definitions of each variable, even when they seem obvious:
     #totalheight - the z span of everything, from the bottom edge of the skirt/foot to the top of the neck
@@ -163,7 +170,11 @@ def make_z_and_r(totalheight,neckheight,bodyheight,neckradius,barrelradius,shoul
     return z, r
 
 
-def make_z_and_r_inner_volumes(neckradius, tubeheight, totalheight, curvefraction):
+def make_z_and_r_inner_volumes(
+        neckradius:float,
+        tubeheight:float,
+        totalheight:float,
+        curvefraction:float) -> Tuple[list,list]:
 
     #The RT is much simpler - it only has one curved side and one radius
 
@@ -220,7 +231,11 @@ def make_z_and_r_inner_volumes(neckradius, tubeheight, totalheight, curvefractio
     
     return z,r
 
-def make_moderator_z_r_r(modheight, modradius, modthickness, tuberadius):
+def make_moderator_z_r_r(
+        modheight:float,
+        modradius:float,
+        modthickness:float,
+        tuberadius:float) -> Tuple[list,list,list]:
     #Instead of a polycone, we use a G4Polyhedra for the moderator
     #It's assumed that the moderator will not have curved sides
 
@@ -259,62 +274,91 @@ def make_moderator_z_r_r(modheight, modradius, modthickness, tuberadius):
 
 
 
-def construct_outer_cryostat(cryostat_material: g4.Material, reg: g4.Registry, ocryo_r, ocryo_z) -> g4.LogicalVolume:
+def construct_outer_cryostat(
+        cryostat_material: g4.Material,
+        reg: g4.Registry,
+        ocryo_r: list,
+        ocryo_z: list) -> g4.LogicalVolume:
 
     ocryo_solid = g4.solid.GenericPolycone("ocryo_sol", 0, 2 * pi, ocryo_r, ocryo_z, reg, "mm")
     
     return g4.LogicalVolume(ocryo_solid, cryostat_material, "outercryostat", reg)
 
 
-def construct_vacuum_gap(vac_material: g4.Material, reg: g4.Registry, vac_r, vac_z) -> g4.LogicalVolume:
+def construct_vacuum_gap(
+        vac_material: g4.Material,
+        reg: g4.Registry,
+        vac_r: list,
+        vac_z: list) -> g4.LogicalVolume:
 
     vac_solid = g4.solid.GenericPolycone("vac_sol", 0, 2 * pi, vac_r, vac_z, reg, "mm")
     
     return g4.LogicalVolume(vac_solid, vac_material, "vacuumgap", reg)
 
 
-def construct_inner_cryostat(cryostat_material: g4.Material, reg: g4.Registry, icryo_r, icryo_z) -> g4.LogicalVolume:
+def construct_inner_cryostat(
+        cryostat_material: g4.Material,
+        reg: g4.Registry,
+        icryo_r: list,
+        icryo_z: list) -> g4.LogicalVolume:
 
     icryo_solid = g4.solid.GenericPolycone("icryo_sol", 0, 2 * pi, icryo_r, icryo_z, reg, "mm")
     
     return g4.LogicalVolume(icryo_solid, cryostat_material, "innercryostat", reg)
 
 
-def construct_atmospheric_lar(lar_material: g4.Material, reg: g4.Registry, atmlar_r, atmlar_z) -> g4.LogicalVolume:
+def construct_atmospheric_lar(
+        lar_material: g4.Material,
+        reg: g4.Registry,
+        atmlar_r: list,
+        atmlar_z: list) -> g4.LogicalVolume:
 
     atmlar_solid = g4.solid.GenericPolycone("atmlar_sol", 0, 2 * pi, atmlar_r, atmlar_z, reg, "mm")
     
     return g4.LogicalVolume(atmlar_solid, lar_material, "atmosphericlar", reg)
 
 
-def construct_moderator(mod_material: g4.Material, reg: g4.Registry, mod_r_inner,mod_r_outer, mod_z, modnsides) -> g4.LogicalVolume:
-
-    mod_solid = g4.solid.Polyhedra("mod_sol", 0 , 2*pi, modnsides, len(mod_z), mod_z, mod_r_inner, mod_r_outer, reg, "mm")
-    
-    return g4.LogicalVolume(mod_solid, mod_material, "neutronmoderator", reg)
-
-
-def construct_reentrance_tube(tube_material: g4.Material, reg: g4.Registry, tube_r, tube_z) -> g4.LogicalVolume:
+def construct_reentrance_tube(
+        tube_material: g4.Material,
+        reg: g4.Registry,
+        tube_r: list,
+        tube_z: list) -> g4.LogicalVolume:
 
     tube_solid = g4.solid.GenericPolycone("tube_sol", 0, 2 * pi, tube_r, tube_z, reg, "mm")
     
     return g4.LogicalVolume(tube_solid, tube_material, "reentrancetube", reg)
 
 
-def construct_underground_lar(lar_material: g4.Material, reg: g4.Registry, uglar_r, uglar_z) -> g4.LogicalVolume:
+def construct_underground_lar(
+        lar_material: g4.Material,
+        reg: g4.Registry,
+        uglar_r: list,
+        uglar_z: list) -> g4.LogicalVolume:
 
     uglar_solid = g4.solid.GenericPolycone("uglar_sol", 0, 2 * pi, uglar_r, uglar_z, reg, "mm")
     
     return g4.LogicalVolume(uglar_solid, lar_material, "undergroundlar", reg)
 
-def construct_moderator_simple(mod_material: g4.Material, reg: g4.Registry,  mod_r_inner,mod_r_outer, mod_z, modnsides, mother_lv):
+
+def construct_moderator_simple(
+        mod_material: g4.Material,
+        reg: g4.Registry,
+        mod_r_inner: list,
+        mod_r_outer: list,
+        mod_z: list,
+        modnsides: int,
+        mother_lv: g4.LogicalVolume):
+
      mod_solid = g4.solid.Polyhedra("mod_sol", 0 , 2*pi, modnsides, len(mod_z), mod_z, mod_r_inner, mod_r_outer, reg, "mm")
      mod_lv =  g4.LogicalVolume(mod_solid, mod_material, "neutronmoderator", reg)
      mod_pv = g4.PhysicalVolume([0, 0, 0], [0, 0, -3000], mod_lv, "neutronmoderator", mother_lv, reg)
      #Z value used to be -bodyheight/2.*(1-bottomfraction)
      #Could import this if we wanted, but maybe this method has enough arguments already...     
 
-def construct_moderator_stl(mod_material: g4.Material, reg: g4.Registry, mother_lv):
+def construct_moderator_stl(
+        mod_material: g4.Material,
+        reg: g4.Registry,
+        mother_lv: g4.LogicalVolume):
     #There are 50 parts for the neutron moderator, numbered 0 to 49
     #There are an additional 289(!) parts for the moderator's metal support structure
     #The steel pieces are also much more complex than the plastic pieces
@@ -371,6 +415,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> g4.Physical
 
     skirtheight = totalheight - neckheight - (bodyheight*(1-bottomfraction))
     skirtradius = barrelradius
+    skirtz = -bodyheight/2 - ocryo_thickness*3.2
     skirtthickness = 60#A guess
     footheight = 150
     footwidth = 150#Not really a guess so much as a placeholder...
@@ -436,14 +481,14 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> g4.Physical
     tube_lv = construct_reentrance_tube(instr.materials.metal_copper, instr.registry, tube_r, tube_z)
     tube_lv.pygeom_color_rgba = [0.8,0.7,0.1,0.6]
 
-    if "moderator" not in instr.detail:
+    if "nm_plastic" not in instr.detail:
         print("Warning: neutron moderator not specified. Omitting by default.")
 
-    elif instr.detail["moderator"] == "simple":
+    elif instr.detail["nm_plastic"] == "simple":
         mod_z,mod_r_inn,mod_r_out = make_moderator_z_r_r(modheight, modradius, modthickness, neckradius+1)
         construct_moderator_simple(instr.materials.pmma, instr.registry, mod_r_inn, mod_r_out, mod_z, modnsides, atmlar_lv)
          
-    elif instr.detail["moderator"] == "stl":
+    elif instr.detail["nm_plastic"] == "stl":
         construct_moderator_stl(instr.materials.pmma, instr.registry, atmlar_lv)
         
     #Finally, the RT should be filled with LAr
@@ -452,17 +497,22 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> g4.Physical
     tubeheight = tubeheight - tubethickness
     
     uglar_z, uglar_r = make_z_and_r_inner_volumes(neckradius, tubeheight, totalheight,curvefraction)
-
+    
     uglar_lv = construct_underground_lar(instr.materials.liquidargon, instr.registry, uglar_r, uglar_z)
     uglar_lv.pygeom_color_rgba = [0.1,0.8,0.3,0.6]
     
     
     #Place the physical volumes at the end
-   # Move the cryostat back in a central position
-
-    skirt_pv = g4.PhysicalVolume([0, 0, 0], [0, 0, skirtheight/2.], skirt_lv, "skirt", instr.mother_lv, instr.registry)
-    foot_pv = g4.PhysicalVolume([0, 0, 0], [0, 0, footheight/2.+20], foot_lv, "foot", instr.mother_lv, instr.registry)    
+    #Move the cryostat back in a central position
     
+    if instr.detail["watertank"] == "omit":
+        skirt_pv = g4.PhysicalVolume([0, 0, 0], [0, 0, skirtz], skirt_lv, "skirt", instr.mother_lv, instr.registry)
+        foot_pv = g4.PhysicalVolume([0, 0, 0], [0, 0, skirtz - skirtheight/2 + footheight/2], foot_lv, "foot", instr.mother_lv, instr.registry)    
+    else:
+        skirt_pv = g4.PhysicalVolume([0, 0, 0], [0, 0, skirtheight/2.], skirt_lv, "skirt", instr.mother_lv, instr.registry)
+        foot_pv = g4.PhysicalVolume([0, 0, 0], [0, 0, footheight/2.+20], foot_lv, "foot", instr.mother_lv, instr.registry)
+   
+       
     outercryo_pv=g4.PhysicalVolume(
         [0, 0, 0],
         [0, 0, -instr.mother_z_displacement],

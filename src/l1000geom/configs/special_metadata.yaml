@@ -10,11 +10,9 @@ detail:
     labs: omit
     nm_holding_structure: simple
     nm_plastic: stl
-    scaffolding: omit
     watertank: omit
-    moderator: simple
   cosmogenic:
-    HPGe_dets: omit
+    HPGe_dets: metadata
     PEN_plates: stl
     cavern: omit
     cryostat: simple
@@ -23,9 +21,7 @@ detail:
     labs: omit
     nm_holding_structure: omit
     nm_plastic: simple
-    scaffolding: omit
     watertank: simple
-    moderator: simple
 fibers:
   S0101:
     geometry:
