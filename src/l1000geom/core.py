@@ -41,7 +41,7 @@ class InstrumentationData(NamedTuple):
 
 def construct(
     assemblies: list[str] | None = None,
-    detail_level: str = "close_detector",
+    detail_level: str = "radiogenic",
     config: dict | None = None,
 ) -> geant4.Registry:
     """Construct the LEGEND-1000 geometry and return the pyg4ometry Registry containing the world volume."""

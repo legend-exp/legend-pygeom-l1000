@@ -1,6 +1,6 @@
 calibration: {}
 detail:
-  close_detector:
+  radiogenic:
     HPGe_dets: metadata
     PEN_plates: stl
     cavern: omit
