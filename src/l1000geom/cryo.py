@@ -479,7 +479,7 @@ def construct_moderator_simple(
         "mod_sol", 0, 2 * pi, modnsides, len(mod_z), mod_z, mod_r_inner, mod_r_outer, reg, "mm"
     )
     mod_lv = g4.LogicalVolume(mod_solid, mod_material, "neutronmoderator", reg)
-    g4.PhysicalVolume([0, 0, 0], [0, 0, -3000], mod_lv, "neutronmoderator", mother_lv, reg)
+    g4.PhysicalVolume([0, 0, 0], [0, 0, -2900], mod_lv, "neutronmoderator", mother_lv, reg)  # -3000
     # Z value used to be -bodyheight/2.*(1-bottomfraction)
     # Could import this if we wanted, but maybe this method has enough arguments already...
 
@@ -494,7 +494,7 @@ def construct_moderator_stl(mod_material: g4.Material, reg: g4.Registry, mother_
         mod_file = resources.files("l1000geom") / "models" / f"modpiece_{i}.stl"
         mod_solid = pyg4ometry.stl.Reader(mod_file, solidname=mod_name, registry=reg).getSolid()
         mod_lv = g4.LogicalVolume(mod_solid, mod_material, mod_name, reg)
-        g4.PhysicalVolume([0, 0, 0], [0, 0, -850], mod_lv, mod_name, mother_lv, reg)
+        g4.PhysicalVolume([0, 0, 0], [0, 0, -1250], mod_lv, mod_name, mother_lv, reg)
 
 
 def construct_and_place_cryostat(instr: core.InstrumentationData) -> g4.PhysicalVolume:
@@ -509,26 +509,28 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> g4.Physical
     # You can find the definitions in the preamble or in make_z_and_r
     totalheight = 10000  # 10200
     neckheight = 1940  # 2000
-    bodyheight = 7100  # 8000 #7000
+    bodyheight = 7750  # 8000 #7000
     neckradius = 1200
     # neckradius = 1900 / 2. # 1.9m diameter
-    barrelradius = 3800
-    shoulderfraction = 0.25
-    bottomfraction = 0.25
+    # barrelradius = 3800
+    shoulderfraction = 0.233
+    bottomfraction = 0.233
 
     # The following parameters are internal to this class. Definitions should be obvious if you read the definitions in the other
     # two places mentioned before
     ocryo_thickness = 60
     # However, I should mention the vacuum gap is asymmetric - it has distinct values at the neck, barrel, and bottom
     vgapthickness_neck = 120
-    vgapthickness_barrel = 500  # 400
+    vgapthickness_barrel = 200  # 500  # 400
     vgapthickness_bottom = 150  # 100
     icryo_thickness = 40
+
+    barrelradius = 3500 + icryo_thickness + ocryo_thickness + vgapthickness_barrel
 
     # Separated, because these are parameters for the reentrance tube and the UGLar, which have another make_z_and_r class
     # However the radius is controlled by the cryostat neck radius, and doesn't get specified manually
     # tubeheight = 7500
-    tubeheight = 7000  # 6456 #- 494.45 #7500
+    tubeheight = 6750  # - 494.45 #7500 #7000  #
     curvefraction = 0.05
     tubethickness = 1
 
@@ -569,7 +571,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> g4.Physical
     )
 
     outercryo_lv = construct_outer_cryostat(instr.materials.metal_steel, instr.registry, ocryo_r, ocryo_z)
-    outercryo_lv.pygeom_color_rgba = [0.5, 0.5, 0.5, 0.5]
+    outercryo_lv.pygeom_color_rgba = [0.5, 0.5, 0.5, 0.25]
 
     # For the vacuum gap, it should be as simple as subtracting the outer cryostat thicknesses
     # The neck height stays the same, effectively lowering the body by the thickness
@@ -587,7 +589,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> g4.Physical
     )
 
     vac_lv = construct_vacuum_gap(instr.materials.vacuum, instr.registry, vac_r, vac_z)
-    vac_lv.pygeom_color_rgba = [0.6, 0.0, 0.6, 0.7]
+    vac_lv.pygeom_color_rgba = [0.6, 0.0, 0.6, 0.1]
 
     # Here things are a bit more complicated with the asymmetric vacuum gap
     # Of course, there is no vacuum gap at the top of the neck - that's where the lock goes
@@ -605,7 +607,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> g4.Physical
     )
 
     icryo_lv = construct_inner_cryostat(instr.materials.liquidargon, instr.registry, icryo_r, icryo_z)
-    icryo_lv.pygeom_color_rgba = [0.5, 0.5, 0.5, 0.5]
+    icryo_lv.pygeom_color_rgba = [0.5, 0.5, 0.5, 0.25]
 
     # The next layer should be again just subtracting by the inner cryo thickness everywhere
     totalheight = totalheight - icryo_thickness
@@ -618,7 +620,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> g4.Physical
     )
 
     atmlar_lv = construct_atmospheric_lar(instr.materials.liquidargon, instr.registry, atmlar_r, atmlar_z)
-    atmlar_lv.pygeom_color_rgba = [0.1, 0.8, 0.3, 0.6]
+    atmlar_lv.pygeom_color_rgba = [0.1, 0.8, 0.3, 0.1]
 
     # The RT and UGLAr have a totally different shape than the cryostat bodies
     # They need to have their own smaller r/z method
@@ -626,7 +628,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> g4.Physical
     tube_z, tube_r = make_z_and_r_inner_volumes(neckradius, tubeheight, totalheight, curvefraction)
 
     tube_lv = construct_reentrance_tube(instr.materials.metal_copper, instr.registry, tube_r, tube_z)
-    tube_lv.pygeom_color_rgba = [0.8, 0.7, 0.1, 0.6]
+    tube_lv.pygeom_color_rgba = [0.8, 0.7, 0.1, 0.2]
 
     if "nm_plastic" not in instr.detail:
         log.warning("Warning: neutron moderator not specified. Omitting by default.")
@@ -648,7 +650,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> g4.Physical
     uglar_z, uglar_r = make_z_and_r_inner_volumes(neckradius, tubeheight, totalheight, curvefraction)
 
     uglar_lv = construct_underground_lar(instr.materials.liquidargon, instr.registry, uglar_r, uglar_z)
-    uglar_lv.pygeom_color_rgba = [0.1, 0.8, 0.3, 0.6]
+    uglar_lv.pygeom_color_rgba = [0.1, 0.8, 0.3, 0.1]
 
     # Place the physical volumes at the end
     # Move the cryostat back in a central position
