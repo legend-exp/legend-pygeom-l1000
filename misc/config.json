@@ -28,7 +28,7 @@
       "PEN_plates": "stl",
       "HPGe_dets": "metadata"
     },
-    "close_detector": {
+    "radiogenic": {
       "cavern": "omit",
       "labs": "omit",
       "watertank": "omit",

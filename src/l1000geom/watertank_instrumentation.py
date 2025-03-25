@@ -152,7 +152,7 @@ def place_PMT_front(
     # In order to have unique PMT physical volumes, we need to re-create the mother logical volumes.
     pmt_window_lv = g4.LogicalVolume(pmt_volumes[0], instr.materials.borosilicate, name + "_window", reg)
     pmt_window_lv.pygeom_color_rgba = [0.9, 0.8, 0.5, 0.5]
-    pmt_vacuum_lv = g4.LogicalVolume(pmt_volumes[1], instr.materials.vac, name + "_vacuum", reg)
+    pmt_vacuum_lv = g4.LogicalVolume(pmt_volumes[1], instr.materials.vacuum, name + "_vacuum", reg)
 
     # We have to place the new logical volumes for every single PMT
     g4.PhysicalVolume([0, 0, 0], [0, 0, 0], pmt_vacuum_lv, name + "_vacuum", pmt_window_lv, reg)
@@ -242,7 +242,7 @@ def construct_and_place_instrumentation(instr: core.InstrumentationData) -> g4.P
     tyvek_lv.pygeom_color_rgba = [1, 1, 1, 0.20]
     g4.SkinSurface("tyvek_surface", tyvek_lv, instr.materials.surfaces.to_tyvek, instr.registry)
     g4.PhysicalVolume([0, 0, 0], [0, 0, 2 * offset], tyvek_lv, "tyvek_foil", instr.mother_lv, instr.registry)
-    pmt_volumes = construct_PMT_front(instr.materials.vac, instr.materials.surfaces, instr.registry)
+    pmt_volumes = construct_PMT_front(instr.materials.vacuum, instr.materials.surfaces, instr.registry)
     pmt_base_lv = construct_PMT_back(instr.materials.epoxy, instr.registry)
     pmt_base_lv.pygeom_color_rgba = [0, 0, 0, 1]
     g4.SkinSurface("pmt_back_surface", pmt_base_lv, instr.materials.surfaces.to_steel, instr.registry)

@@ -69,7 +69,7 @@ def dump_gdml_cli() -> None:
     geom_opts.add_argument(
         "--detail",
         action="store",
-        default="close_detector",
+        default="radiogenic",
         help="""Select the detail level for the setup. (default: %(default)s)""",
     )
     geom_opts.add_argument(

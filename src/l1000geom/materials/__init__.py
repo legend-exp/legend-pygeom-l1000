@@ -118,22 +118,6 @@ class OpticalMaterialRegistry:
         return self._metal_steel
 
     @property
-    def vacuum(self) -> g4.Material:
-        """Vacuum-equivalent material - extremely diffuse hydrogen."""
-        if hasattr(self, "_vacuum"):
-            return self._vacuum
-
-        self._vacuum = g4.Material(
-            name="vacuum",
-            density=0.00000000001,
-            number_of_components=1,
-            registry=self.g4_registry,
-        )
-        self._vacuum.add_element_massfraction(self.get_element("H"), massfraction=1.)
-
-        return self._vacuum
-
-    @property
     def metal_silicon(self) -> g4.Material:
         """Silicon."""
         if hasattr(self, "_metal_silicon"):
@@ -556,19 +540,19 @@ class OpticalMaterialRegistry:
         return self._epoxy
 
     @property
-    def vac(self) -> g4.Material:
+    def vacuum(self) -> g4.Material:
         """Vacuum material with refractive index."""
-        if hasattr(self, "_vac"):
-            return self._vac
+        if hasattr(self, "_vacuum"):
+            return self._vacuum
 
-        self._vac = g4.Material(
+        self._vacuum = g4.Material(
             name="vacuum",
             density=1e-25,
             number_of_components=1,
             registry=self.g4_registry,
         )
-        self._vac.add_element_natoms(self.get_element("H"), natoms=1)
+        self._vacuum.add_element_natoms(self.get_element("H"), natoms=1)
         # Vacuum has refractive index of 1.0, air also is defined as 1.0 for optical properties.
-        legendoptics.pmts.pyg4_pmt_attach_air_rindex(self._vac, self.g4_registry)
+        legendoptics.pmts.pyg4_pmt_attach_air_rindex(self._vacuum, self.g4_registry)
 
-        return self._vac
+        return self._vacuum
