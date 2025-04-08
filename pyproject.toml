@@ -36,7 +36,7 @@ dependencies = [
     "numpy",
     "pint",
     "pyg4ometry",
-    "pylegendmeta>=v0.9.0",
+    "pylegendmeta>=v1.0.0",
     "pyarrow",
     "pyyaml",
     "scipy",
