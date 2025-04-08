@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from functools import wraps
+from typing import Callable
+
 import legendoptics.fibers
 import legendoptics.lar
 import legendoptics.nylon
@@ -14,11 +17,22 @@ import numpy as np
 import pint
 import pyg4ometry.geant4 as g4
 
-from .surfaces import OpticalSurfaceRegistry
+
+def cached_property(material: Callable):
+    @wraps(material)
+    def wrapper(self):
+        attr = f"_{material.__name__}"
+        if not hasattr(self, attr):
+            setattr(self, attr, material(self))
+        return getattr(self, attr)
+
+    return property(wrapper)
 
 
 class OpticalMaterialRegistry:
     def __init__(self, g4_registry: g4.Registry):
+        from .surfaces import OpticalSurfaceRegistry
+
         self.g4_registry = g4_registry
         self.lar_temperature = 88.8
 
