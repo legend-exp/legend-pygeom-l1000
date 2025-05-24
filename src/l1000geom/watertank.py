@@ -291,7 +291,12 @@ def construct_and_place_tank(instr: core.InstrumentationData) -> core.Instrument
     tank_z_displacement = -(800.0 + 8877.6 / 2.0)
 
     g4.PhysicalVolume(
-        [0, 0, 0], [0, 0, tank_z_displacement], tank_lv, "tank", instr.mother_lv, instr.registry
+        [0, 0, 0],
+        [instr.mother_x_displacement, 0, tank_z_displacement + instr.mother_z_displacement],
+        tank_lv,
+        "tank",
+        instr.mother_lv,
+        instr.registry,
     )
 
     water_lv = construct_water(instr.materials.water, instr.registry, instr.detail["watertank"])

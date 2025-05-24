@@ -21,6 +21,8 @@ class InstrumentationData(NamedTuple):
     """Argon PhysicalVolume instance in which all components are to be placed."""
     mother_z_displacement: float
     """The z-displacement of the mother volume."""
+    mother_x_displacement: float
+    """The x-displacement of the mother volume."""
     materials: materials.OpticalMaterialRegistry
     """Material properties for common materials"""
     registry: geant4.Registry
@@ -87,11 +89,11 @@ def construct(
 
     # This object will be used and edited by all subsystems and then passed to the next subsystem
     instr = InstrumentationData(
-        world_lv, None, 0, mats, reg, channelmap, special_metadata, AttrsDict(config), detail
+        world_lv, None, 0, 0, mats, reg, channelmap, special_metadata, AttrsDict(config), detail
     )
     # Create and place the structures
     # NamedTuples are immutable, so we need to take copies of instr
-    cavern_and_labs.construct_and_place_cavern_and_labs(instr)
+    instr = cavern_and_labs.construct_and_place_cavern_and_labs(instr)
     instr = watertank.construct_and_place_tank(instr)
     instr = watertank_instrumentation.construct_and_place_instrumentation(instr)
     instr = cryo.construct_and_place_cryostat(instr)
