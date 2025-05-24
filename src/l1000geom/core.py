@@ -8,7 +8,7 @@ from pyg4ometry import geant4
 from pygeomtools import detectors, geometry, visualization
 from pygeomtools.utils import load_dict_from_config
 
-from . import cavern_and_labs, cryo, fibers, hpge_strings, materials, watertank
+from . import cavern_and_labs, cryo, fibers, hpge_strings, materials, watertank, watertank_instrumentation
 
 lmeta = LegendMetadata()
 configs = TextDB(resources.files("l1000geom") / "configs")
@@ -41,7 +41,7 @@ class InstrumentationData(NamedTuple):
 
 def construct(
     assemblies: list[str] | None = None,
-    detail_level: str = "close_detector",
+    detail_level: str = "radiogenic",
     config: dict | None = None,
 ) -> geant4.Registry:
     """Construct the LEGEND-1000 geometry and return the pyg4ometry Registry containing the world volume."""
@@ -93,6 +93,7 @@ def construct(
     # NamedTuples are immutable, so we need to take copies of instr
     cavern_and_labs.construct_and_place_cavern_and_labs(instr)
     instr = watertank.construct_and_place_tank(instr)
+    instr = watertank_instrumentation.construct_and_place_instrumentation(instr)
     instr = cryo.construct_and_place_cryostat(instr)
     hpge_strings.place_hpge_strings(instr)  # Does not edit InstrumentationData
     fibers.place_fiber_modules(instr)

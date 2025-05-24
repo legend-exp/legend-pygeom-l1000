@@ -562,7 +562,7 @@ class ModuleFactorySingleFibers(ModuleFactoryBase):
         coating_lv = g4.LogicalVolume(coating, self.materials.tpb_on_fibers, v_name, self.registry)
         g4.PhysicalVolume([0, 0, 0], [0, 0, 0], inner_lv, f"fiber_cl2{v_suffix}", coating_lv, self.registry)
 
-        coating_lv.pygeom_color_rgba = [0, 1, 0, 1]
+        coating_lv.pygeom_color_rgba = [0, 1, 0, 0.0125]
 
         return coating_lv
 
@@ -930,7 +930,7 @@ class ModuleFactorySegment(ModuleFactoryBase):
             self.registry,
         )
 
-        coating_lv.pygeom_color_rgba = [0, 1, 0, 1]
+        coating_lv.pygeom_color_rgba = [0, 1, 0, 0.0125]
 
         return coating_lv
 

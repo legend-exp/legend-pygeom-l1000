@@ -6,7 +6,10 @@ import legendoptics.fibers
 import legendoptics.lar
 import legendoptics.nylon
 import legendoptics.pen
+import legendoptics.pmts
 import legendoptics.tpb
+import legendoptics.vm2000
+import legendoptics.water
 import numpy as np
 import pint
 import pyg4ometry.geant4 as g4
@@ -40,10 +43,13 @@ class OpticalMaterialRegistry:
     def _define_elements(self) -> None:
         """Lazily define all used elements."""
         self._add_element(name="Hydrogen", symbol="H", Z=1, A=1.00794)
+        self._add_element(name="Boron", symbol="B", Z=5, A=10.811)
         self._add_element(name="Carbon", symbol="C", Z=6, A=12.011)
         self._add_element(name="Nitrogen", symbol="N", Z=7, A=14.01)
         self._add_element(name="Oxygen", symbol="O", Z=8, A=16.00)
         self._add_element(name="Fluorine", symbol="F", Z=9, A=19.00)
+        self._add_element(name="Sodium", symbol="Na", Z=11, A=22.99)
+        self._add_element(name="Aluminium", symbol="Al", Z=13, A=26.981539)
         self._add_element(name="Silicon", symbol="Si", Z=14, A=28.09)
         self._add_element(name="argon", symbol="Ar", Z=18, A=39.95)
         self._add_element(name="Chromium", symbol="Cr", Z=24, A=51.9961)
@@ -466,3 +472,104 @@ class OpticalMaterialRegistry:
         self._rock.add_element_natoms(self.get_element("O"), natoms=2)
 
         return self._rock
+
+    @property
+    def tyvek(self) -> g4.Material:
+        """Tyvek material."""
+        if hasattr(self, "_tyvek"):
+            return self._tyvek
+
+        self._tyvek = g4.Material(
+            name="tyvek",
+            density=0.38,  # https://www.dupont.com/content/dam/dupont/amer/us/en/microsites/tyvek-design/images/documents/EN-NA-Tyvek(r)-Graphics-Printing&Technical-Guide-2018.pdf
+            number_of_components=2,
+            registry=self.g4_registry,
+        )
+        self._tyvek.add_element_natoms(self.get_element("C"), natoms=2)
+        self._tyvek.add_element_natoms(self.get_element("H"), natoms=4)
+
+        return self._tyvek
+
+    @property
+    def water(self) -> g4.Material:
+        """High purity water of the watertank."""
+        if hasattr(self, "_water"):
+            return self._water
+
+        self._water = g4.MaterialCompound(
+            name="Water",  # written "Water" to use Geant4 intern way of handling Rayleigh scattering with water,
+            # see Geant4 BookForApplicationDevelopers pg. 270
+            density=1.0,
+            number_of_components=2,
+            registry=self.g4_registry,
+        )
+
+        self._water.add_element_natoms(self.get_element("H"), natoms=2)
+        self._water.add_element_natoms(self.get_element("O"), natoms=1)
+
+        legendoptics.water.pyg4_water_attach_rindex(self._water, self.g4_registry)
+        legendoptics.water.pyg4_water_attach_absorption(self._water, self.g4_registry)
+
+        return self._water
+
+    @property
+    def borosilicate(self) -> g4.Material:
+        """Material for the borosilicate glass of the PMT."""
+        if hasattr(self, "_borosilicate"):
+            return self._borosilicate
+
+        self._borosilicate = g4.MaterialCompound(
+            name="borosilicate",
+            density=2.23,
+            number_of_components=4,
+            registry=self.g4_registry,
+        )
+
+        self._borosilicate.add_element_massfraction(self.get_element("Si"), 0.376)
+        self._borosilicate.add_element_massfraction(self.get_element("O"), 0.543)
+        self._borosilicate.add_element_massfraction(self.get_element("B"), 0.04)
+        self._borosilicate.add_element_massfraction(self.get_element("Na"), 0.029)
+        self._borosilicate.add_element_massfraction(self.get_element("Al"), 0.012)
+
+        legendoptics.pmts.pyg4_pmt_attach_borosilicate_rindex(self._borosilicate, self.g4_registry)
+        legendoptics.pmts.pyg4_pmt_attach_borosilicate_absorption_length(self._borosilicate, self.g4_registry)
+
+        return self._borosilicate
+
+    @property
+    def epoxy(self) -> g4.Material:
+        """Material for the potted base of the PMT."""
+        if hasattr(self, "_epoxy"):
+            return self._epoxy
+
+        self._epoxy = g4.Material(
+            name="potted_base",
+            density=1.1,
+            number_of_components=3,
+            registry=self.g4_registry,
+        )
+
+        self._epoxy.add_element_massfraction(self.get_element("H"), 0.65)
+        self._epoxy.add_element_massfraction(self.get_element("C"), 0.1)
+        self._epoxy.add_element_massfraction(self.get_element("O"), 0.20)
+        self._epoxy.add_element_massfraction(self.get_element("O"), 0.5)
+
+        return self._epoxy
+
+    @property
+    def vacuum(self) -> g4.Material:
+        """Vacuum material with refractive index."""
+        if hasattr(self, "_vacuum"):
+            return self._vacuum
+
+        self._vacuum = g4.Material(
+            name="vacuum",
+            density=1e-25,
+            number_of_components=1,
+            registry=self.g4_registry,
+        )
+        self._vacuum.add_element_natoms(self.get_element("H"), natoms=1)
+        # Vacuum has refractive index of 1.0, air also is defined as 1.0 for optical properties.
+        legendoptics.pmts.pyg4_pmt_attach_air_rindex(self._vacuum, self.g4_registry)
+
+        return self._vacuum
