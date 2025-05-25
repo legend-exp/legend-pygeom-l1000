@@ -17,6 +17,7 @@ def parse_arguments():
     argparser.add_argument("-i", "--input", type=str, required=True)
     argparser.add_argument("-s", "--output_special_metadata", type=str, default="special_metadata.yaml")
     argparser.add_argument("-c", "--output_channelmap", type=str, default="channelmap.json")
+    argparser.add_argument("-f", "--force-fallback", action="store_true")
     return argparser.parse_args()
 
 
@@ -271,8 +272,16 @@ def main():
     ).reshape(len(ARRAY_CONFIG["center"]["x_in_mm"]), len(ARRAY_CONFIG["angle_in_deg"]))
 
     timestamp = "20230125T212014Z"
-    chm = legendmeta.LegendMetadata().channelmap(on=timestamp)
-    hpge_data = chm[config["dummy_dets"]["hpge"]]
+    if legendmeta.LegendMetadata() and not args.force_fallback:
+        chm = legendmeta.LegendMetadata().channelmap(on=timestamp)
+        hpge_data = chm[config["dummy_dets"]["hpge"]]
+        spms_data = chm[config["dummy_dets"]["spms"]]
+        pmts_meta = chm[config["dummy_dets"]["pmts"]]
+    else:
+        hpge_data = config["fallback_chm_template"]["hpge"]
+        spms_data = config["fallback_chm_template"]["spms"]
+        pmts_meta = config["fallback_chm_template"]["pmts"]
+
     hpge_names = np.sort(
         np.concatenate(
             [
@@ -290,9 +299,6 @@ def main():
         )
     )
 
-    spms_data = chm[config["dummy_dets"]["spms"]]
-
-    pmts_meta = chm[config["dummy_dets"]["pmts"]]
     pmts_pos = config["pmts"]
 
     generate_special_metadata(args.output_special_metadata, config, string_idx, hpge_names)
