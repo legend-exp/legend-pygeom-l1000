@@ -17,7 +17,13 @@ def parse_arguments():
     argparser.add_argument("-i", "--input", type=str, required=True)
     argparser.add_argument("-s", "--output_special_metadata", type=str, default="special_metadata.yaml")
     argparser.add_argument("-c", "--output_channelmap", type=str, default="channelmap.json")
-    argparser.add_argument("-f", "--force-fallback", action="store_true")
+    argparser.add_argument(
+        "-d",
+        "--dets_from_metadata",
+        type=str,
+        help="Use detector from metadata as template. Should be in dict form, e.g., {'hpge': 'V000000A', ...}",
+        default="",
+    )
     return argparser.parse_args()
 
 
@@ -266,21 +272,32 @@ def generate_channelmap(
 def main():
     args = parse_arguments()
     config = load_config(args.input)
+    if args.dets_from_metadata != "":
+        json_acceptable_string = args.dets_from_metadata.replace("'", '"')
+        det_names_from_metadata = json.loads(json_acceptable_string)
 
     string_idx = np.arange(
         len(ARRAY_CONFIG["center"]["x_in_mm"]) * len(ARRAY_CONFIG["angle_in_deg"])
     ).reshape(len(ARRAY_CONFIG["center"]["x_in_mm"]), len(ARRAY_CONFIG["angle_in_deg"]))
 
-    timestamp = "20230125T212014Z"
-    if legendmeta.LegendMetadata() and not args.force_fallback:
+    hpge_data, spms_data, pmts_meta = None, None, None
+
+    if legendmeta.LegendMetadata() and args.dets_from_metadata:
+        timestamp = "20230125T212014Z"
         chm = legendmeta.LegendMetadata().channelmap(on=timestamp)
-        hpge_data = chm[config["dummy_dets"]["hpge"]]
-        spms_data = chm[config["dummy_dets"]["spms"]]
-        pmts_meta = chm[config["dummy_dets"]["pmts"]]
-    else:
-        hpge_data = config["fallback_chm_template"]["hpge"]
-        spms_data = config["fallback_chm_template"]["spms"]
-        pmts_meta = config["fallback_chm_template"]["pmts"]
+        if "hpge" in det_names_from_metadata:
+            hpge_data = chm[det_names_from_metadata["hpge"]]
+        if "spms" in det_names_from_metadata:
+            spms_data = chm[det_names_from_metadata["spms"]]
+        if "pmts" in det_names_from_metadata:
+            pmts_meta = chm[det_names_from_metadata["pmts"]]
+
+    if not hpge_data:
+        hpge_data = config["template_dets"]["hpge"]
+    if not spms_data:
+        spms_data = config["template_dets"]["spms"]
+    if not pmts_meta:
+        pmts_meta = config["template_dets"]["pmts"]
 
     hpge_names = np.sort(
         np.concatenate(
@@ -299,7 +316,7 @@ def main():
         )
     )
 
-    pmts_pos = config["pmts"]
+    pmts_pos = config["pmts_pos"]
 
     generate_special_metadata(args.output_special_metadata, config, string_idx, hpge_names)
     generate_channelmap(

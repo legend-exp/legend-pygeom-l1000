@@ -1,13 +1,7 @@
 {
-  "dummy_dets": {
-    "hpge": "V04199A",
-    "spms": "S060",
-    "pmts": "PMT202"
-  },
-
-  "fallback_chm_template": {
+  "template_dets": {
     "hpge": {
-      "name": "V00_DUMMY",
+      "name": "V00_template",
       "system": "geds",
       "location": {
         "string": 1,
@@ -18,7 +12,7 @@
       },
       "type": "icpc",
       "production": {
-        "manufacturer": "dummy",
+        "manufacturer": "template",
         "enrichment": {
           "val": 0.913,
           "unc": 0.005
@@ -61,7 +55,7 @@
       }
     },
     "spms": {
-      "name": "S00_DUMMY",
+      "name": "S00_template",
       "system": "spms",
       "location": {
         "barrel": 0,
@@ -73,7 +67,7 @@
       }
     },
     "pmts": {
-      "name": "PMT00_DUMMY",
+      "name": "PMT00_template",
       "system": "pmts",
       "daq": {
         "rawid": 2
@@ -118,7 +112,7 @@
       "HPGe_dets": "metadata"
     }
   },
-  "pmts": {
+  "pmts_pos": {
     "floor": {
       "row1": {
         "id": 1,
