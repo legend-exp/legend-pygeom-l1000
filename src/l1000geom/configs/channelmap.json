@@ -11,7 +11,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -65,7 +65,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -119,7 +119,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -173,7 +173,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -227,7 +227,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -281,7 +281,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -335,7 +335,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -389,7 +389,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -443,7 +443,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -497,7 +497,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -551,7 +551,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -605,7 +605,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -659,7 +659,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -713,7 +713,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -767,7 +767,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -821,7 +821,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -875,7 +875,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -929,7 +929,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -983,7 +983,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -1037,7 +1037,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -1091,7 +1091,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -1145,7 +1145,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -1199,7 +1199,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -1253,7 +1253,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -1307,7 +1307,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -1361,7 +1361,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -1415,7 +1415,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -1469,7 +1469,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -1523,7 +1523,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -1577,7 +1577,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -1631,7 +1631,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -1685,7 +1685,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -1739,7 +1739,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -1793,7 +1793,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -1847,7 +1847,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -1901,7 +1901,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -1955,7 +1955,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -2009,7 +2009,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -2063,7 +2063,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -2117,7 +2117,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -2171,7 +2171,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -2225,7 +2225,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -2279,7 +2279,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -2333,7 +2333,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -2387,7 +2387,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -2441,7 +2441,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -2495,7 +2495,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -2549,7 +2549,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -2603,7 +2603,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -2657,7 +2657,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -2711,7 +2711,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -2765,7 +2765,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -2819,7 +2819,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -2873,7 +2873,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -2927,7 +2927,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -2981,7 +2981,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -3035,7 +3035,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -3089,7 +3089,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -3143,7 +3143,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -3197,7 +3197,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -3251,7 +3251,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -3305,7 +3305,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -3359,7 +3359,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -3413,7 +3413,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -3467,7 +3467,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -3521,7 +3521,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -3575,7 +3575,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -3629,7 +3629,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -3683,7 +3683,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -3737,7 +3737,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -3791,7 +3791,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -3845,7 +3845,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -3899,7 +3899,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -3953,7 +3953,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -4007,7 +4007,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -4061,7 +4061,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -4115,7 +4115,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -4169,7 +4169,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -4223,7 +4223,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -4277,7 +4277,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -4331,7 +4331,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -4385,7 +4385,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -4439,7 +4439,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -4493,7 +4493,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -4547,7 +4547,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -4601,7 +4601,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -4655,7 +4655,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -4709,7 +4709,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -4763,7 +4763,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -4817,7 +4817,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -4871,7 +4871,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -4925,7 +4925,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -4979,7 +4979,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -5033,7 +5033,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -5087,7 +5087,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -5141,7 +5141,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -5195,7 +5195,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -5249,7 +5249,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -5303,7 +5303,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -5357,7 +5357,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -5411,7 +5411,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -5465,7 +5465,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -5519,7 +5519,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -5573,7 +5573,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -5627,7 +5627,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -5681,7 +5681,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -5735,7 +5735,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -5789,7 +5789,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -5843,7 +5843,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -5897,7 +5897,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -5951,7 +5951,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -6005,7 +6005,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -6059,7 +6059,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -6113,7 +6113,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -6167,7 +6167,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -6221,7 +6221,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -6275,7 +6275,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -6329,7 +6329,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -6383,7 +6383,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -6437,7 +6437,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -6491,7 +6491,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -6545,7 +6545,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -6599,7 +6599,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -6653,7 +6653,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -6707,7 +6707,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -6761,7 +6761,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -6815,7 +6815,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -6869,7 +6869,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -6923,7 +6923,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -6977,7 +6977,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -7031,7 +7031,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -7085,7 +7085,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -7139,7 +7139,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -7193,7 +7193,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -7247,7 +7247,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -7301,7 +7301,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -7355,7 +7355,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -7409,7 +7409,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -7463,7 +7463,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -7517,7 +7517,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -7571,7 +7571,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -7625,7 +7625,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -7679,7 +7679,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -7733,7 +7733,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -7787,7 +7787,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -7841,7 +7841,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -7895,7 +7895,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -7949,7 +7949,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -8003,7 +8003,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -8057,7 +8057,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -8111,7 +8111,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -8165,7 +8165,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -8219,7 +8219,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -8273,7 +8273,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -8327,7 +8327,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -8381,7 +8381,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -8435,7 +8435,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -8489,7 +8489,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -8543,7 +8543,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -8597,7 +8597,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -8651,7 +8651,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -8705,7 +8705,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -8759,7 +8759,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -8813,7 +8813,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -8867,7 +8867,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -8921,7 +8921,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -8975,7 +8975,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -9029,7 +9029,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -9083,7 +9083,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -9137,7 +9137,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -9191,7 +9191,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -9245,7 +9245,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -9299,7 +9299,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -9353,7 +9353,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -9407,7 +9407,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -9461,7 +9461,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -9515,7 +9515,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -9569,7 +9569,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -9623,7 +9623,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -9677,7 +9677,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -9731,7 +9731,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -9785,7 +9785,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -9839,7 +9839,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -9893,7 +9893,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -9947,7 +9947,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -10001,7 +10001,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -10055,7 +10055,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -10109,7 +10109,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -10163,7 +10163,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -10217,7 +10217,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -10271,7 +10271,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -10325,7 +10325,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -10379,7 +10379,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -10433,7 +10433,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -10487,7 +10487,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -10541,7 +10541,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -10595,7 +10595,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -10649,7 +10649,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -10703,7 +10703,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -10757,7 +10757,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -10811,7 +10811,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -10865,7 +10865,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -10919,7 +10919,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -10973,7 +10973,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -11027,7 +11027,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -11081,7 +11081,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -11135,7 +11135,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -11189,7 +11189,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -11243,7 +11243,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -11297,7 +11297,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -11351,7 +11351,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -11405,7 +11405,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -11459,7 +11459,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -11513,7 +11513,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -11567,7 +11567,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -11621,7 +11621,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -11675,7 +11675,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -11729,7 +11729,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -11783,7 +11783,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -11837,7 +11837,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -11891,7 +11891,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -11945,7 +11945,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -11999,7 +11999,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -12053,7 +12053,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -12107,7 +12107,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -12161,7 +12161,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -12215,7 +12215,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -12269,7 +12269,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -12323,7 +12323,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -12377,7 +12377,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -12431,7 +12431,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -12485,7 +12485,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -12539,7 +12539,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -12593,7 +12593,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -12647,7 +12647,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -12701,7 +12701,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -12755,7 +12755,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -12809,7 +12809,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -12863,7 +12863,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -12917,7 +12917,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -12971,7 +12971,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -13025,7 +13025,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -13079,7 +13079,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -13133,7 +13133,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -13187,7 +13187,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -13241,7 +13241,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -13295,7 +13295,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -13349,7 +13349,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -13403,7 +13403,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -13457,7 +13457,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -13511,7 +13511,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -13565,7 +13565,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -13619,7 +13619,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -13673,7 +13673,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -13727,7 +13727,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -13781,7 +13781,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -13835,7 +13835,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -13889,7 +13889,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -13943,7 +13943,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -13997,7 +13997,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -14051,7 +14051,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -14105,7 +14105,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -14159,7 +14159,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -14213,7 +14213,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -14267,7 +14267,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -14321,7 +14321,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -14375,7 +14375,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -14429,7 +14429,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -14483,7 +14483,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -14537,7 +14537,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -14591,7 +14591,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -14645,7 +14645,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -14699,7 +14699,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -14753,7 +14753,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -14807,7 +14807,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -14861,7 +14861,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -14915,7 +14915,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -14969,7 +14969,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -15023,7 +15023,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -15077,7 +15077,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -15131,7 +15131,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -15185,7 +15185,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -15239,7 +15239,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -15293,7 +15293,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -15347,7 +15347,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -15401,7 +15401,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -15455,7 +15455,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -15509,7 +15509,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -15563,7 +15563,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -15617,7 +15617,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -15671,7 +15671,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -15725,7 +15725,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -15779,7 +15779,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -15833,7 +15833,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -15887,7 +15887,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -15941,7 +15941,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -15995,7 +15995,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -16049,7 +16049,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -16103,7 +16103,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -16157,7 +16157,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -16211,7 +16211,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -16265,7 +16265,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -16319,7 +16319,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -16373,7 +16373,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -16427,7 +16427,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -16481,7 +16481,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -16535,7 +16535,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -16589,7 +16589,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -16643,7 +16643,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -16697,7 +16697,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -16751,7 +16751,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -16805,7 +16805,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -16859,7 +16859,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -16913,7 +16913,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -16967,7 +16967,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -17021,7 +17021,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -17075,7 +17075,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -17129,7 +17129,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -17183,7 +17183,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -17237,7 +17237,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -17291,7 +17291,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -17345,7 +17345,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -17399,7 +17399,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -17453,7 +17453,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -17507,7 +17507,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -17561,7 +17561,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -17615,7 +17615,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -17669,7 +17669,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -17723,7 +17723,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -17777,7 +17777,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -17831,7 +17831,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -17885,7 +17885,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -17939,7 +17939,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -17993,7 +17993,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -18047,7 +18047,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005
@@ -18101,7 +18101,7 @@
     },
     "type": "icpc",
     "production": {
-      "manufacturer": "template",
+      "manufacturer": "dummy",
       "enrichment": {
         "val": 0.913,
         "unc": 0.005

@@ -1,7 +1,7 @@
 {
-  "template_dets": {
+  "dummy_dets": {
     "hpge": {
-      "name": "V00_template",
+      "name": "V00_dummy",
       "system": "geds",
       "location": {
         "string": 1,
@@ -12,7 +12,7 @@
       },
       "type": "icpc",
       "production": {
-        "manufacturer": "template",
+        "manufacturer": "dummy",
         "enrichment": {
           "val": 0.913,
           "unc": 0.005
@@ -55,7 +55,7 @@
       }
     },
     "spms": {
-      "name": "S00_template",
+      "name": "S00_dummy",
       "system": "spms",
       "location": {
         "barrel": 0,
@@ -67,7 +67,7 @@
       }
     },
     "pmts": {
-      "name": "PMT00_template",
+      "name": "PMT00_dummy",
       "system": "pmts",
       "daq": {
         "rawid": 2

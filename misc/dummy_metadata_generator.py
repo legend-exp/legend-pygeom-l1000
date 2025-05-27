@@ -21,7 +21,7 @@ def parse_arguments():
         "-d",
         "--dets_from_metadata",
         type=str,
-        help="Use detector from metadata as template. Should be in dict form, e.g., {'hpge': 'V000000A', ...}",
+        help="Use detector from metadata as dummy. Should be in dict form, e.g., {'hpge': 'V000000A', ...}",
         default="",
     )
     return argparser.parse_args()
@@ -293,11 +293,11 @@ def main():
             pmts_meta = chm[det_names_from_metadata["pmts"]]
 
     if not hpge_data:
-        hpge_data = config["template_dets"]["hpge"]
+        hpge_data = config["dummy_dets"]["hpge"]
     if not spms_data:
-        spms_data = config["template_dets"]["spms"]
+        spms_data = config["dummy_dets"]["spms"]
     if not pmts_meta:
-        pmts_meta = config["template_dets"]["pmts"]
+        pmts_meta = config["dummy_dets"]["pmts"]
 
     hpge_names = np.sort(
         np.concatenate(
