@@ -8,7 +8,7 @@ from pyg4ometry import geant4
 from pygeomtools import detectors, geometry, visualization
 from pygeomtools.utils import load_dict_from_config
 
-from . import cryo, fibers, hpge_strings, materials, watertank, watertank_instrumentation
+from . import cavern_and_labs, cryo, fibers, hpge_strings, materials, watertank, watertank_instrumentation
 
 lmeta = LegendMetadata()
 configs = TextDB(resources.files("l1000geom") / "configs")
@@ -21,6 +21,8 @@ class InstrumentationData(NamedTuple):
     """Argon PhysicalVolume instance in which all components are to be placed."""
     mother_z_displacement: float
     """The z-displacement of the mother volume."""
+    mother_x_displacement: float
+    """The x-displacement of the mother volume."""
     materials: materials.OpticalMaterialRegistry
     """Material properties for common materials"""
     registry: geant4.Registry
@@ -81,16 +83,17 @@ def construct(
 
     # Create the world volume
     world_material = geant4.MaterialPredefined("G4_Galactic")
-    world = geant4.solid.Box("world", 30, 30, 30, reg, "m")
+    world = geant4.solid.Box("world", 44, 44, 44, reg, "m")
     world_lv = geant4.LogicalVolume(world, world_material, "world", reg)
     reg.setWorld(world_lv)
 
     # This object will be used and edited by all subsystems and then passed to the next subsystem
     instr = InstrumentationData(
-        world_lv, None, 0, mats, reg, channelmap, special_metadata, AttrsDict(config), detail
+        world_lv, None, 0, 0, mats, reg, channelmap, special_metadata, AttrsDict(config), detail
     )
     # Create and place the structures
     # NamedTuples are immutable, so we need to take copies of instr
+    instr = cavern_and_labs.construct_and_place_cavern_and_labs(instr)
     instr = watertank.construct_and_place_tank(instr)
     instr = watertank_instrumentation.construct_and_place_instrumentation(instr)
     instr = cryo.construct_and_place_cryostat(instr)
