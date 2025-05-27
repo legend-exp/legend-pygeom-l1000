@@ -1,8 +1,78 @@
 {
   "dummy_dets": {
-    "hpge": "V04199A",
-    "spms": "S060",
-    "pmts": "PMT202"
+    "hpge": {
+      "name": "V00_dummy",
+      "system": "geds",
+      "location": {
+        "string": 1,
+        "position": 1
+      },
+      "daq": {
+        "rawid": 0
+      },
+      "type": "icpc",
+      "production": {
+        "manufacturer": "dummy",
+        "enrichment": {
+          "val": 0.913,
+          "unc": 0.005
+        },
+        "passivation": true,
+        "mass_in_g": 2999.4
+      },
+      "geometry": {
+        "height_in_mm": 100,
+        "radius_in_mm": 42.0,
+        "borehole": {
+          "radius_in_mm": 5.0,
+          "depth_in_mm": 60.0
+        },
+        "groove": {
+          "depth_in_mm": 2.0,
+          "radius_in_mm": {
+            "outer": 15,
+            "inner": 10.0
+          }
+        },
+        "pp_contact": {
+          "radius_in_mm": 10.0,
+          "depth_in_mm": 0.0
+        },
+        "taper": {
+          "top": {
+            "angle_in_deg": 0,
+            "height_in_mm": 0
+          },
+          "bottom": {
+            "angle_in_deg": 0,
+            "height_in_mm": 0
+          },
+          "borehole": {
+            "angle_in_deg": 6,
+            "height_in_mm": 60
+          }
+        }
+      }
+    },
+    "spms": {
+      "name": "S00_dummy",
+      "system": "spms",
+      "location": {
+        "barrel": 0,
+        "fiber": "",
+        "position": ""
+      },
+      "daq": {
+        "rawid": 1
+      }
+    },
+    "pmts": {
+      "name": "PMT00_dummy",
+      "system": "pmts",
+      "daq": {
+        "rawid": 2
+      }
+    }
   },
   "string": {
     "units": {
@@ -42,7 +112,7 @@
       "HPGe_dets": "metadata"
     }
   },
-  "pmts": {
+  "pmts_pos": {
     "floor": {
       "row1": {
         "id": 1,

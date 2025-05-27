@@ -3,14 +3,13 @@ from __future__ import annotations
 from importlib import resources
 from typing import NamedTuple
 
-from legendmeta import AttrsDict, LegendMetadata, TextDB
+from legendmeta import AttrsDict, TextDB
 from pyg4ometry import geant4
 from pygeomtools import detectors, geometry, visualization
 from pygeomtools.utils import load_dict_from_config
 
 from . import cavern_and_labs, cryo, fibers, hpge_strings, materials, watertank, watertank_instrumentation
 
-lmeta = LegendMetadata()
 configs = TextDB(resources.files("l1000geom") / "configs")
 
 
