@@ -15,7 +15,7 @@ detail:
   cosmogenic:
     HPGe_dets: metadata
     PEN_plates: stl
-    cavern: omit
+    cavern: simple
     cryostat: simple
     fiber_curtain: simple
     front-end_and_insulators: place
