@@ -441,7 +441,7 @@ class OpticalMaterialRegistry:
 
     @property
     def teflon(self) -> g4.Material:
-        """Teflon for the click and du holder."""
+        """Teflon for the weldment and du holder."""
         if hasattr(self, "_teflon"):
             return self._teflon
 

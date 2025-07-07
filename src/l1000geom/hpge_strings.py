@@ -183,21 +183,21 @@ def _place_front_end_and_insulators(
 
     insulator_top_length = string_info["string_meta"].rod_radius_in_mm - det_unit.radius + 1.5
 
-    click, insulator = _get_click_and_insulator(
+    weldment, insulator = _get_weldment_and_insulator(
         det_unit,
-        thickness["click"],
+        thickness["weldment"],
         thickness["insulator"],
         insulator_top_length,
         b.materials,
         b.registry,
     )
-    click.pygeom_color_rgba = (0.6, 0.6, 0.6, 1)
+    weldment.pygeom_color_rgba = (0.6, 0.6, 0.6, 1)
     insulator.pygeom_color_rgba = (0.6, 0.6, 0.6, 1)
 
     for i in range(3):
         copper_rod_th = np.deg2rad(-30 - i * 120)
         pieces_th = string_info["string_rot"] + np.deg2rad(-(i + 1) * 120)
-        delta_click = (
+        delta_weldment = (
             (string_info["string_meta"].rod_radius_in_mm - 5.6)
             * string_info["string_rot_m"]
             @ np.array([np.cos(copper_rod_th), np.sin(copper_rod_th)])
@@ -209,9 +209,13 @@ def _place_front_end_and_insulators(
         )
         geant4.PhysicalVolume(
             [0, 0, pieces_th],
-            [string_info["x_pos"] + delta_click[0], string_info["y_pos"] + delta_click[1], z_pos["click"]],
-            click,
-            f"{click.name}_{i}",
+            [
+                string_info["x_pos"] + delta_weldment[0],
+                string_info["y_pos"] + delta_weldment[1],
+                z_pos["weldment"],
+            ],
+            weldment,
+            f"{weldment.name}_{i}",
             b.mother_lv,
             b.registry,
         )
@@ -249,10 +253,10 @@ def _place_hpge_unit(
         - thicknesses["pen"] / 2.0
         - pen_offset
         - safety_margin * 2,
-        "click": z_unit_bottom
+        "weldment": z_unit_bottom
         - thicknesses["insulator"]
         - thicknesses["pen"]
-        - thicknesses["click"] / 2.0
+        - thicknesses["weldment"] / 2.0
         - safety_margin * 3,
         "cable": z_unit_bottom
         - thicknesses["insulator"]
@@ -385,7 +389,7 @@ def _place_hpge_string(
             "pen": 1.5,  # mm
             "cable": 0.076,  # mm
             "clamp": 1.8,  # mm
-            "click": 1.5,  # mm flap thickness
+            "weldment": 1.5,  # mm flap thickness
             "insulator": 2.4,  # mm flap thickness
         }
 
@@ -730,26 +734,26 @@ def _get_signal_cable_and_asic(
     return signal_cable_lv, signal_clamp_lv, signal_asic_lv
 
 
-def _get_click_and_insulator(
+def _get_weldment_and_insulator(
     det_unit: HPGeDetUnit,
-    click_top_flap_thickness: float,
+    weldment_top_flap_thickness: float,
     insulator_du_holder_flap_thickness: float,
     insulator_top_length: float,
     materials: materials.OpticalMaterialRegistry,
     reg: geant4.Registry,
 ):
     safety_margin = 0.1
-    click_top_flap = geant4.solid.Box(
-        det_unit.name + "_click_top_flap",
+    weldment_top_flap = geant4.solid.Box(
+        det_unit.name + "_weldment_top_flap",
         20.8,
         5,
-        click_top_flap_thickness,
+        weldment_top_flap_thickness,
         reg,
         "mm",
     )
 
-    click_top_clamp = geant4.solid.Box(
-        det_unit.name + "_click_top_clamp",
+    weldment_top_clamp = geant4.solid.Box(
+        det_unit.name + "_weldment_top_clamp",
         7.8,
         5,
         2.2,
@@ -758,19 +762,19 @@ def _get_click_and_insulator(
     )
 
     # Union the flap and clamp
-    click_top_without_hole = geant4.solid.Union(
-        det_unit.name + "_click_top_without_hole",
-        click_top_flap,
-        click_top_clamp,
-        [[0, 0, 0], [20.8 / 2.0 - 7.8 / 2.0, 0, -2.2 / 2.0 - click_top_flap_thickness / 2.0]],
+    weldment_top_without_hole = geant4.solid.Union(
+        det_unit.name + "_weldment_top_without_hole",
+        weldment_top_flap,
+        weldment_top_clamp,
+        [[0, 0, 0], [20.8 / 2.0 - 7.8 / 2.0, 0, -2.2 / 2.0 - weldment_top_flap_thickness / 2.0]],
         reg,
     )
 
-    click_top_carving_hole = geant4.solid.Tubs(
-        det_unit.name + "_click_top_carving_hole",
+    weldment_top_carving_hole = geant4.solid.Tubs(
+        det_unit.name + "_weldment_top_carving_hole",
         0,
         1.5 + safety_margin,
-        2 * (click_top_flap_thickness + 2.2),
+        2 * (weldment_top_flap_thickness + 2.2),
         0,
         math.pi * 2,
         reg,
@@ -778,10 +782,10 @@ def _get_click_and_insulator(
     )
 
     # Perform subtraction only once
-    click_top = geant4.solid.Subtraction(
-        det_unit.name + "_click_top",
-        click_top_without_hole,
-        click_top_carving_hole,
+    weldment_top = geant4.solid.Subtraction(
+        det_unit.name + "_weldment_top",
+        weldment_top_without_hole,
+        weldment_top_carving_hole,
         [[0, 0, 0], [5.60, 0, 0]],  # Adjust the position of the hole as needed
         reg,
     )
@@ -842,10 +846,10 @@ def _get_click_and_insulator(
         reg,
     )
 
-    click_top_lv = geant4.LogicalVolume(
-        click_top,
-        materials.ultem,
-        det_unit.name + "_click_top",
+    weldment_top_lv = geant4.LogicalVolume(
+        weldment_top,
+        materials.metal_copper,
+        det_unit.name + "_weldment_top",
         reg,
     )
 
@@ -856,4 +860,4 @@ def _get_click_and_insulator(
         reg,
     )
 
-    return click_top_lv, insulator_du_holder_lv
+    return weldment_top_lv, insulator_du_holder_lv
