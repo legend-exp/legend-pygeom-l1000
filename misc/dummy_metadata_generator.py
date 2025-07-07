@@ -21,7 +21,7 @@ def parse_arguments():
         "-d",
         "--dets_from_metadata",
         type=str,
-        help="Use detector from metadata as dummy. Should be in dict form, e.g., {'hpge': 'V000000A', ...}",
+        help="Use HPGe detector from metadata as dummy. Should be the name, e.g., 'V000000A'",
         default="",
     )
     return argparser.parse_args()
@@ -161,7 +161,9 @@ def calculate_and_place_pmts(channelmap: dict, pmts_meta: dict, pmts_pos: dict) 
             raise ValueError(msg)
 
 
-def generate_special_metadata(output_path: str, config: dict, string_idx: list, hpge_names: list) -> None:
+def generate_special_metadata(
+    output_path: str, config: dict, string_idx: list, hpge_names: list, pmts_pos: dict
+) -> None:
     """Generate special_metadata.yaml file."""
 
     special_output = {}
@@ -215,8 +217,8 @@ def generate_special_metadata(output_path: str, config: dict, string_idx: list, 
 
     special_output["watertank_instrumentation"] = {
         "tyvek": {
-            "r": config["pmts"]["tyvek"]["r"],
-            "faces": config["pmts"]["tyvek"]["faces"],
+            "r": pmts_pos["tyvek"]["r"],
+            "faces": pmts_pos["tyvek"]["faces"],
         },
     }
 
@@ -286,18 +288,13 @@ def main():
         timestamp = "20230125T212014Z"
         chm = legendmeta.LegendMetadata().channelmap(on=timestamp)
         if "hpge" in det_names_from_metadata:
-            hpge_data = chm[det_names_from_metadata["hpge"]]
-        if "spms" in det_names_from_metadata:
-            spms_data = chm[det_names_from_metadata["spms"]]
-        if "pmts" in det_names_from_metadata:
-            pmts_meta = chm[det_names_from_metadata["pmts"]]
+            hpge_data = chm[det_names_from_metadata]
 
     if not hpge_data:
         hpge_data = config["dummy_dets"]["hpge"]
-    if not spms_data:
-        spms_data = config["dummy_dets"]["spms"]
-    if not pmts_meta:
-        pmts_meta = config["dummy_dets"]["pmts"]
+
+    spms_data = config["dummy_dets"]["spms"]
+    pmts_meta = config["dummy_dets"]["pmts"]
 
     hpge_names = np.sort(
         np.concatenate(
@@ -318,7 +315,7 @@ def main():
 
     pmts_pos = config["pmts_pos"]
 
-    generate_special_metadata(args.output_special_metadata, config, string_idx, hpge_names)
+    generate_special_metadata(args.output_special_metadata, config, string_idx, hpge_names, pmts_pos)
     generate_channelmap(
         args.output_channelmap, hpge_data, hpge_names, hpge_rawid, string_idx, spms_data, pmts_meta, pmts_pos
     )

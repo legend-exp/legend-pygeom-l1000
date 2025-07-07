@@ -6,7 +6,7 @@ detail:
     cavern: simple
     cryostat: simple
     fiber_curtain: simple
-    front-end_and_insulators: place
+    front-end_and_insulators: omit
     labs: omit
     nm_holding_structure: omit
     nm_plastic: simple
