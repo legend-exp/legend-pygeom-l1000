@@ -17,6 +17,13 @@ def parse_arguments():
     argparser.add_argument("-i", "--input", type=str, required=True)
     argparser.add_argument("-s", "--output_special_metadata", type=str, default="special_metadata.yaml")
     argparser.add_argument("-c", "--output_channelmap", type=str, default="channelmap.json")
+    argparser.add_argument(
+        "-d",
+        "--dets_from_metadata",
+        type=str,
+        help="Use HPGe detector from metadata as dummy. Should be the name, e.g., 'V000000A'",
+        default="",
+    )
     return argparser.parse_args()
 
 
@@ -154,7 +161,9 @@ def calculate_and_place_pmts(channelmap: dict, pmts_meta: dict, pmts_pos: dict) 
             raise ValueError(msg)
 
 
-def generate_special_metadata(output_path: str, config: dict, string_idx: list, hpge_names: list) -> None:
+def generate_special_metadata(
+    output_path: str, config: dict, string_idx: list, hpge_names: list, pmts_pos: dict
+) -> None:
     """Generate special_metadata.yaml file."""
 
     special_output = {}
@@ -208,8 +217,8 @@ def generate_special_metadata(output_path: str, config: dict, string_idx: list, 
 
     special_output["watertank_instrumentation"] = {
         "tyvek": {
-            "r": config["pmts"]["tyvek"]["r"],
-            "faces": config["pmts"]["tyvek"]["faces"],
+            "r": pmts_pos["tyvek"]["r"],
+            "faces": pmts_pos["tyvek"]["faces"],
         },
     }
 
@@ -265,14 +274,28 @@ def generate_channelmap(
 def main():
     args = parse_arguments()
     config = load_config(args.input)
+    if args.dets_from_metadata != "":
+        json_acceptable_string = args.dets_from_metadata.replace("'", '"')
+        det_names_from_metadata = json.loads(json_acceptable_string)
 
     string_idx = np.arange(
         len(ARRAY_CONFIG["center"]["x_in_mm"]) * len(ARRAY_CONFIG["angle_in_deg"])
     ).reshape(len(ARRAY_CONFIG["center"]["x_in_mm"]), len(ARRAY_CONFIG["angle_in_deg"]))
 
-    timestamp = "20230125T212014Z"
-    chm = legendmeta.LegendMetadata().channelmap(on=timestamp)
-    hpge_data = chm[config["dummy_dets"]["hpge"]]
+    hpge_data, spms_data, pmts_meta = None, None, None
+
+    if legendmeta.LegendMetadata() and args.dets_from_metadata:
+        timestamp = "20230125T212014Z"
+        chm = legendmeta.LegendMetadata().channelmap(on=timestamp)
+        if "hpge" in det_names_from_metadata:
+            hpge_data = chm[det_names_from_metadata]
+
+    if not hpge_data:
+        hpge_data = config["dummy_dets"]["hpge"]
+
+    spms_data = config["dummy_dets"]["spms"]
+    pmts_meta = config["dummy_dets"]["pmts"]
+
     hpge_names = np.sort(
         np.concatenate(
             [
@@ -290,12 +313,9 @@ def main():
         )
     )
 
-    spms_data = chm[config["dummy_dets"]["spms"]]
+    pmts_pos = config["pmts_pos"]
 
-    pmts_meta = chm[config["dummy_dets"]["pmts"]]
-    pmts_pos = config["pmts"]
-
-    generate_special_metadata(args.output_special_metadata, config, string_idx, hpge_names)
+    generate_special_metadata(args.output_special_metadata, config, string_idx, hpge_names, pmts_pos)
     generate_channelmap(
         args.output_channelmap, hpge_data, hpge_names, hpge_rawid, string_idx, spms_data, pmts_meta, pmts_pos
     )
