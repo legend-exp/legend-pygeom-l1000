@@ -314,7 +314,7 @@ def _place_hpge_unit(
             list(pen_rot),
             [string_info["x_pos"], string_info["y_pos"], z_pos["pen"]],
             pen_plate,
-            det_unit.name + "_pen",
+            "pen_" + det_unit.name,
             b.mother_lv,
             b.registry,
         )
