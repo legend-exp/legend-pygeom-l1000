@@ -480,7 +480,7 @@ def _get_support_structure(
 
     .. note :: Both models' coordinate origins are a the top face of the tristar structure."""
 
-    if "string_support_structure" not in registry.logicalVolumeDict:
+    if "hpge_support_copper_string_support_structure" not in registry.logicalVolumeDict:
         support_file = resources.files("l1000geom") / "models" / "StringSupportStructure.stl"
         support_solid = pyg4ometry.stl.Reader(
             support_file, solidname="string_support_structure", centre=False, registry=registry
