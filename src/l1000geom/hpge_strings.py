@@ -418,7 +418,7 @@ def _place_hpge_string(
     )
 
     copper_rod_r = string_meta.rod_radius_in_mm
-    copper_rod_name = f"string_{string_id}_cu_rod"
+    copper_rod_name = f"hpge_support_copper_rod_string_{string_id}"
     # the rod has a radius of 1.5 mm, but this would overlap with the coarse model of the PPC top PEN ring.
     copper_rod = geant4.solid.Tubs(copper_rod_name, 0, 1.5, copper_rod_length, 0, 2 * math.pi, b.registry)
     copper_rod = geant4.LogicalVolume(copper_rod, b.materials.metal_copper, copper_rod_name, b.registry)
@@ -479,19 +479,20 @@ def _get_support_structure(
     """Get the (simplified) support structure and the tristar of the requested size.
 
     .. note :: Both models' coordinate origins are a the top face of the tristar structure."""
+
     if "string_support_structure" not in registry.logicalVolumeDict:
         support_file = resources.files("l1000geom") / "models" / "StringSupportStructure.stl"
         support_solid = pyg4ometry.stl.Reader(
             support_file, solidname="string_support_structure", centre=False, registry=registry
         ).getSolid()
         support_lv = geant4.LogicalVolume(
-            support_solid, materials.metal_copper, "string_support_structure", registry
+            support_solid, materials.metal_copper, "hpge_support_copper_string_support_structure", registry
         )
         support_lv.pygeom_color_rgba = (0.72, 0.45, 0.2, 1)
     else:
-        support_lv = registry.logicalVolumeDict["string_support_structure"]
+        support_lv = registry.logicalVolumeDict["hpge_support_copper_string_support_structure"]
 
-    tristar_lv_name = f"tristar_{size}"
+    tristar_lv_name = f"hpge_support_copper_tristar_{size}"
     if tristar_lv_name not in registry.logicalVolumeDict:
         pen_file = resources.files("l1000geom") / "models" / f"TriStar_{size}.stl"
 
@@ -530,7 +531,7 @@ def _get_hv_cable(
     cable_length -= safety_margin
 
     hv_cable_under_clamp = geant4.solid.Box(
-        name + "_hv_cable_under_clamp",
+        "hv_cable_under_clamp_" + name,
         8,
         13,
         cable_thickness,
@@ -538,7 +539,7 @@ def _get_hv_cable(
         "mm",
     )
     hv_cable_clamp_to_curve = geant4.solid.Box(
-        name + "_hv_cable_clamp_to_curve",
+        "hv_cable_clamp_to_curve_" + name,
         5.5,
         2,
         cable_thickness,
@@ -547,11 +548,11 @@ def _get_hv_cable(
     )
 
     hv_cable_curve = geant4.solid.Tubs(
-        name + "_hv_cable_curve", 3.08, 3.08 + cable_thickness, 2.0, 0, math.pi / 2.0, reg, "mm"
+        "hv_cable_curve_" + name, 3.08, 3.08 + cable_thickness, 2.0, 0, math.pi / 2.0, reg, "mm"
     )
 
     hv_cable_along_unit = geant4.solid.Box(
-        name + "_hv_along_unit",
+        "hv_along_unit_" + name,
         cable_thickness,
         2.0,
         cable_length,
@@ -560,7 +561,7 @@ def _get_hv_cable(
     )
 
     hv_cable_part1 = geant4.solid.Union(
-        name + "_hv_cable_part1",
+        "hv_cable_part1_" + name,
         hv_cable_under_clamp,
         hv_cable_clamp_to_curve,
         [[0, 0, 0], [8 / 2.0 + 5.5 / 2.0, 0, 0]],
@@ -568,7 +569,7 @@ def _get_hv_cable(
     )
 
     hv_cable_part2 = geant4.solid.Union(
-        name + "_hv_cable_part2",
+        "hv_cable_part2_" + name,
         hv_cable_part1,
         hv_cable_curve,
         [[-np.pi / 2, 0, 0], [8 / 2.0 + 5.5, 0, 3.08 + cable_thickness / 2.0]],
@@ -576,7 +577,7 @@ def _get_hv_cable(
     )
 
     hv_cable = geant4.solid.Union(
-        name + "_hv_cable",
+        "hv_cable_" + name,
         hv_cable_part2,
         hv_cable_along_unit,
         [[0, 0, 0], [8 / 2.0 + 5.5 + 3.08 + cable_thickness / 2.0, 0, 3.08 + cable_length / 2.0]],
@@ -584,7 +585,7 @@ def _get_hv_cable(
     )
 
     hv_clamp = geant4.solid.Box(
-        name + "_hv_clamp",
+        "hv_clamp_" + name,
         5,
         13,
         clamp_thickness,
@@ -595,14 +596,14 @@ def _get_hv_cable(
     hv_cable_lv = geant4.LogicalVolume(
         hv_cable,
         materials.metal_copper,
-        name + "_hv_cable",
+        "hv_cable_" + name,
         reg,
     )
 
     hv_clamp_lv = geant4.LogicalVolume(
         hv_clamp,
         materials.ultem,
-        name + "_hv_clamp",
+        "hv_clamp_" + name,
         reg,
     )
 
@@ -622,7 +623,7 @@ def _get_signal_cable_and_asic(
     cable_length -= safety_margin
 
     signal_cable_under_clamp = geant4.solid.Box(
-        name + "_signal_cable_under_clamp",
+        "signal_cable_under_clamp_" + name,
         16,
         13,
         cable_thickness,
@@ -630,7 +631,7 @@ def _get_signal_cable_and_asic(
         "mm",
     )
     signal_cable_clamp_to_curve = geant4.solid.Box(
-        name + "_signal_cable_clamp_to_curve",
+        "signal_cable_clamp_to_curve_" + name,
         23.25,
         2,
         cable_thickness,
@@ -638,10 +639,10 @@ def _get_signal_cable_and_asic(
         "mm",
     )
     signal_cable_curve = geant4.solid.Tubs(
-        name + "_signal_cable_curve", 3.08, 3.08 + cable_thickness, 2.0, 0, math.pi / 2.0, reg, "mm"
+        "signal_cable_curve_" + name, 3.08, 3.08 + cable_thickness, 2.0, 0, math.pi / 2.0, reg, "mm"
     )
     signal_cable_along_unit = geant4.solid.Box(
-        name + "_signal_along_unit",
+        "signal_along_unit_" + name,
         cable_thickness,
         2.0,
         cable_length,
@@ -649,21 +650,21 @@ def _get_signal_cable_and_asic(
         "mm",
     )
     signal_cable_part1 = geant4.solid.Union(
-        name + "_signal_cable_part1",
+        "signal_cable_part1_" + name,
         signal_cable_under_clamp,
         signal_cable_clamp_to_curve,
         [[0, 0, 0], [16 / 2.0 + 23.25 / 2.0, 0, 0]],
         reg,
     )
     signal_cable_part2 = geant4.solid.Union(
-        name + "_signal_cable_part2",
+        "signal_cable_part2_" + name,
         signal_cable_part1,
         signal_cable_curve,
         [[np.pi / 2, 0, 0], [16 / 2.0 + 23.25, 0, -3.08 - cable_thickness / 2.0]],
         reg,
     )
     signal_cable = geant4.solid.Union(
-        name + "_signal_cable",
+        "signal_cable_" + name,
         signal_cable_part2,
         signal_cable_along_unit,
         [[0, 0, 0], [16 / 2.0 + 23.25 + 3.08 + cable_thickness / 2.0, 0, -3.08 - cable_length / 2.0]],
@@ -671,7 +672,7 @@ def _get_signal_cable_and_asic(
     )
 
     signal_clamp_part1 = geant4.solid.Box(
-        name + "_signal_clamp_part1",
+        "signal_clamp_part1_" + name,
         5,
         13,
         clamp_thickness,
@@ -679,7 +680,7 @@ def _get_signal_cable_and_asic(
         "mm",
     )
     signal_clamp_part2 = geant4.solid.Box(
-        name + "_signal_clamp_part2",
+        "signal_clamp_part2_" + name,
         9,
         2.5,
         clamp_thickness,
@@ -687,14 +688,14 @@ def _get_signal_cable_and_asic(
         "mm",
     )
     signal_clamp_part3 = geant4.solid.Union(
-        name + "_signal_clamp_part3",
+        "signal_clamp_part3_" + name,
         signal_clamp_part1,
         signal_clamp_part2,
         [[0, 0, 0], [5 / 2.0 + 9 / 2.0, 13 / 2.0 - 2.5 / 2.0, 0]],
         reg,
     )
     signal_clamp = geant4.solid.Union(
-        name + "_signal_clamp",
+        "signal_clamp_" + name,
         signal_clamp_part3,
         signal_clamp_part2,
         [[0, 0, 0], [5 / 2.0 + 9 / 2.0, -13 / 2.0 + 2.5 / 2.0, 0]],
@@ -702,7 +703,7 @@ def _get_signal_cable_and_asic(
     )
 
     signal_asic = geant4.solid.Box(
-        name + "_signal_asic",
+        "signal_asic_" + name,
         1,
         1,
         0.5,
@@ -713,21 +714,21 @@ def _get_signal_cable_and_asic(
     signal_cable_lv = geant4.LogicalVolume(
         signal_cable,
         materials.metal_copper,
-        name + "_signal_cable",
+        "signal_cable_" + name,
         reg,
     )
 
     signal_clamp_lv = geant4.LogicalVolume(
         signal_clamp,
         materials.ultem,
-        name + "_signal_clamp",
+        "signal_clamp_" + name,
         reg,
     )
 
     signal_asic_lv = geant4.LogicalVolume(
         signal_asic,
         materials.silica,
-        name + "_signal_asic",
+        "signal_asic_" + name,
         reg,
     )
 
@@ -744,7 +745,7 @@ def _get_weldment_and_insulator(
 ):
     safety_margin = 0.1
     weldment_top_flap = geant4.solid.Box(
-        det_unit.name + "_weldment_top_flap",
+        "weldment_top_flap_" + det_unit.name,
         20.8,
         5,
         weldment_top_flap_thickness,
@@ -753,7 +754,7 @@ def _get_weldment_and_insulator(
     )
 
     weldment_top_clamp = geant4.solid.Box(
-        det_unit.name + "_weldment_top_clamp",
+        "weldment_top_clamp_" + det_unit.name,
         7.8,
         5,
         2.2,
@@ -763,7 +764,7 @@ def _get_weldment_and_insulator(
 
     # Union the flap and clamp
     weldment_top_without_hole = geant4.solid.Union(
-        det_unit.name + "_weldment_top_without_hole",
+        "weldment_top_without_hole_" + det_unit.name,
         weldment_top_flap,
         weldment_top_clamp,
         [[0, 0, 0], [20.8 / 2.0 - 7.8 / 2.0, 0, -2.2 / 2.0 - weldment_top_flap_thickness / 2.0]],
@@ -771,7 +772,7 @@ def _get_weldment_and_insulator(
     )
 
     weldment_top_carving_hole = geant4.solid.Tubs(
-        det_unit.name + "_weldment_top_carving_hole",
+        "weldment_top_carving_hole_" + det_unit.name,
         0,
         1.5 + safety_margin,
         2 * (weldment_top_flap_thickness + 2.2),
@@ -783,7 +784,7 @@ def _get_weldment_and_insulator(
 
     # Perform subtraction only once
     weldment_top = geant4.solid.Subtraction(
-        det_unit.name + "_weldment_top",
+        "weldment_top_" + det_unit.name,
         weldment_top_without_hole,
         weldment_top_carving_hole,
         [[0, 0, 0], [5.60, 0, 0]],  # Adjust the position of the hole as needed
@@ -791,7 +792,7 @@ def _get_weldment_and_insulator(
     )
 
     insulator_du_holder_flap = geant4.solid.Box(
-        det_unit.name + "_insulator_du_holder_flap",
+        "insulator_du_holder_flap_" + det_unit.name,
         16.5,
         7,
         insulator_du_holder_flap_thickness,
@@ -802,7 +803,7 @@ def _get_weldment_and_insulator(
     safety_margin_touching_detector = 0.25
 
     insulator_du_holder_clamp = geant4.solid.Box(
-        det_unit.name + "_insulator_du_holder_clamp",
+        "insulator_du_holder_clamp_" + det_unit.name,
         insulator_top_length - safety_margin_touching_detector,
         7,
         5.5 - insulator_du_holder_flap_thickness,
@@ -812,7 +813,7 @@ def _get_weldment_and_insulator(
 
     # Union the flap and clamp
     insulator_du_holder_without_hole = geant4.solid.Union(
-        det_unit.name + "_insulator_du_holder_without_hole",
+        "insulator_du_holder_without_hole_ " + det_unit.name,
         insulator_du_holder_flap,
         insulator_du_holder_clamp,
         [
@@ -827,7 +828,7 @@ def _get_weldment_and_insulator(
     )
 
     insulator_du_holder_carving_hole = geant4.solid.Tubs(
-        det_unit.name + "_insulator_du_holder_carving_hole",
+        "insulator_du_holder_carving_hole_" + det_unit.name,
         0,
         1.5 + safety_margin,
         3 * 5.5,
@@ -839,7 +840,7 @@ def _get_weldment_and_insulator(
 
     # Perform subtraction only once
     insulator_du_holder = geant4.solid.Subtraction(
-        det_unit.name + "_insulator_du_holder",
+        "insulator_du_holder_" + det_unit.name,
         insulator_du_holder_without_hole,
         insulator_du_holder_carving_hole,
         [[0, 0, 0], [16.5 / 2.0 - 1.5, 0, 0]],  # Adjust the position of the hole as needed
@@ -849,14 +850,14 @@ def _get_weldment_and_insulator(
     weldment_top_lv = geant4.LogicalVolume(
         weldment_top,
         materials.metal_copper,
-        det_unit.name + "_weldment_top",
+        "weldment_top_" + det_unit.name,
         reg,
     )
 
     insulator_du_holder_lv = geant4.LogicalVolume(
         insulator_du_holder,
         materials.ultem,
-        det_unit.name + "_insulator_du_holder",
+        "insulator_du_holder_" + det_unit.name,
         reg,
     )
 
