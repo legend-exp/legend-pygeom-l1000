@@ -745,7 +745,7 @@ def _get_weldment_and_insulator(
 ):
     safety_margin = 0.1
     weldment_top_flap = geant4.solid.Box(
-        "weldment_top_flap_" + det_unit.name,
+        "hpge_support_copper_weldment_top_flap_" + det_unit.name,
         20.8,
         5,
         weldment_top_flap_thickness,
@@ -754,7 +754,7 @@ def _get_weldment_and_insulator(
     )
 
     weldment_top_clamp = geant4.solid.Box(
-        "weldment_top_clamp_" + det_unit.name,
+        "hpge_support_copper_weldment_top_clamp_" + det_unit.name,
         7.8,
         5,
         2.2,
@@ -764,7 +764,7 @@ def _get_weldment_and_insulator(
 
     # Union the flap and clamp
     weldment_top_without_hole = geant4.solid.Union(
-        "weldment_top_without_hole_" + det_unit.name,
+        "hpge_support_copper_weldment_top_without_hole_" + det_unit.name,
         weldment_top_flap,
         weldment_top_clamp,
         [[0, 0, 0], [20.8 / 2.0 - 7.8 / 2.0, 0, -2.2 / 2.0 - weldment_top_flap_thickness / 2.0]],
@@ -772,7 +772,7 @@ def _get_weldment_and_insulator(
     )
 
     weldment_top_carving_hole = geant4.solid.Tubs(
-        "weldment_top_carving_hole_" + det_unit.name,
+        "hpge_support_copper_weldment_top_carving_hole_" + det_unit.name,
         0,
         1.5 + safety_margin,
         2 * (weldment_top_flap_thickness + 2.2),
@@ -784,7 +784,7 @@ def _get_weldment_and_insulator(
 
     # Perform subtraction only once
     weldment_top = geant4.solid.Subtraction(
-        "weldment_top_" + det_unit.name,
+        "hpge_support_copper_weldment_top_" + det_unit.name,
         weldment_top_without_hole,
         weldment_top_carving_hole,
         [[0, 0, 0], [5.60, 0, 0]],  # Adjust the position of the hole as needed
@@ -792,7 +792,7 @@ def _get_weldment_and_insulator(
     )
 
     insulator_du_holder_flap = geant4.solid.Box(
-        "insulator_du_holder_flap_" + det_unit.name,
+        "ultem_insulator_du_holder_flap_" + det_unit.name,
         16.5,
         7,
         insulator_du_holder_flap_thickness,
@@ -803,7 +803,7 @@ def _get_weldment_and_insulator(
     safety_margin_touching_detector = 0.25
 
     insulator_du_holder_clamp = geant4.solid.Box(
-        "insulator_du_holder_clamp_" + det_unit.name,
+        "ultem_insulator_du_holder_clamp_" + det_unit.name,
         insulator_top_length - safety_margin_touching_detector,
         7,
         5.5 - insulator_du_holder_flap_thickness,
@@ -813,7 +813,7 @@ def _get_weldment_and_insulator(
 
     # Union the flap and clamp
     insulator_du_holder_without_hole = geant4.solid.Union(
-        "insulator_du_holder_without_hole_ " + det_unit.name,
+        "ultem_insulator_du_holder_without_hole_ " + det_unit.name,
         insulator_du_holder_flap,
         insulator_du_holder_clamp,
         [
@@ -828,7 +828,7 @@ def _get_weldment_and_insulator(
     )
 
     insulator_du_holder_carving_hole = geant4.solid.Tubs(
-        "insulator_du_holder_carving_hole_" + det_unit.name,
+        "ultem_insulator_du_holder_carving_hole_" + det_unit.name,
         0,
         1.5 + safety_margin,
         3 * 5.5,
@@ -840,7 +840,7 @@ def _get_weldment_and_insulator(
 
     # Perform subtraction only once
     insulator_du_holder = geant4.solid.Subtraction(
-        "insulator_du_holder_" + det_unit.name,
+        "ultem_insulator_du_holder_" + det_unit.name,
         insulator_du_holder_without_hole,
         insulator_du_holder_carving_hole,
         [[0, 0, 0], [16.5 / 2.0 - 1.5, 0, 0]],  # Adjust the position of the hole as needed
@@ -850,14 +850,14 @@ def _get_weldment_and_insulator(
     weldment_top_lv = geant4.LogicalVolume(
         weldment_top,
         materials.metal_copper,
-        "weldment_top_" + det_unit.name,
+        "hpge_support_copper_weldment_top_" + det_unit.name,
         reg,
     )
 
     insulator_du_holder_lv = geant4.LogicalVolume(
         insulator_du_holder,
         materials.ultem,
-        "insulator_du_holder_" + det_unit.name,
+        "ultem_insulator_du_holder_" + det_unit.name,
         reg,
     )
 
