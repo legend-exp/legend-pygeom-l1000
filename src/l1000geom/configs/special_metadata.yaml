@@ -21,7 +21,7 @@ detail:
     front-end_and_insulators: place
     labs: omit
     nm_holding_structure: simple
-    nm_plastic: stl
+    nm_plastic: simple
     watertank: omit
     watertank_instrumentation: omit
 fibers:
