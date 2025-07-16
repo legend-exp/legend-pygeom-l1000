@@ -577,7 +577,7 @@ def _get_hv_cable(
     )
 
     hv_cable = geant4.solid.Union(
-        "hv_cable_" + name,
+        "cable_hv_" + name,
         hv_cable_part2,
         hv_cable_along_unit,
         [[0, 0, 0], [8 / 2.0 + 5.5 + 3.08 + cable_thickness / 2.0, 0, 3.08 + cable_length / 2.0]],
@@ -585,7 +585,7 @@ def _get_hv_cable(
     )
 
     hv_clamp = geant4.solid.Box(
-        "hv_clamp_" + name,
+        "ultem_clamp_hv_" + name,
         5,
         13,
         clamp_thickness,
@@ -596,14 +596,14 @@ def _get_hv_cable(
     hv_cable_lv = geant4.LogicalVolume(
         hv_cable,
         materials.metal_copper,
-        "hv_cable_" + name,
+        "cable_hv_" + name,
         reg,
     )
 
     hv_clamp_lv = geant4.LogicalVolume(
         hv_clamp,
         materials.ultem,
-        "hv_clamp_" + name,
+        "ultem_clamp_hv_" + name,
         reg,
     )
 
@@ -664,7 +664,7 @@ def _get_signal_cable_and_asic(
         reg,
     )
     signal_cable = geant4.solid.Union(
-        "signal_cable_" + name,
+        "cable_signal_" + name,
         signal_cable_part2,
         signal_cable_along_unit,
         [[0, 0, 0], [16 / 2.0 + 23.25 + 3.08 + cable_thickness / 2.0, 0, -3.08 - cable_length / 2.0]],
@@ -695,7 +695,7 @@ def _get_signal_cable_and_asic(
         reg,
     )
     signal_clamp = geant4.solid.Union(
-        "signal_clamp_" + name,
+        "ultem_clamp_signal_" + name,
         signal_clamp_part3,
         signal_clamp_part2,
         [[0, 0, 0], [5 / 2.0 + 9 / 2.0, -13 / 2.0 + 2.5 / 2.0, 0]],
@@ -714,14 +714,14 @@ def _get_signal_cable_and_asic(
     signal_cable_lv = geant4.LogicalVolume(
         signal_cable,
         materials.metal_copper,
-        "signal_cable_" + name,
+        "cable_signal_" + name,
         reg,
     )
 
     signal_clamp_lv = geant4.LogicalVolume(
         signal_clamp,
         materials.ultem,
-        "signal_clamp_" + name,
+        "ultem_clamp_signal_" + name,
         reg,
     )
 
