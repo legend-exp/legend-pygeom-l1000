@@ -241,7 +241,7 @@ def generate_channelmap(
     """Generate channelmap.json file."""
 
     channelmap = {}
-    for name, rawid in zip(hpge_names, hpge_rawid):
+    for name, rawid in zip(hpge_names, hpge_rawid, strict=False):
         channelmap[name] = copy.deepcopy(hpge_data)
         channelmap[name]["name"] = name
         channelmap[name]["daq"]["rawid"] = rawid
