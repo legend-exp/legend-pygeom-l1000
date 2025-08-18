@@ -1,23 +1,22 @@
-# legnd-pygeom-l1000
+# legend-pygeom-l1000
 
-[![Actions Status][actions-badge]][actions-link]
-[![Documentation Status][rtd-badge]][rtd-link]
+[![PyPI](https://img.shields.io/pypi/v/legend-pygeom-l1000?logo=pypi)](https://pypi.org/project/legend-pygeom-l1000/)
+![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/legend-exp/legend-pygeom-l1000?logo=git)
+[![GitHub Workflow Status](https://img.shields.io/github/checks-status/legend-exp/legend-pygeom-l1000/main?label=main%20branch&logo=github)](https://github.com/legend-exp/legend-pygeom-l1000/actions)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Codecov](https://img.shields.io/codecov/c/github/legend-exp/legend-pygeom-l1000?logo=codecov)](https://app.codecov.io/gh/legend-exp/legend-pygeom-l1000)
+![GitHub issues](https://img.shields.io/github/issues/legend-exp/legend-pygeom-l1000?logo=github)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/legend-exp/legend-pygeom-l1000?logo=github)
+![License](https://img.shields.io/github/license/legend-exp/legend-pygeom-l1000)
+[![Read the Docs](https://img.shields.io/readthedocs/legend-pygeom-l1000?logo=readthedocs)](https://legend-pygeom-l1000.readthedocs.io)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16778749.svg)](https://doi.org/10.5281/zenodo.16778749)
 
-[![GitHub Discussion][github-discussions-badge]][github-discussions-link]
+This package implements the `legend-pygeom-l1000` CLI utility to interact with
+the LEGEND-1000 geometry.
 
-<!-- SPHINX-START -->
-
-<!-- prettier-ignore-start -->
-[actions-badge]:            https://github.com/legend-exp/legend-pygeom-l1000/workflows/CI/badge.svg
-[actions-link]:             https://github.com/legend-exp/legend-pygeom-l1000/actions
-[conda-badge]:              https://img.shields.io/conda/vn/conda-forge/l1000geom
-[conda-link]:               https://github.com/conda-forge/l1000geom-feedstock
-[github-discussions-badge]: https://img.shields.io/static/v1?label=Discussions&message=Ask&color=blue&logo=github
-[github-discussions-link]:  https://github.com/legend-exp/legend-pygeom-l1000/discussions
-[pypi-link]:                https://pypi.org/project/l1000geom/
-[pypi-platforms]:           https://img.shields.io/pypi/pyversions/l1000geom
-[pypi-version]:             https://img.shields.io/pypi/v/l1000geom
-[rtd-badge]:                https://readthedocs.org/projects/l1000geom/badge/?version=latest
-[rtd-link]:                 https://l1000geom.readthedocs.io/en/latest/?badge=latest
-
-<!-- prettier-ignore-end -->
+> [!NOTE]
+>
+> For full functionality, this package requires a working setup of
+> [`legend-metadata`](https://github.com/legend-exp/legend-metadata) before
+> usage.
