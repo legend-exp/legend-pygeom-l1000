@@ -125,9 +125,7 @@ def construct_cavern(
     cavern_width = 18500  # mm
     cavern_onset_of_curvature = 10600  # mm
     distance_center_to_end_of_tunnle = 17600  # mm (this is rought guess)
-    if distance_center_to_end_of_tunnle > world_lengths[0] / 2.0:
-        # this is a safety check, if the distance is larger than the cavern itself
-        distance_center_to_end_of_tunnle = world_lengths[0] / 2.0
+    distance_center_to_end_of_tunnle = min(distance_center_to_end_of_tunnle, world_lengths[0] / 2.0)
 
     # the cavern is a union of solids consisting of:
     # 1. a box for the boxy part near the floor

@@ -67,7 +67,7 @@ def calculate_and_place_pmts(channelmap: dict, pmts_meta: dict, pmts_pos: dict) 
         radius = row["r"]
 
         for i in range(pmts_in_row):
-            name = f"PMT0{row_index}{i+1:02d}"
+            name = f"PMT0{row_index}{i + 1:02d}"
             x = radius * np.cos(np.radians(360 / pmts_in_row * i))
             y = radius * np.sin(np.radians(360 / pmts_in_row * i))
             z = 0.0
@@ -136,7 +136,7 @@ def calculate_and_place_pmts(channelmap: dict, pmts_meta: dict, pmts_pos: dict) 
             num_detectors_this_face = detectors_per_face + extra_detectors_per_face[(i + row_index) % faces]
 
             for j in range(num_detectors_this_face):
-                name = f"PMT{row_index+10}{pmt_id+1:02d}"
+                name = f"PMT{row_index + 10}{pmt_id + 1:02d}"
                 pmt_id += 1
                 # Interpolate position along the face
                 t = (j + 1) / (num_detectors_this_face + 1)  # Normalized position (avoid exact endpoints)
@@ -187,8 +187,8 @@ def generate_special_metadata(
     }
 
     special_output["fibers"] = {
-        f"S{string+1:02d}{n+1:02d}": {
-            "name": f"S{string+1:02d}{n+1:02d}",
+        f"S{string + 1:02d}{n + 1:02d}": {
+            "name": f"S{string + 1:02d}{n + 1:02d}",
             "type": "single_string",
             "geometry": {"tpb": {"thickness_in_nm": 1093}},
             "location": {
@@ -250,7 +250,7 @@ def generate_channelmap(
 
     for string in string_idx.flatten():
         for n in range(N_FIBERS_PER_STRING):
-            name = f"S{string+1:02d}{n+1:02d}T"
+            name = f"S{string + 1:02d}{n + 1:02d}T"
             channelmap[name] = copy.deepcopy(spms_data)
             channelmap[name]["name"] = name
             channelmap[name]["location"]["fiber"] = name[:-1]
@@ -258,7 +258,7 @@ def generate_channelmap(
             channelmap[name]["location"]["barrel"] = string + 1
 
         for n in range(N_FIBERS_PER_STRING):
-            name = f"S{string+1:02d}{n+1:02d}B"
+            name = f"S{string + 1:02d}{n + 1:02d}B"
             channelmap[name] = copy.deepcopy(spms_data)
             channelmap[name]["name"] = name
             channelmap[name]["location"]["fiber"] = name[:-1]
@@ -299,7 +299,7 @@ def main():
     hpge_names = np.sort(
         np.concatenate(
             [
-                [f"V{i+1:02d}{j+1:02d}" for j in range(config["string"]["units"]["n"])]
+                [f"V{i + 1:02d}{j + 1:02d}" for j in range(config["string"]["units"]["n"])]
                 for i in range(string_idx.size)
             ]
         )
