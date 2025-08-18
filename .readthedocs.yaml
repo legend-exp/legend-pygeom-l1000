@@ -13,7 +13,8 @@ build:
     - asdf global uv latest
     - uv venv
     - uv pip install .[docs]
-    - .venv/bin/python -m sphinx.ext.apidoc -o docs/api/ --module-first --no-toc
-      --force src/l1000geom
+    - .venv/bin/python -m sphinx.ext.apidoc --private --output-dir
+      docs/source/api/ --module-first --force src/l1000geom
+      src/l1000geom/_version.py
     - .venv/bin/python -m sphinx -T -b html -d docs/_build/doctrees -D
-      language=en docs $READTHEDOCS_OUTPUT/html
+      language=en docs/source $READTHEDOCS_OUTPUT/html
