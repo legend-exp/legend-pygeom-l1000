@@ -11,7 +11,7 @@ def test_import():
 def test_construct(tmp_path):
     from l1000geom import core
 
-    registry = core.construct()
+    core.construct()
 
 
 def test_read_back(tmp_path):
