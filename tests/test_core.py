@@ -1,3 +1,5 @@
+# ruff: noqa: PLC0415 F401
+
 from __future__ import annotations
 
 import numpy as np
@@ -5,7 +7,7 @@ from pyg4ometry import gdml
 
 
 def test_import():
-    import l1000geom  # noqa: F401
+    import l1000geom
 
 
 def test_construct(tmp_path):

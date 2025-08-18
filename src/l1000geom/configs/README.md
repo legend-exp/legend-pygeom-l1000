@@ -22,7 +22,6 @@ This metadata is passed to all instrumentation modules, stored as
 ## HPGe detector unit configuration
 
 - `hpges` → HPGe detector name
-
   - `rodlength_in_mm` → length of the copper rods next to this detector. This is
     a "warm" length, i.e. it is multiplied by a factor < 1 to get the shorter
     rod length in the cryostat.
@@ -35,7 +34,6 @@ This metadata is passed to all instrumentation modules, stored as
 ## Calibration tube configuration
 
 - `calibration` → Calibration tube number
-
   - `radius_in_mm` → radial distance from the center of the cryostat to the
     calibration tube
   - `angle_in_deg` → azimutal position of the calibration tube with respect to

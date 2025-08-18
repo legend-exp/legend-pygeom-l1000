@@ -6,60 +6,145 @@ on:
   push:
     branches:
       - main
+      - "releases/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
-  # Many color libraries just need this to be set to any value, but at least
-  # one distinguishes color depth, where "3" -> "256-bit color".
   FORCE_COLOR: 3
 
 jobs:
-  pre-commit:
-    name: Format
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.x"
-      - uses: pre-commit/action@v3.0.1
-        with:
-          extra_args: --all-files
-
-  checks:
-    name: Check Python ${{ matrix.python-version }} on ${{ matrix.runs-on }}
-    runs-on: ${{ matrix.runs-on }}
-    needs: [pre-commit]
+  build-and-test:
+    name: Test l1000geom with Python
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.12"]
-        runs-on: [ubuntu-latest, macos-15]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        os: [ubuntu-latest, macOS-latest]
 
     steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          allow-prereleases: true
+      - name: Install non-python (homebrew) dependencies
+        if: ${{ matrix.os == 'macOS-latest' }}
+        run: |
+          brew update
+          brew install opencascade cgal gmp mpfr boost
+      - name: Get dependencies and install l1000geom
+        run: |
+          python -m pip install --upgrade pip wheel setuptools
+          python -m pip install --upgrade .[test]
 
-      - name: Install package
-        run: python -m pip install .[test]
+      - name: Set LEGEND_METADATA variable
+        run: |
+          echo "LEGEND_METADATA=$GITHUB_WORKSPACE/legend-metadata" >> $GITHUB_ENV
+        # secrets are not available in PRs from forks, so do not even attempt to clone metadata.
+        if:
+          "${{ github.event_name != 'pull_request' ||
+          github.event.pull_request.head.repo.owner.login == 'legend-exp' }}"
+      - name: Clone legend-metadata
+        uses: actions/checkout@v4
+        with:
+          repository: legend-exp/legend-metadata
+          fetch-depth: 0
+          token: ${{ secrets.READPRIVATE }}
+          path: ${{ env.LEGEND_METADATA }}
+          submodules: "recursive"
+        # secrets are not available in PRs from forks, so do not even attempt to clone metadata.
+        if:
+          "${{ github.event_name != 'pull_request' ||
+          github.event.pull_request.head.repo.owner.login == 'legend-exp' }}"
 
-      - name: Test package
-        run: >-
-          python -m pytest -ra --cov --cov-report=xml --cov-report=term
-          --durations=20
+      - name: Run unit tests
+        run: |
+          python -m pytest
 
-      - name: Upload coverage report
-        uses: codecov/codecov-action@v5.4.3
+  test-coverage:
+    name: Calculate and upload test coverage
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Set LEGEND_METADATA variable
+        run: |
+          echo "LEGEND_METADATA=$GITHUB_WORKSPACE/legend-metadata" >> $GITHUB_ENV
+        # secrets are not available in PRs from forks, so do not even attempt to clone metadata.
+        if:
+          "${{ github.event_name != 'pull_request' ||
+          github.event.pull_request.head.repo.owner.login == 'legend-exp' }}"
+      - name: Clone legend-metadata
+        uses: actions/checkout@v4
+        with:
+          repository: legend-exp/legend-metadata
+          fetch-depth: 0
+          token: ${{ secrets.READPRIVATE }}
+          path: ${{ env.LEGEND_METADATA }}
+          submodules: "recursive"
+        # secrets are not available in PRs from forks, so do not even attempt to clone metadata.
+        if:
+          "${{ github.event_name != 'pull_request' ||
+          github.event.pull_request.head.repo.owner.login == 'legend-exp' }}"
+
+      - name: Generate Report
+        run: |
+          python -m pip install --upgrade pip wheel setuptools
+          python -m pip install --upgrade .[test]
+          python -m pytest --cov=l1000geom --cov-report=xml
+      - name: Upload Coverage to codecov.io
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+
+  build-docs:
+    name: Build documentation
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Set LEGEND_METADATA variable
+        run: |
+          echo "LEGEND_METADATA=$GITHUB_WORKSPACE/legend-metadata" >> $GITHUB_ENV
+        # secrets are not available in PRs from forks, so do not even attempt to clone metadata.
+        if:
+          "${{ github.event_name != 'pull_request' ||
+          github.event.pull_request.head.repo.owner.login == 'legend-exp' }}"
+      - name: Clone legend-metadata
+        uses: actions/checkout@v4
+        with:
+          repository: legend-exp/legend-metadata
+          fetch-depth: 0
+          token: ${{ secrets.READPRIVATE }}
+          path: ${{ env.LEGEND_METADATA }}
+          submodules: "recursive"
+        # secrets are not available in PRs from forks, so do not even attempt to clone metadata.
+        if:
+          "${{ github.event_name != 'pull_request' ||
+          github.event.pull_request.head.repo.owner.login == 'legend-exp' }}"
+
+      - name: Setup build environment
+        run: |
+          python -m pip install --upgrade pip wheel setuptools
+          python -m pip install --upgrade .[docs]
+      - name: Build docs for current ref
+        run: |
+          cd docs
+          make clean
+          make
