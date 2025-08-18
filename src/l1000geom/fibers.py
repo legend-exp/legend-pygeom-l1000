@@ -15,7 +15,7 @@ def place_fiber_modules(b: core.InstrumentationData) -> None:
     """Construct LEGEND-1000 HPGe strings.
 
     detail options:
-    ----------
+    ---------------
     "segmented" or "detailed"
         Switch between an implementation of single fibers (“detailed”) or
         slabs of fiber material (“segmented”).
