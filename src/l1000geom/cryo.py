@@ -1,10 +1,8 @@
 from __future__ import annotations
 
 import logging
-from importlib import resources
 from math import pi
 
-import pyg4ometry
 import pyg4ometry.geant4 as g4
 
 from . import core
@@ -484,19 +482,6 @@ def construct_moderator_simple(
     # Could import this if we wanted, but maybe this method has enough arguments already...
 
 
-def construct_moderator_stl(mod_material: g4.Material, reg: g4.Registry, mother_lv: g4.LogicalVolume):
-    # There are 50 parts for the neutron moderator, numbered 0 to 49
-    # There are an additional 289(!) parts for the moderator's metal support structure
-    # The steel pieces are also much more complex than the plastic pieces
-    # For now, omitting the steel pieces. If a RMG user really cares about them, we can implement them
-    for i in range(49):
-        mod_name = f"moderator_{i}"
-        mod_file = resources.files("l1000geom") / "models" / f"modpiece_{i}.stl"
-        mod_solid = pyg4ometry.stl.Reader(mod_file, solidname=mod_name, registry=reg).getSolid()
-        mod_lv = g4.LogicalVolume(mod_solid, mod_material, mod_name, reg)
-        g4.PhysicalVolume([0, 0, 0], [0, 0, -1250], mod_lv, mod_name, mother_lv, reg)
-
-
 def construct_and_place_cryostat(instr: core.InstrumentationData) -> g4.PhysicalVolume:
     if "cryostat" not in instr.detail:
         msg = "No 'cryostat' detail specified in the special metadata."
@@ -640,7 +625,8 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> g4.Physical
         )
 
     elif instr.detail["nm_plastic"] == "stl":
-        construct_moderator_stl(instr.materials.pmma, instr.registry, atmlar_lv)
+        msg = "stl neutron moderator temporarily removed due to overlaps. Feel free to help with a fix."
+        raise ValueError(msg)
 
     # Finally, the RT should be filled with LAr
 
