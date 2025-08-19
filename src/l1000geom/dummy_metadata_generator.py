@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import argparse
 import copy
 import json
 from pathlib import Path
@@ -9,22 +8,7 @@ import legendmeta
 import numpy as np
 import yaml
 
-
 # This script is used to generate the special_metadata.yaml and channelmap.yaml files for the LEGEND-1000 geometry.
-def parse_arguments():
-    """Parse command line arguments."""
-    argparser = argparse.ArgumentParser()
-    argparser.add_argument("-i", "--input", type=str, required=True)
-    argparser.add_argument("-s", "--output_special_metadata", type=str, default="special_metadata.yaml")
-    argparser.add_argument("-c", "--output_channelmap", type=str, default="channelmap.json")
-    argparser.add_argument(
-        "-d",
-        "--dets_from_metadata",
-        type=str,
-        help="Use HPGe detector from metadata as dummy. Should be the name, e.g., 'V000000A'",
-        default="",
-    )
-    return argparser.parse_args()
 
 
 # Helper class taken from https://stackoverflow.com/questions/50916422/python-typeerror-object-of-type-int64-is-not-json-serializable
@@ -60,7 +44,7 @@ def load_config(input_path):
 
 def calculate_and_place_pmts(channelmap: dict, pmts_meta: dict, pmts_pos: dict) -> None:
     # Floor PMTs are pretty trivial to place
-    rawid = pmts_meta["daq"]["rawid"]
+    rawid = 6000
     for row in pmts_pos["floor"].values():
         row_index = row["id"]
         pmts_in_row = row["n"]
@@ -161,9 +145,7 @@ def calculate_and_place_pmts(channelmap: dict, pmts_meta: dict, pmts_pos: dict) 
             raise ValueError(msg)
 
 
-def generate_special_metadata(
-    output_path: str, config: dict, string_idx: list, hpge_names: list, pmts_pos: dict
-) -> None:
+def generate_special_metadata(config: dict, string_idx: list, hpge_names: list, pmts_pos: dict) -> dict:
     """Generate special_metadata.yaml file."""
 
     special_output = {}
@@ -224,12 +206,10 @@ def generate_special_metadata(
 
     special_output["detail"] = config["detail"]
 
-    with Path(output_path).open("w") as f:
-        yaml.dump(special_output, f)
+    return special_output
 
 
 def generate_channelmap(
-    output_path: str,
     hpge_data: dict,
     hpge_names: list,
     hpge_rawid: list,
@@ -237,7 +217,7 @@ def generate_channelmap(
     spms_data: dict,
     pmts_meta: dict,
     pmts_pos: dict,
-) -> None:
+) -> dict:
     """Generate channelmap.json file."""
 
     channelmap = {}
@@ -248,6 +228,7 @@ def generate_channelmap(
         channelmap[name]["location"]["string"] = rawid // 100
         channelmap[name]["location"]["position"] = rawid % 100
 
+    rawid = 5000
     for string in string_idx.flatten():
         for n in range(N_FIBERS_PER_STRING):
             name = f"S{string + 1:02d}{n + 1:02d}T"
@@ -256,6 +237,8 @@ def generate_channelmap(
             channelmap[name]["location"]["fiber"] = name[:-1]
             channelmap[name]["location"]["position"] = "top"
             channelmap[name]["location"]["barrel"] = string + 1
+            channelmap[name]["daq"]["rawid"] = rawid
+            rawid += 1
 
         for n in range(N_FIBERS_PER_STRING):
             name = f"S{string + 1:02d}{n + 1:02d}B"
@@ -264,18 +247,59 @@ def generate_channelmap(
             channelmap[name]["location"]["fiber"] = name[:-1]
             channelmap[name]["location"]["position"] = "bottom"
             channelmap[name]["location"]["barrel"] = string + 1
+            channelmap[name]["daq"]["rawid"] = rawid
+            rawid += 1
 
     calculate_and_place_pmts(channelmap, pmts_meta, pmts_pos)
 
-    with Path(output_path).open("w") as f:
-        json.dump(channelmap, f, cls=NpEncoder, indent=4)
+    return channelmap
 
 
-def main():
-    args = parse_arguments()
-    config = load_config(args.input)
-    if args.dets_from_metadata != "":
-        json_acceptable_string = args.dets_from_metadata.replace("'", '"')
+def _convert_numpy_types(obj):
+    """Convert numpy types to native Python types recursively."""
+    if isinstance(obj, dict):
+        return {key: _convert_numpy_types(value) for key, value in obj.items()}
+    if isinstance(obj, list):
+        return [_convert_numpy_types(item) for item in obj]
+    if isinstance(obj, np.integer):
+        return int(obj)
+    if isinstance(obj, np.floating):
+        return float(obj)
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    return obj
+
+
+def generate_dummy_metadata(
+    input_config: str = "",
+    dets_from_metadata: str = "",
+) -> tuple[dict, dict]:
+    """Generate dummy metadata objects without writing files.
+
+    Returns:
+        tuple: (channelmap_dict, special_metadata_dict)
+    """
+    # Default to configs directory if paths are not provided
+    script_dir = Path(__file__).parent
+    configs_dir = script_dir / "configs"
+
+    if not input_config:
+        input_config = str(configs_dir / "config.json")
+
+    try:
+        config = load_config(input_config)
+    except FileNotFoundError as e:
+        msg = f"Config file not found: {input_config}"
+        raise FileNotFoundError(msg) from e
+    except json.JSONDecodeError as e:
+        msg = f"Invalid JSON in config file {input_config}: {e}"
+        raise ValueError(msg) from e
+    except Exception as e:
+        msg = f"Error loading config file {input_config}: {e}"
+        raise RuntimeError(msg) from e
+
+    if dets_from_metadata != "":
+        json_acceptable_string = dets_from_metadata.replace("'", '"')
         det_names_from_metadata = json.loads(json_acceptable_string)
 
     string_idx = np.arange(
@@ -284,11 +308,12 @@ def main():
 
     hpge_data, spms_data, pmts_meta = None, None, None
 
-    if legendmeta.LegendMetadata() and args.dets_from_metadata:
+    if dets_from_metadata and legendmeta.LegendMetadata():
         timestamp = "20230125T212014Z"
         chm = legendmeta.LegendMetadata().channelmap(on=timestamp)
         if "hpge" in det_names_from_metadata:
-            hpge_data = chm[det_names_from_metadata]
+            hpge_detector_name = det_names_from_metadata["hpge"]
+            hpge_data = chm[hpge_detector_name]
 
     if not hpge_data:
         hpge_data = config["dummy_dets"]["hpge"]
@@ -315,11 +340,40 @@ def main():
 
     pmts_pos = config["pmts_pos"]
 
-    generate_special_metadata(args.output_special_metadata, config, string_idx, hpge_names, pmts_pos)
-    generate_channelmap(
-        args.output_channelmap, hpge_data, hpge_names, hpge_rawid, string_idx, spms_data, pmts_meta, pmts_pos
+    special_metadata = generate_special_metadata(config, string_idx, hpge_names, pmts_pos)
+    channelmap = generate_channelmap(
+        hpge_data, hpge_names, hpge_rawid, string_idx, spms_data, pmts_meta, pmts_pos
     )
 
+    # Convert numpy types to native Python types to match file serialization behavior
+    channelmap = _convert_numpy_types(channelmap)
+    special_metadata = _convert_numpy_types(special_metadata)
 
-if __name__ == "__main__":
-    main()
+    return channelmap, special_metadata
+
+
+def setup_dummy_metadata(
+    input_config: str = "",
+    output_special_metadata: str = "",
+    output_channelmap: str = "",
+    dets_from_metadata: str = "",
+) -> None:
+    """Generate and write dummy metadata files to disk."""
+    # Default to configs directory if paths are not provided
+    script_dir = Path(__file__).parent
+    configs_dir = script_dir / "configs"
+
+    if not output_special_metadata:
+        output_special_metadata = str(configs_dir / "special_metadata.yaml")
+    if not output_channelmap:
+        output_channelmap = str(configs_dir / "channelmap.json")
+
+    # Generate the metadata objects
+    channelmap, special_metadata = generate_dummy_metadata(input_config, dets_from_metadata)
+
+    # Write to files
+    with Path(output_special_metadata).open("w") as f:
+        yaml.dump(special_metadata, f)
+
+    with Path(output_channelmap).open("w") as f:
+        json.dump(channelmap, f, cls=NpEncoder, indent=4)

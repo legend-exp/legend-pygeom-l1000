@@ -8,9 +8,6 @@ still under heavy development!
 
 ## Installation and usage
 
-This package requires a working setup of
-[`legend-metadata`](https://github.com/legend-exp/legend-metadata) before usage.
-
 Following a git checkout, the package and its other python dependencies can be
 installed with:
 
@@ -27,6 +24,8 @@ now, you can find usage docs by running `legend-pygeom-l1000 -h`.
 
 ```{toctree}
 :maxdepth: 2
+
+metadata.md
 ```
 
 ```{toctree}

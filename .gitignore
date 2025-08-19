@@ -157,3 +157,8 @@ Thumbs.db
 # Common editor files
 *~
 *.swp
+
+
+# Setup configs for the repo
+src/l1000geom/configs/channelmap.json
+src/l1000geom/configs/special_metadata.yaml

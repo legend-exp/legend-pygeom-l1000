@@ -5,10 +5,9 @@ from __future__ import annotations
 import argparse
 import logging
 
-from pyg4ometry import gdml
-from pygeomtools import detectors, utils, visualization
+from pygeomtools import detectors, utils, visualization, write_pygeom
 
-from . import _version, core
+from . import _version, core, dummy_metadata_generator
 
 log = logging.getLogger(__name__)
 
@@ -80,6 +79,38 @@ def dump_gdml_cli() -> None:
         help="""Select a config file to read geometry config from.""",
     )
 
+    # options for metadata generation
+    meta_opts = parser.add_argument_group("metadata generation options")
+    meta_opts.add_argument(
+        "--generate-metadata",
+        action="store_true",
+        help="""Generate necessary dummy metadata files (special_metadata.yaml and channelmap.json)""",
+    )
+    meta_opts.add_argument(
+        "--metadata-config",
+        action="store",
+        default="",
+        help="""Config file for metadata generation (defaults to configs/config.json)""",
+    )
+    meta_opts.add_argument(
+        "--output-special-metadata",
+        action="store",
+        default="",
+        help="""Output file for special metadata (defaults to configs/special_metadata.yaml)""",
+    )
+    meta_opts.add_argument(
+        "--output-channelmap",
+        action="store",
+        default="",
+        help="""Output file for channelmap (defaults to configs/channelmap.json)""",
+    )
+    meta_opts.add_argument(
+        "--dets-from-metadata",
+        action="store",
+        default="",
+        help="""Use HPGe detector from metadata as dummy. Format: '{"hpge": "DETECTOR_NAME"}', e.g., '{"hpge": "V000000A"}'""",
+    )
+
     parser.add_argument(
         "filename",
         default="",
@@ -89,8 +120,8 @@ def dump_gdml_cli() -> None:
 
     args = parser.parse_args()
 
-    if not args.visualize and args.filename == "":
-        parser.error("no output file and no visualization specified")
+    if not args.visualize and args.filename == "" and not args.generate_metadata:
+        parser.error("no output file, no visualization, and no metadata generation specified")
     if (args.vis_macro_file or args.det_macro_file) and args.filename == "":
         parser.error("writing macro file(s) without gdml file is not possible")
 
@@ -99,9 +130,28 @@ def dump_gdml_cli() -> None:
     if args.debug:
         logging.root.setLevel(logging.DEBUG)
 
+    # Handle metadata generation
+    if args.generate_metadata:
+        log.info("generating dummy metadata files")
+        try:
+            dummy_metadata_generator.setup_dummy_metadata(
+                input_config=args.metadata_config,
+                output_special_metadata=args.output_special_metadata,
+                output_channelmap=args.output_channelmap,
+                dets_from_metadata=args.dets_from_metadata,
+            )
+            log.info("metadata files generated successfully")
+        except Exception as e:
+            log.error("failed to generate metadata files: %s", e)
+            return
+
     config = {}
     if args.config:
         config = utils.load_dict(args.config)
+
+    # Skip geometry generation if only generating metadata
+    if args.generate_metadata and args.filename == "" and not args.visualize:
+        return
 
     registry = core.construct(
         assemblies=args.assemblies.split(",") if args.assemblies else None,
@@ -115,11 +165,8 @@ def dump_gdml_cli() -> None:
         registry.worldVolume.checkOverlaps(recursive=True)
 
     if args.filename != "":
-        msg = f"exporting GDML geometry to {args.filename}"
-        log.info(msg)
-        w = gdml.Writer()
-        w.addDetector(registry)
-        w.write(args.filename)
+        log.info("exporting GDML geometry to %s", args.filename)
+    write_pygeom(registry, args.filename)
 
     if args.det_macro_file:
         detectors.generate_detector_macro(registry, args.det_macro_file)
