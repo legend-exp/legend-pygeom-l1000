@@ -624,10 +624,6 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> g4.Physical
             instr.materials.pmma, instr.registry, mod_r_inn, mod_r_out, mod_z, modnsides, atmlar_lv
         )
 
-    elif instr.detail["nm_plastic"] == "stl":
-        msg = "stl neutron moderator temporarily removed due to overlaps. Feel free to help with a fix."
-        raise ValueError(msg)
-
     # Finally, the RT should be filled with LAr
 
     neckradius = neckradius - tubethickness
