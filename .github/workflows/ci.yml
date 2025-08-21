@@ -26,7 +26,7 @@ jobs:
         os: [ubuntu-latest, macOS-latest]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
@@ -49,11 +49,11 @@ jobs:
           "${{ github.event_name != 'pull_request' ||
           github.event.pull_request.head.repo.owner.login == 'legend-exp' }}"
       - name: Clone legend-metadata
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: legend-exp/legend-metadata
           fetch-depth: 0
-          token: ${{ secrets.READPRIVATE }}
+          token: ${{ secrets.CLONE_LEGEND_METADATA }}
           path: ${{ env.LEGEND_METADATA }}
           submodules: "recursive"
         # secrets are not available in PRs from forks, so do not even attempt to clone metadata.
@@ -70,7 +70,7 @@ jobs:
     needs: build-and-test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 2
       - uses: actions/setup-python@v5
@@ -85,11 +85,11 @@ jobs:
           "${{ github.event_name != 'pull_request' ||
           github.event.pull_request.head.repo.owner.login == 'legend-exp' }}"
       - name: Clone legend-metadata
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: legend-exp/legend-metadata
           fetch-depth: 0
-          token: ${{ secrets.READPRIVATE }}
+          token: ${{ secrets.CLONE_LEGEND_METADATA }}
           path: ${{ env.LEGEND_METADATA }}
           submodules: "recursive"
         # secrets are not available in PRs from forks, so do not even attempt to clone metadata.
@@ -112,7 +112,7 @@ jobs:
     needs: build-and-test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - uses: actions/setup-python@v5
@@ -127,11 +127,11 @@ jobs:
           "${{ github.event_name != 'pull_request' ||
           github.event.pull_request.head.repo.owner.login == 'legend-exp' }}"
       - name: Clone legend-metadata
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: legend-exp/legend-metadata
           fetch-depth: 0
-          token: ${{ secrets.READPRIVATE }}
+          token: ${{ secrets.CLONE_LEGEND_METADATA }}
           path: ${{ env.LEGEND_METADATA }}
           submodules: "recursive"
         # secrets are not available in PRs from forks, so do not even attempt to clone metadata.
