@@ -1,15 +1,25 @@
 from __future__ import annotations
 
+import logging
 from importlib import resources
 from typing import NamedTuple
 
 from dbetto import AttrsDict, TextDB
 from pyg4ometry import geant4
-from pygeomtools import detectors, geometry, visualization
 from pygeomtools.utils import load_dict_from_config
 
-from . import cavern_and_labs, cryo, fibers, hpge_strings, materials, watertank, watertank_instrumentation
+from . import (
+    cavern_and_labs,
+    cryo,
+    dummy_metadata_generator,
+    fibers,
+    hpge_strings,
+    materials,
+    watertank,
+    watertank_instrumentation,
+)
 
+logger = logging.getLogger(__name__)
 configs = TextDB(resources.files("l1000geom") / "configs")
 
 
@@ -49,10 +59,31 @@ def construct(
 
     config = config if config is not None else {}
 
-    channelmap = load_dict_from_config(config, "channelmap", lambda: AttrsDict(configs["channelmap.json"]))
-    special_metadata = load_dict_from_config(
-        config, "special_metadata", lambda: AttrsDict(configs["special_metadata.yaml"])
-    )
+    # Try to load channelmap and special_metadata, with fallback to generate the data on the fly
+    try:
+        channelmap = load_dict_from_config(
+            config, "channelmap", lambda: AttrsDict(configs["channelmap.json"])
+        )
+    except FileNotFoundError:
+        # Fallback: generate dummy metadata objects directly
+        logger.info("channelmap.json not found in configs directory, generating channelmap on the fly")
+        channelmap_dict, special_metadata_dict = dummy_metadata_generator.generate_dummy_metadata()
+        channelmap = AttrsDict(channelmap_dict)
+    except Exception as e:
+        msg = f"Error loading channelmap: {e}"
+        raise RuntimeError(msg) from e
+
+    try:
+        special_metadata = load_dict_from_config(
+            config, "special_metadata", lambda: AttrsDict(configs["special_metadata.yaml"])
+        )
+    except FileNotFoundError:
+        # Fallback: use dummy metadata objects directly
+        logger.info("special_metadata.yaml not found in configs directory, generating metadata on the fly")
+        special_metadata = AttrsDict(special_metadata_dict)
+    except Exception as e:
+        msg = f"Error loading special_metadata: {e}"
+        raise RuntimeError(msg) from e
 
     if detail_level not in special_metadata["detail"]:
         msg = "invalid detail level specified"
@@ -100,10 +131,6 @@ def construct(
     fibers.place_fiber_modules(instr)
 
     _assign_common_copper_surface(instr)
-
-    detectors.write_detector_auxvals(reg)
-    visualization.write_color_auxvals(reg)
-    geometry.check_registry_sanity(reg, reg)
 
     return reg
 

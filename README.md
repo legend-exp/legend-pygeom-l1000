@@ -16,8 +16,12 @@
 This package implements the `legend-pygeom-l1000` CLI utility to interact with
 the LEGEND-1000 geometry.
 
-> [!NOTE]
->
-> For full functionality, this package requires a working setup of
-> [`legend-metadata`](https://github.com/legend-exp/legend-metadata) before
-> usage.
+Following a git checkout, the package and its other python dependencies can be
+installed with:
+
+```
+pip install -e .
+```
+
+The basic geometry can then be created using `legend-pygeom-l1000 l1000.gdml`.
+For more information check out the documentation.
