@@ -27,14 +27,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
-      - name: Clone legend-metadata
-        uses: actions/checkout@v5
-        with:
-          repository: legend-exp/legend-metadata
-          fetch-depth: 0
-          token: ${{ secrets.CLONE_LEGEND_METADATA }}
-          path: ${{ env.LEGEND_METADATA }}
-          submodules: "recursive"
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
