@@ -27,6 +27,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+      - name: Clone legend-metadata
+        uses: actions/checkout@v5
+        with:
+          repository: legend-exp/legend-metadata
+          fetch-depth: 0
+          token: ${{ secrets.CLONE_LEGEND_METADATA }}
+          path: ${{ env.LEGEND_METADATA }}
+          submodules: "recursive"
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
@@ -53,7 +61,7 @@ jobs:
         with:
           repository: legend-exp/legend-metadata
           fetch-depth: 0
-          token: ${{ secrets.READPRIVATE }}
+          token: ${{ secrets.CLONE_LEGEND_METADATA }}
           path: ${{ env.LEGEND_METADATA }}
           submodules: "recursive"
         # secrets are not available in PRs from forks, so do not even attempt to clone metadata.
@@ -89,7 +97,7 @@ jobs:
         with:
           repository: legend-exp/legend-metadata
           fetch-depth: 0
-          token: ${{ secrets.READPRIVATE }}
+          token: ${{ secrets.CLONE_LEGEND_METADATA }}
           path: ${{ env.LEGEND_METADATA }}
           submodules: "recursive"
         # secrets are not available in PRs from forks, so do not even attempt to clone metadata.
@@ -131,7 +139,7 @@ jobs:
         with:
           repository: legend-exp/legend-metadata
           fetch-depth: 0
-          token: ${{ secrets.READPRIVATE }}
+          token: ${{ secrets.CLONE_LEGEND_METADATA }}
           path: ${{ env.LEGEND_METADATA }}
           submodules: "recursive"
         # secrets are not available in PRs from forks, so do not even attempt to clone metadata.
