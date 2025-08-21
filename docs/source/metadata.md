@@ -71,7 +71,6 @@ Additionally there is more information about detailed structures in there.
 ### HPGe detector unit configuration
 
 - `hpges` → HPGe detector name
-
   - `rodlength_in_mm` → length of the copper rods next to this detector. This is
     a "warm" length, i.e. it is multiplied by a factor < 1 to get the shorter
     rod length in the cryostat.
