@@ -236,8 +236,8 @@ class OpticalSurfaceRegistry:
             registry=self.g4_registry,
         )
 
-        # I would ignore reflectivity for now, but it is possible to add it in the future.
-        # legendoptics.pmts.pyg4_pmt_attach_photocathode_reflectivity(self._to_photocathode, self.g4_registry)
+        # Need reflectivity. Otherwise Geant4 just assumes 1 and ignores the efficiency (dont ask why)
+        legendoptics.pmts.pyg4_pmt_attach_photocathode_reflectivity(self._to_photocathode, self.g4_registry)
         legendoptics.pmts.pyg4_pmt_attach_photocathode_efficiency(
             self._to_photocathode, self.g4_registry, name="r7081"
         )
