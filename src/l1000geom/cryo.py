@@ -482,6 +482,9 @@ def construct_moderator_simple(
     # Could import this if we wanted, but maybe this method has enough arguments already...
 
 
+NECKRADIUS_START = 1200
+
+
 def construct_and_place_cryostat(instr: core.InstrumentationData) -> g4.PhysicalVolume:
     if "cryostat" not in instr.detail:
         msg = "No 'cryostat' detail specified in the special metadata."
@@ -495,7 +498,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> g4.Physical
     totalheight = 10000  # 10200
     neckheight = 1940  # 2000
     bodyheight = 7750  # 8000 #7000
-    neckradius = 1200
+    neckradius = NECKRADIUS_START
     # neckradius = 1900 / 2. # 1.9m diameter
     # barrelradius = 3800
     shoulderfraction = 0.233
@@ -530,16 +533,18 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> g4.Physical
 
     skirtheight = totalheight - neckheight - (bodyheight * (1 - bottomfraction))
     skirtradius = barrelradius
-    skirtz = -bodyheight / 2 - ocryo_thickness * 3.2
+    # Due to the curvature of the bottom it is hard to remove exactly enough
+    # To close flush with the cryo but not have overlaps.
+    skirtz = -bodyheight / 2 - ocryo_thickness
     skirtthickness = 60  # A guess
-    footheight = 150
+    footheight = 250
     footwidth = 150  # Not really a guess so much as a placeholder...
 
     skirt_solid = g4.solid.Tubs(
         "skirt_sol",
         skirtradius - skirtthickness,
         skirtradius,
-        skirtheight - (ocryo_thickness * 7),
+        skirtheight - (ocryo_thickness * 2),  # Take a little bit away to avoid overlapps with the cryo
         0,
         2 * pi,
         instr.registry,

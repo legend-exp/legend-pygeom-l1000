@@ -12,7 +12,7 @@ from math import pi
 import numpy as np
 import pyg4ometry.geant4 as g4
 
-from . import core
+from . import core, cryo
 
 # Everything in mm
 # Basic tank
@@ -21,9 +21,10 @@ tank_vertical_wall = 10.0
 tank_horizontal_wall = 20.0  # If i read the drawing correctly the horizontal wall is thicker
 tank_base_radius = 12000.0 / 2  # Radius of the base of the tank
 tank_pit_height = 800.0  # Height of the icarus pit
+tank_central_part_height = 8877.6  # This is the height of the central part
 tank_base_height = (
-    8877.6 + tank_pit_height
-)  # height being the z position with regards to the tank bottom at z = 0
+    tank_central_part_height + tank_pit_height
+)  # This is the difference between top part and pit start
 
 # Tank top is a little more complicated
 tank_top_height = 9409.8 + tank_pit_height  # This value is therefore equal to the entire tank height.
@@ -35,6 +36,10 @@ tank_top_bulge_radius = 3025.0  # radius of the bulged sections
 # Flanges on top of the tank
 tank_flange_height = 9976.1 + tank_pit_height  # Height of the flange on top of the tank
 tank_flange_position_radius = 10600.0 / 2
+
+# This is just some extra height so that the reentrance tube does not overlap with the cryo
+# This is just guessed for now.
+Reentrance_tube_height = 250.0
 
 # Think of the manhole as a square with curved top/bottom (geometric term is 'stadium')
 # Where to place the manhole
@@ -70,6 +75,8 @@ def construct_base(name: str, reg: g4.Registry, v_wall: float = 0.0, h_wall: flo
         tank_base_radius - v_wall,
         tank_top_bulge_hwidth + v_wall,
         tank_top_bulge_hwidth + v_wall,
+        cryo.NECKRADIUS_START,
+        cryo.NECKRADIUS_START,
         0,
     ]
     z_base = [
@@ -81,6 +88,8 @@ def construct_base(name: str, reg: g4.Registry, v_wall: float = 0.0, h_wall: flo
         tank_top_height - h_wall,
         tank_top_bulge_height - h_wall,
         tank_top_bulge_height - h_wall,
+        tank_top_bulge_height - h_wall + Reentrance_tube_height,
+        tank_top_bulge_height - h_wall + Reentrance_tube_height,
     ]
     return g4.solid.GenericPolycone(name + "_base", 0, 2 * pi, r_base, z_base, reg, "mm")
 
@@ -288,7 +297,10 @@ def construct_and_place_tank(instr: core.InstrumentationData) -> core.Instrument
     tank_lv = construct_tank(instr.materials.metal_steel, instr.registry, instr.detail["watertank"])
     tank_lv.pygeom_color_rgba = False
     g4.SkinSurface("tank_steel_surface", tank_lv, instr.materials.surfaces.to_steel, instr.registry)
-    tank_z_displacement = -(800.0 + 8877.6 / 2.0)
+    # Polycones are placed with the bottom positioned at the given coordinates.
+    # But we want it such that the polycone is centered around (0,0,0)
+    # Displace it so the center of the middle straight part is at (0,0,0)
+    tank_z_displacement = -(tank_pit_height + tank_central_part_height / 2.0)
 
     g4.PhysicalVolume(
         [0, 0, 0],
