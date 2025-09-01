@@ -548,11 +548,11 @@ class OpticalMaterialRegistry:
             number_of_components=3,
             registry=self.g4_registry,
         )
-
-        self._epoxy.add_element_massfraction(self.get_element("H"), 0.65)
-        self._epoxy.add_element_massfraction(self.get_element("C"), 0.1)
-        self._epoxy.add_element_massfraction(self.get_element("O"), 0.20)
-        self._epoxy.add_element_massfraction(self.get_element("O"), 0.5)
+        # We do not yet now what the potted base will be made out of.
+        # matches typical bisphenol-A epoxy resin.
+        self._epoxy.add_element_massfraction(self.get_element("H"), 0.12)
+        self._epoxy.add_element_massfraction(self.get_element("C"), 0.79)
+        self._epoxy.add_element_massfraction(self.get_element("O"), 0.09)
 
         return self._epoxy
 
