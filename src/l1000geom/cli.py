@@ -6,6 +6,7 @@ import argparse
 import logging
 
 from legendoptics.store import load_user_material_code
+from pyg4ometry import config as meshconfig
 from pygeomtools import detectors, utils, visualization, write_pygeom
 
 from . import _version, core, dummy_metadata_generator
@@ -41,8 +42,9 @@ def dump_gdml_cli() -> None:
     parser.add_argument(
         "--visualize",
         "-V",
-        action="store_true",
-        help="""Open a VTK visualization of the generated geometry""",
+        nargs="?",
+        const=True,
+        help="""Open a VTK visualization of the generated geometry (with optional scene file)""",
     )
     parser.add_argument(
         "--vis-macro-file",
@@ -159,6 +161,13 @@ def dump_gdml_cli() -> None:
     if args.generate_metadata and args.filename == "" and not args.visualize:
         return
 
+    vis_scene = {}
+    if isinstance(args.visualize, str):
+        vis_scene = utils.load_dict(args.visualize)
+
+    if vis_scene.get("fine_mesh", False) or args.check_overlaps:
+        meshconfig.setGlobalMeshSliceAndStack(100)
+
     # load custom module to change material properties.
     if args.pygeom_optics_plugin:
         load_user_material_code(args.pygeom_optics_plugin)
@@ -188,4 +197,4 @@ def dump_gdml_cli() -> None:
         log.info("visualizing...")
         from pygeomtools import viewer
 
-        viewer.visualize(registry)
+        viewer.visualize(registry, vis_scene)
