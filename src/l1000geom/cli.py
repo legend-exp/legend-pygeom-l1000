@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import logging
 
+from legendoptics.store import load_user_material_code
 from pygeomtools import detectors, utils, visualization, write_pygeom
 
 from . import _version, core, dummy_metadata_generator
@@ -57,6 +58,11 @@ def dump_gdml_cli() -> None:
         "--check-overlaps",
         action="store_true",
         help="""Check for overlaps with pyg4ometry (note: this might not be accurate)""",
+    )
+    parser.add_argument(
+        "--pygeom-optics-plugin",
+        action="store",
+        help="""Execute the python module given by this path before constructing the geometry""",
     )
 
     # options for geometry generation.
@@ -152,6 +158,10 @@ def dump_gdml_cli() -> None:
     # Skip geometry generation if only generating metadata
     if args.generate_metadata and args.filename == "" and not args.visualize:
         return
+
+    # load custom module to change material properties.
+    if args.pygeom_optics_plugin:
+        load_user_material_code(args.pygeom_optics_plugin)
 
     registry = core.construct(
         assemblies=args.assemblies.split(",") if args.assemblies else None,
