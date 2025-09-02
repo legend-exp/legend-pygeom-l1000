@@ -10,6 +10,7 @@ import legendoptics.tyvek
 import numpy as np
 import pint
 import pyg4ometry.geant4 as g4
+from pygeomtools.materials import cached_property
 
 from .ketek_sipm import ketek_sipm_efficiency
 
@@ -41,13 +42,10 @@ class OpticalSurfaceRegistry:
         # do not change the surface model w/o also changing all surface values below!
         self._model = "unified"
 
-    @property
+    @cached_property
     def to_copper(self) -> g4.solid.OpticalSurface:
         """Reflective surface for copper structure."""
-        if hasattr(self, "_to_copper"):
-            return self._to_copper
-
-        self._to_copper = g4.solid.OpticalSurface(
+        _to_copper = g4.solid.OpticalSurface(
             "surface_to_copper",
             finish="ground",
             model=self._model,
@@ -56,20 +54,14 @@ class OpticalSurfaceRegistry:
             registry=self.g4_registry,
         )
 
-        legendoptics.copper.pyg4_copper_attach_reflectivity(
-            self._to_copper,
-            self.g4_registry,
-        )
+        legendoptics.copper.pyg4_copper_attach_reflectivity(_to_copper, self.g4_registry)
 
-        return self._to_copper
+        return _to_copper
 
-    @property
+    @cached_property
     def to_germanium(self) -> g4.solid.OpticalSurface:
         """Reflective surface for germanium detectors."""
-        if hasattr(self, "_to_germanium"):
-            return self._to_germanium
-
-        self._to_germanium = g4.solid.OpticalSurface(
+        _to_germanium = g4.solid.OpticalSurface(
             "surface_to_germanium",
             finish="ground",
             model=self._model,
@@ -78,20 +70,14 @@ class OpticalSurfaceRegistry:
             registry=self.g4_registry,
         )
 
-        legendoptics.germanium.pyg4_germanium_attach_reflectivity(
-            self._to_germanium,
-            self.g4_registry,
-        )
+        legendoptics.germanium.pyg4_germanium_attach_reflectivity(_to_germanium, self.g4_registry)
 
-        return self._to_germanium
+        return _to_germanium
 
-    @property
+    @cached_property
     def wlsr_tpb_to_tetratex(self) -> g4.solid.OpticalSurface:
         """Reflective surface Tetratex diffuse reflector."""
-        if hasattr(self, "_wlsr_tpb_to_tetratex"):
-            return self._wlsr_tpb_to_tetratex
-
-        self._wlsr_tpb_to_tetratex = g4.solid.OpticalSurface(
+        _wlsr_tpb_to_tetratex = g4.solid.OpticalSurface(
             "surface_wlsr_tpb_to_tetratex",
             finish="groundfrontpainted",  # only lambertian reflection
             model=self._model,
@@ -100,20 +86,14 @@ class OpticalSurfaceRegistry:
             registry=self.g4_registry,
         )
 
-        legendoptics.tetratex.pyg4_tetratex_attach_reflectivity(
-            self._wlsr_tpb_to_tetratex,
-            self.g4_registry,
-        )
+        legendoptics.tetratex.pyg4_tetratex_attach_reflectivity(_wlsr_tpb_to_tetratex, self.g4_registry)
 
-        return self._wlsr_tpb_to_tetratex
+        return _wlsr_tpb_to_tetratex
 
-    @property
+    @cached_property
     def to_sipm_silicon(self) -> g4.solid.OpticalSurface:
         """Reflective surface for KETEK SiPM."""
-        if hasattr(self, "_to_sipm_silicon"):
-            return self._to_sipm_silicon
-
-        self._to_sipm_silicon = g4.solid.OpticalSurface(
+        _to_sipm_silicon = g4.solid.OpticalSurface(
             "surface_to_sipm_silicon",
             finish="ground",
             model=self._model,
@@ -122,25 +102,19 @@ class OpticalSurfaceRegistry:
             registry=self.g4_registry,
         )
 
-        legendoptics.silicon.pyg4_silicon_attach_complex_rindex(
-            self._to_sipm_silicon,
-            self.g4_registry,
-        )
+        legendoptics.silicon.pyg4_silicon_attach_complex_rindex(_to_sipm_silicon, self.g4_registry)
 
         # add custom efficiency for the KETEK SiPMs. This is not part of legendoptics.
         λ, eff = ketek_sipm_efficiency()
         with u.context("sp"):
-            self._to_sipm_silicon.addVecPropertyPint("EFFICIENCY", λ.to("eV"), eff)
+            _to_sipm_silicon.addVecPropertyPint("EFFICIENCY", λ.to("eV"), eff)
 
-        return self._to_sipm_silicon
+        return _to_sipm_silicon
 
-    @property
+    @cached_property
     def lar_to_tpb(self) -> g4.solid.OpticalSurface:
         """Optical surface between LAr and TBP wavelength shifting coating."""
-        if hasattr(self, "_lar_to_tpb"):
-            return self._lar_to_tpb
-
-        self._lar_to_tpb = g4.solid.OpticalSurface(
+        return g4.solid.OpticalSurface(
             "surface_lar_to_tpb",
             finish="ground",
             model="unified",
@@ -149,15 +123,10 @@ class OpticalSurfaceRegistry:
             registry=self.g4_registry,
         )
 
-        return self._lar_to_tpb
-
-    @property
+    @cached_property
     def lar_to_pen(self) -> g4.solid.OpticalSurface:
         """Optical surface between LAr and PEN scintillator/wavelength shifting coating."""
-        if hasattr(self, "_lar_to_pen"):
-            return self._lar_to_pen
-
-        self._lar_to_pen = g4.solid.OpticalSurface(
+        _lar_to_pen = g4.solid.OpticalSurface(
             "surface_lar_to_pen",
             finish="ground",
             model="unified",
@@ -176,18 +145,15 @@ class OpticalSurfaceRegistry:
         specular_lobe = np.array([0.4, 0.4])
         specular_spike = np.array([0.6, 0.6])
         with u.context("sp"):
-            self._lar_to_pen.addVecPropertyPint("SPECULARSPIKECONSTANT", λ.to("eV"), specular_spike)
-            self._lar_to_pen.addVecPropertyPint("SPECULARLOBECONSTANT", λ.to("eV"), specular_lobe)
+            _lar_to_pen.addVecPropertyPint("SPECULARSPIKECONSTANT", λ.to("eV"), specular_spike)
+            _lar_to_pen.addVecPropertyPint("SPECULARLOBECONSTANT", λ.to("eV"), specular_lobe)
 
-        return self._lar_to_pen
+        return _lar_to_pen
 
-    @property
+    @cached_property
     def to_steel(self) -> g4.solid.OpticalSurface:
         """Optical surface of steel."""
-        if hasattr(self, "_to_steel"):
-            return self._to_steel
-
-        self._to_steel = g4.solid.OpticalSurface(
+        _to_steel = g4.solid.OpticalSurface(
             name="pmt_steel_surface",
             finish="polished",
             model="unified",
@@ -196,18 +162,15 @@ class OpticalSurfaceRegistry:
             registry=self.g4_registry,
         )
 
-        legendoptics.pmts.pyg4_pmt_attach_steel_reflectivity(self._to_steel, self.g4_registry)
+        legendoptics.pmts.pyg4_pmt_attach_steel_reflectivity(_to_steel, self.g4_registry)
 
-        return self._to_steel
+        return _to_steel
 
-    @property
+    @cached_property
     def to_tyvek(self) -> g4.solid.OpticalSurface:
         """Reflective surface for tyvek."""
-        if hasattr(self, "_to_tyvek"):
-            return self._to_tyvek
-
         # Create material properties table for tyvek surface
-        self._to_tyvek = g4.solid.OpticalSurface(
+        _to_tyvek = g4.solid.OpticalSurface(
             name="tyvek_foil_surface",
             finish="groundfrontpainted",
             model="unified",
@@ -216,18 +179,15 @@ class OpticalSurfaceRegistry:
             registry=self.g4_registry,
         )
 
-        legendoptics.tyvek.pyg4_tyvek_attach_reflectivity(self._to_tyvek, self.g4_registry)
+        legendoptics.tyvek.pyg4_tyvek_attach_reflectivity(_to_tyvek, self.g4_registry)
 
-        return self._to_tyvek
+        return _to_tyvek
 
-    @property
+    @cached_property
     def to_photocathode(self) -> g4.solid.OpticalSurface:
         """Optical surface of the PMT photocathode."""
-        if hasattr(self, "_to_photocathode"):
-            return self._to_photocathode
-
         # Detector Surface
-        self._to_photocathode = g4.solid.OpticalSurface(
+        _to_photocathode = g4.solid.OpticalSurface(
             name="pmt_cathode_surface",
             finish="polished",
             model="unified",
@@ -237,9 +197,9 @@ class OpticalSurfaceRegistry:
         )
 
         # Need reflectivity. Otherwise Geant4 just assumes 1 and ignores the efficiency (dont ask why)
-        legendoptics.pmts.pyg4_pmt_attach_photocathode_reflectivity(self._to_photocathode, self.g4_registry)
+        legendoptics.pmts.pyg4_pmt_attach_photocathode_reflectivity(_to_photocathode, self.g4_registry)
         legendoptics.pmts.pyg4_pmt_attach_photocathode_efficiency(
-            self._to_photocathode, self.g4_registry, name="r7081"
+            _to_photocathode, self.g4_registry, name="r7081"
         )
 
-        return self._to_photocathode
+        return _to_photocathode
