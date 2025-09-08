@@ -121,16 +121,16 @@ def dump_gdml_cli() -> None:
 
     parser.add_argument(
         "filename",
-        default="",
+        default=None,
         nargs="?",
         help="""File name for the output GDML geometry.""",
     )
 
     args = parser.parse_args()
 
-    if not args.visualize and args.filename == "" and not args.generate_metadata:
+    if not args.visualize and args.filename is None and not args.generate_metadata:
         parser.error("no output file, no visualization, and no metadata generation specified")
-    if (args.vis_macro_file or args.det_macro_file) and args.filename == "":
+    if (args.vis_macro_file or args.det_macro_file) and args.filename is None:
         parser.error("writing macro file(s) without gdml file is not possible")
 
     if args.verbose:
@@ -158,7 +158,7 @@ def dump_gdml_cli() -> None:
         config = utils.load_dict(args.config)
 
     # Skip geometry generation if only generating metadata
-    if args.generate_metadata and args.filename == "" and not args.visualize:
+    if args.generate_metadata and args.filename is None and not args.visualize:
         return
 
     vis_scene = {}
@@ -183,7 +183,7 @@ def dump_gdml_cli() -> None:
         log.info(msg)
         registry.worldVolume.checkOverlaps(recursive=True)
 
-    if args.filename != "":
+    if args.filename is not None:
         log.info("exporting GDML geometry to %s", args.filename)
     write_pygeom(registry, args.filename)
 
