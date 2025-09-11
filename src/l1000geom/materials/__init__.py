@@ -194,6 +194,7 @@ class OpticalMaterialRegistry(BaseMaterialRegistry):
         legendoptics.fibers.pyg4_fiber_core_attach_rindex(_ps_fibers, self.g4_registry)
         legendoptics.fibers.pyg4_fiber_core_attach_absorption(_ps_fibers, self.g4_registry)
         legendoptics.fibers.pyg4_fiber_core_attach_wls(_ps_fibers, self.g4_registry)
+        legendoptics.fibers.pyg4_fiber_core_attach_scintillation(_ps_fibers, self.g4_registry)
 
         return _ps_fibers
 
