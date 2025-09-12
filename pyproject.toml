@@ -32,7 +32,7 @@ requires-python = ">=3.10"
 dependencies = [
     "legend-pygeom-hpges",
     "legend-pygeom-optics>=0.13",
-    "legend-pygeom-tools>=0.0.17",
+    "legend-pygeom-tools>=0.0.18",
     "numpy",
     "pint",
     "pyg4ometry",
