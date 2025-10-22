@@ -116,7 +116,7 @@ class ModuleFactoryBase(ABC):
     SIPM_OVERLAP = 0.3  # mm
     SIPM_GAP_SIDE = 0.01  # mm, for fitting problems with round "SiPMs" and square fibers.
 
-    ANGLE_SAFETY = 0.001  # rad
+    ANGLE_SAFETY = 1e-9  # rad
 
     def __init__(
         self,
