@@ -116,6 +116,8 @@ class ModuleFactoryBase(ABC):
     SIPM_OVERLAP = 0.3  # mm
     SIPM_GAP_SIDE = 0.01  # mm, for fitting problems with round "SiPMs" and square fibers.
 
+    ANGLE_SAFETY = 0.001  # rad
+
     def __init__(
         self,
         radius_mm: float,
@@ -169,8 +171,8 @@ class ModuleFactoryBase(ABC):
             self.radius - sipm_dim / 2,
             self.radius + sipm_dim / 2,
             self.SIPM_HEIGHT,
-            0,
-            fiber_segment,
+            self.ANGLE_SAFETY,
+            fiber_segment - self.ANGLE_SAFETY,
             self.registry,
             "mm",
         )
@@ -181,18 +183,18 @@ class ModuleFactoryBase(ABC):
             self.radius - sipm_dim / 2 - self.SIPM_OUTER_EXTRA,
             self.radius + sipm_dim / 2 + self.SIPM_OUTER_EXTRA,
             self.SIPM_HEIGHT + self.SIPM_OUTER_EXTRA + self.SIPM_OVERLAP,
-            0,
-            fiber_segment,
+            self.ANGLE_SAFETY,
+            fiber_segment - self.ANGLE_SAFETY,
             self.registry,
             "mm",
         )
         sipm_outer2 = g4.solid.Tubs(
             f"sipm_outer2{v_suffix}",
-            self.radius - sipm_dim / 2,
-            self.radius + sipm_dim / 2,
+            self.radius - sipm_dim / 2 - 1e-9,
+            self.radius + sipm_dim / 2 + 1e-9,
             self.SIPM_HEIGHT + 2 * self.SIPM_GAP + self.SIPM_OVERLAP,
-            0,
-            fiber_segment,
+            self.ANGLE_SAFETY,
+            fiber_segment - self.ANGLE_SAFETY,
             self.registry,
             "mm",
         )
@@ -269,9 +271,9 @@ class ModuleFactoryBase(ABC):
         """Creates a (dummy) SiPM physical volume for use at the top/bottom of straight fiber sections."""
         z = +self.fiber_length / 2 + self.SIPM_HEIGHT / 2 + self.SIPM_GAP  # add small gap
         z_outer = (
-            z + self.SIPM_OUTER_EXTRA / 2 - self.SIPM_OVERLAP / 2 - self.SIPM_GAP
+            z + self.SIPM_OUTER_EXTRA / 2 - self.SIPM_OVERLAP / 2 - self.SIPM_GAP + 1e-9
             if is_top
-            else -z - self.SIPM_OUTER_EXTRA / 2 + self.SIPM_OVERLAP / 2 + self.SIPM_GAP
+            else -z - self.SIPM_OUTER_EXTRA / 2 + self.SIPM_OVERLAP / 2 + self.SIPM_GAP - 1e-9
         )
         z = z if is_top else -z
         z += z_displacement_straight
@@ -363,8 +365,8 @@ class ModuleFactorySingleFibers(ModuleFactoryBase):
         sipm_outer2 = g4.solid.Box(
             f"sipm_outer2{v_suffix}",
             self.SIPM_HEIGHT + 2 * self.SIPM_GAP + self.SIPM_OVERLAP,
-            sipm_dim,
-            sipm_dim,
+            sipm_dim + 1e-8,
+            sipm_dim + 1e-8,
             self.registry,
             "mm",
         )
@@ -636,7 +638,11 @@ class ModuleFactorySingleFibers(ModuleFactoryBase):
                 sipm_transforms.append([[0, 0, th], [x2, y2, z]])
 
                 sipm_placement_outer_r = (
-                    sipm_placement_r - self.SIPM_OUTER_EXTRA / 2 + self.SIPM_OVERLAP / 2 - self.SIPM_GAP
+                    sipm_placement_r
+                    - self.SIPM_OUTER_EXTRA / 2
+                    + self.SIPM_OVERLAP / 2
+                    - self.SIPM_GAP
+                    - 1e-9
                 )
                 x2 = sipm_placement_outer_r * math.cos(th) + mod.x_position_mm
                 y2 = sipm_placement_outer_r * math.sin(th) + mod.y_position_mm
@@ -743,8 +749,8 @@ class ModuleFactorySegment(ModuleFactoryBase):
             inner_radius - self.SIPM_HEIGHT,
             inner_radius,
             sipm_dim,
-            0,
-            fiber_segment,
+            self.ANGLE_SAFETY,
+            fiber_segment - self.ANGLE_SAFETY,
             self.registry,
             "mm",
         )
@@ -755,18 +761,18 @@ class ModuleFactorySegment(ModuleFactoryBase):
             inner_radius - self.SIPM_HEIGHT - self.SIPM_OUTER_EXTRA,
             inner_radius + self.SIPM_OVERLAP,
             sipm_dim + 2 * self.SIPM_OUTER_EXTRA,
-            0,
-            fiber_segment,
+            self.ANGLE_SAFETY,
+            fiber_segment - self.ANGLE_SAFETY,
             self.registry,
             "mm",
         )
         sipm_outer2 = g4.solid.Tubs(
             f"sipm_outer2{v_suffix}",
-            inner_radius - self.SIPM_HEIGHT,
+            inner_radius - self.SIPM_HEIGHT - 1e-9,
             inner_radius + 2 * self.SIPM_GAP + self.SIPM_OVERLAP,
-            sipm_dim,
-            0,
-            fiber_segment,
+            sipm_dim + 1e-9,
+            self.ANGLE_SAFETY,
+            fiber_segment - self.ANGLE_SAFETY,
             self.registry,
             "mm",
         )
