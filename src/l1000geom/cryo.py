@@ -3,9 +3,19 @@ from __future__ import annotations
 import logging
 from math import pi
 
+import numpy as np
 import pyg4ometry.geant4 as g4
 
 from . import core
+
+# Import new reentrance tube profile and WLSR functions
+from .profiles import (
+    make_316l_ss_profiles,
+    make_inner_profile,
+    make_ofhc_cu_profiles,
+    make_outer_profile,
+)
+from .wlsr import place_inner_wlsr_in_argon, place_outer_wlsr_in_atmospheric
 
 log = logging.getLogger(__name__)
 
@@ -268,114 +278,6 @@ def make_z_and_r(
     return z, r
 
 
-def make_z_and_r_inner_volumes(
-    neckradius: float, tubeheight: float, totalheight: float, curvefraction: float
-) -> tuple[list, list]:
-    # The RT is much simpler - it only has one curved side and one radius
-
-    # Start at the top, as usual
-    z = [totalheight - 1]
-
-    # Makes sure it's a closed polycone
-    z.append(totalheight - 1.00001)
-
-    # Go all the way to the bottom of the cylindrical section
-    nowheight = totalheight - tubeheight * (1 - curvefraction)
-    z.append(nowheight)
-
-    # For now just use the r and z fractions from the bottom of the cryostat
-    curvezfractions = [
-        16.39,
-        26.23,
-        33.61,
-        40.98,
-        47.54,
-        53.28,
-        55.74,
-        59.02,
-        64.75,
-        67.21,
-        70.49,
-        74.59,
-        78.69,
-        80.33,
-        82.79,
-        86.07,
-        88.52,
-        90.98,
-        92.62,
-        94.26,
-        95.90,
-        97.54,
-        99.18,
-        99.88,
-    ]
-
-    for i in curvezfractions:
-        j = i * 0.01
-        z.append(round(nowheight - (j * curvefraction * tubeheight), 2))
-
-    # Final point where r = 0
-    z.append(totalheight - tubeheight)
-
-    # Closed polycone
-    r = [0]
-    r.append(neckradius)
-    # To the bottom of the cylindrical section
-    r.append(neckradius)
-
-    curverfractions = [
-        1.89,
-        4.17,
-        6.82,
-        10.23,
-        14.02,
-        18.56,
-        21.21,
-        23.86,
-        28.79,
-        31.82,
-        34.47,
-        39.39,
-        44.32,
-        46.97,
-        49.62,
-        54.55,
-        59.47,
-        64.39,
-        68.56,
-        73.11,
-        76.52,
-        82.58,
-        88.64,
-        93.94,
-    ]
-
-    for i in curverfractions:
-        j = i * 0.01
-        r.append(neckradius * (1 - j))
-
-    # Final point where r = 0
-    r.append(0)
-
-    # Final formatting adjustments and diagnostics
-
-    # Polycones are weird - it might behoove us to simply adjust the z values here
-    for i in range(len(z)):
-        z[i] = z[i] - 5000
-
-    r.reverse()
-    z.reverse()
-
-    # For testing/diagnostics
-    # print(r)
-    # print(z)
-    # print(len(z))
-    # print(len(r))
-
-    return z, r
-
-
 def make_moderator_z_r_r(
     modheight: float, modradius: float, modthickness: float, tuberadius: float
 ) -> tuple[list, list, list]:
@@ -448,20 +350,146 @@ def construct_atmospheric_lar(
     return g4.LogicalVolume(atmlar_solid, lar_material, "atmosphericlar", reg)
 
 
-def construct_reentrance_tube(
-    tube_material: g4.Material, reg: g4.Registry, tube_r: list, tube_z: list
-) -> g4.LogicalVolume:
-    tube_solid = g4.solid.GenericPolycone("tube_sol", 0, 2 * pi, tube_r, tube_z, reg, "mm")
+def construct_reentrance_tube_with_layers(
+    materials,
+    reg: g4.Registry,
+    atmlar_lv: g4.LogicalVolume,
+    atmlar_pv: g4.PhysicalVolume,
+    neckradius: float,
+    tubeheight: float,
+    totalheight: float,
+    curvefraction: float,
+    wls_height: float,
+    ofhc_start_height: float,
+    ofhc_end_height: float,
+    ss_start_height: float,
+) -> tuple[g4.LogicalVolume, g4.PhysicalVolume]:
+    """
+    Construct reentrance tube with WLSR, OFHC Cu, and 316L SS layers.
 
-    return g4.LogicalVolume(tube_solid, tube_material, "reentrancetube", reg)
+    All layers are always present in the geometry:
+    - Copper tube with variable thickness
+    - OFHC copper layer (2179-4184mm height)
+    - 316L stainless steel layer (4184mm-top)
+    - Inner WLSR (TPB + Tetratex) in underground argon
+    - Outer WLSR (TPB + Tetratex) in atmospheric argon
 
+    Returns:
+        Tuple of (underground_argon_lv, underground_argon_pv)
+    """
 
-def construct_underground_lar(
-    lar_material: g4.Material, reg: g4.Registry, uglar_r: list, uglar_z: list
-) -> g4.LogicalVolume:
-    uglar_solid = g4.solid.GenericPolycone("uglar_sol", 0, 2 * pi, uglar_r, uglar_z, reg, "mm")
+    # Generate steel tube profiles using functions from profiles.py
+    outer_z, outer_r = make_outer_profile(neckradius, tubeheight, totalheight, curvefraction, wls_height)
+    inner_z, inner_r = make_inner_profile(neckradius, tubeheight, totalheight, curvefraction, wls_height)
 
-    return g4.LogicalVolume(uglar_solid, lar_material, "undergroundlar", reg)
+    # Construct steel tube
+    tube_solid = g4.solid.GenericPolycone("reentrancetube", 0, 2 * np.pi, outer_r, outer_z, reg, "mm")
+    tube_lv = g4.LogicalVolume(tube_solid, materials.metal_copper, "reentrancetube", reg)
+    tube_lv.pygeom_color_rgba = [0.5, 0.5, 0.5, 0.8]
+    g4.PhysicalVolume([0, 0, 0], [0, 0, 0, "mm"], tube_lv, "reentrancetube", atmlar_lv, registry=reg)
+
+    # Construct underground argon cavity
+    uglar_solid = g4.solid.GenericPolycone("undergroundlar", 0, 2 * np.pi, inner_r, inner_z, reg, "mm")
+    uglar_lv = g4.LogicalVolume(uglar_solid, materials.liquidargon, "undergroundlar", reg)
+    uglar_lv.pygeom_color_rgba = [0.1, 0.8, 0.3, 0.1]
+    uglar_pv = g4.PhysicalVolume(
+        [0, 0, 0], [0, 0, 0, "mm"], uglar_lv, "undergroundlar", tube_lv, registry=reg
+    )
+
+    # Place inner WLSR in underground argon (function from wlsr.py)
+    place_inner_wlsr_in_argon(
+        materials,
+        reg,
+        uglar_lv,
+        uglar_pv,
+        neckradius,
+        tubeheight,
+        totalheight,
+        curvefraction,
+        wls_height,
+        inner_z,
+        inner_r,
+        outer_z,
+        outer_r,
+    )
+
+    # Place outer WLSR in atmospheric argon (function from wlsr.py)
+    place_outer_wlsr_in_atmospheric(
+        materials,
+        reg,
+        atmlar_lv,
+        atmlar_pv,
+        neckradius,
+        tubeheight,
+        totalheight,
+        curvefraction,
+        wls_height,
+        outer_z,
+        outer_r,
+    )
+
+    # Construct OFHC copper layer (always present)
+    ofhc_outer_z, ofhc_outer_r, ofhc_inner_z, ofhc_inner_r = make_ofhc_cu_profiles(
+        neckradius,
+        tubeheight,
+        totalheight,
+        curvefraction,
+        ofhc_start_height,
+        ofhc_end_height,
+        outer_z,
+        outer_r,
+        inner_z,
+        inner_r,
+    )
+
+    ofhc_outer_bound = g4.solid.GenericPolycone(
+        "ofhc_cu_outer_bound", 0, 2 * np.pi, ofhc_outer_r, ofhc_outer_z, reg, "mm"
+    )
+    ofhc_inner_bound = g4.solid.GenericPolycone(
+        "ofhc_cu_inner_bound", 0, 2 * np.pi, ofhc_inner_r, ofhc_inner_z, reg, "mm"
+    )
+    ofhc_solid = g4.solid.Subtraction(
+        "ofhc_cu",
+        ofhc_outer_bound,
+        ofhc_inner_bound,
+        [[0, 0, 0], [0, 0, 0, "mm"]],
+        reg,
+    )
+    ofhc_lv = g4.LogicalVolume(ofhc_solid, materials.metal_copper, "ofhc_cu", reg)
+    ofhc_lv.pygeom_color_rgba = [1.0, 0.5, 0.0, 1.0]
+    g4.PhysicalVolume([0, 0, 0], [0, 0, 0, "mm"], ofhc_lv, "ofhc_cu", tube_lv, registry=reg)
+
+    # Construct 316L stainless steel layer (always present)
+    ss_outer_z, ss_outer_r, ss_inner_z, ss_inner_r = make_316l_ss_profiles(
+        neckradius,
+        tubeheight,
+        totalheight,
+        curvefraction,
+        ss_start_height,
+        outer_z,
+        outer_r,
+        inner_z,
+        inner_r,
+    )
+
+    ss_outer_bound = g4.solid.GenericPolycone(
+        "ss_316l_outer_bound", 0, 2 * np.pi, ss_outer_r, ss_outer_z, reg, "mm"
+    )
+    ss_inner_bound = g4.solid.GenericPolycone(
+        "ss_316l_inner_bound", 0, 2 * np.pi, ss_inner_r, ss_inner_z, reg, "mm"
+    )
+    ss_solid = g4.solid.Subtraction(
+        "ss_316l",
+        ss_outer_bound,
+        ss_inner_bound,
+        [[0, 0, 0], [0, 0, 0, "mm"]],
+        reg,
+    )
+    ss_lv = g4.LogicalVolume(ss_solid, materials.metal_steel, "ss_316l", reg)
+    ss_lv.pygeom_color_rgba = [0.7, 0.7, 0.8, 1.0]
+    g4.PhysicalVolume([0, 0, 0], [0, 0, 0, "mm"], ss_lv, "ss_316l", tube_lv, registry=reg)
+
+    return uglar_lv, uglar_pv
 
 
 def construct_moderator_simple(
@@ -478,6 +506,7 @@ def construct_moderator_simple(
     )
     mod_lv = g4.LogicalVolume(mod_solid, mod_material, "neutronmoderator", reg)
     g4.PhysicalVolume([0, 0, 0], [0, 0, -2900], mod_lv, "neutronmoderator", mother_lv, reg)  # -3000
+
     # Z value used to be -bodyheight/2.*(1-bottomfraction)
     # Could import this if we wanted, but maybe this method has enough arguments already...
 
@@ -485,7 +514,7 @@ def construct_moderator_simple(
 NECKRADIUS_START = 1200
 
 
-def construct_and_place_cryostat(instr: core.InstrumentationData) -> g4.PhysicalVolume:
+def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.InstrumentationData:
     if "cryostat" not in instr.detail:
         msg = "No 'cryostat' detail specified in the special metadata."
         raise ValueError(msg)
@@ -515,12 +544,15 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> g4.Physical
 
     barrelradius = 3500 + icryo_thickness + ocryo_thickness + vgapthickness_barrel
 
-    # Separated, because these are parameters for the reentrance tube and the UGLar, which have another make_z_and_r class
-    # However the radius is controlled by the cryostat neck radius, and doesn't get specified manually
-    # tubeheight = 7500
-    tubeheight = 6750  # - 494.45 #7500 #7000  #
-    curvefraction = 0.05
-    tubethickness = 1
+    # Parameters for the new reentrance tube with WLSR and metal layers
+    tubeheight = 6750  # Height of cylindrical section
+    curvefraction = 0.05  # Fraction for curved transition
+
+    # WLSR and metal layer parameters (always enabled)
+    wls_height = 2179  # Height where WLS layers extend to
+    ofhc_start_height = 2179  # Start of OFHC copper layer
+    ofhc_end_height = 4184  # End of OFHC copper layer
+    ss_start_height = 4184  # Start of 316L SS layer
 
     # The skirt and moderator are unlike any other shapes and need their own parameters and constructors
     # The skirt borrows some parameters from the outer cryostat, to make sure it connects with the barrel
@@ -544,7 +576,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> g4.Physical
         "skirt_sol",
         skirtradius - skirtthickness,
         skirtradius,
-        skirtheight - (ocryo_thickness * 2),  # Take a little bit away to avoid overlapps with the cryo
+        skirtheight - (ocryo_thickness * 2),  # Take a little bit away to avoid overlaps with the cryo
         0,
         2 * pi,
         instr.registry,
@@ -612,32 +644,33 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> g4.Physical
     atmlar_lv = construct_atmospheric_lar(instr.materials.liquidargon, instr.registry, atmlar_r, atmlar_z)
     atmlar_lv.pygeom_color_rgba = [0.1, 0.8, 0.3, 0.1]
 
-    # The RT and UGLAr have a totally different shape than the cryostat bodies
-    # They need to have their own smaller r/z method
+    # Place atmospheric argon first (needed as mother volume for reentrance tube)
+    atmlar_pv = g4.PhysicalVolume([0, 0, 0], [0, 0, 0], atmlar_lv, "atmosphericlar", icryo_lv, instr.registry)
 
-    tube_z, tube_r = make_z_and_r_inner_volumes(neckradius, tubeheight, totalheight, curvefraction)
+    # Construct the new reentrance tube with all layers (WLSR, OFHC Cu, 316L SS, UAr)
+    uglar_lv, uglar_pv = construct_reentrance_tube_with_layers(
+        instr.materials,
+        instr.registry,
+        atmlar_lv,
+        atmlar_pv,
+        neckradius,
+        tubeheight,
+        totalheight,
+        curvefraction,
+        wls_height,
+        ofhc_start_height,
+        ofhc_end_height,
+        ss_start_height,
+    )
 
-    tube_lv = construct_reentrance_tube(instr.materials.metal_copper, instr.registry, tube_r, tube_z)
-    tube_lv.pygeom_color_rgba = [0.8, 0.7, 0.1, 0.2]
-
+    # Construct neutron moderator if specified
     if "nm_plastic" not in instr.detail:
         log.warning("Warning: neutron moderator not specified. Omitting by default.")
-
     elif instr.detail["nm_plastic"] == "simple":
         mod_z, mod_r_inn, mod_r_out = make_moderator_z_r_r(modheight, modradius, modthickness, neckradius + 1)
         construct_moderator_simple(
             instr.materials.pmma, instr.registry, mod_r_inn, mod_r_out, mod_z, modnsides, atmlar_lv
         )
-
-    # Finally, the RT should be filled with LAr
-
-    neckradius = neckradius - tubethickness
-    tubeheight = tubeheight - tubethickness
-
-    uglar_z, uglar_r = make_z_and_r_inner_volumes(neckradius, tubeheight, totalheight, curvefraction)
-
-    uglar_lv = construct_underground_lar(instr.materials.liquidargon, instr.registry, uglar_r, uglar_z)
-    uglar_lv.pygeom_color_rgba = [0.1, 0.8, 0.3, 0.1]
 
     # Place the physical volumes at the end
     # Move the cryostat back in a central position
@@ -671,9 +704,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> g4.Physical
 
     g4.PhysicalVolume([0, 0, 0], [0, 0, 0], vac_lv, "vacuumgap", outercryo_lv, instr.registry)
     g4.PhysicalVolume([0, 0, 0], [0, 0, 0], icryo_lv, "innercryostat", vac_lv, instr.registry)
-    g4.PhysicalVolume([0, 0, 0], [0, 0, 0], atmlar_lv, "atmosphericlar", icryo_lv, instr.registry)
-    g4.PhysicalVolume([0, 0, 0], [0, 0, 0], tube_lv, "reentrancetube", atmlar_lv, instr.registry)
-    uglar_pv = g4.PhysicalVolume([0, 0, 0], [0, 0, 0], uglar_lv, "undergroundlar", tube_lv, instr.registry)
+    # atmlar_pv already placed above
 
     # NamedTuples are immutable, so we need to create a copy
     return instr._replace(mother_lv=uglar_lv, mother_pv=uglar_pv, mother_z_displacement=0)
