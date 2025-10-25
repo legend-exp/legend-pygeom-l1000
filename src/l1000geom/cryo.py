@@ -505,13 +505,13 @@ def construct_moderator_simple(
         "mod_sol", 0, 2 * pi, mod_n_sides, len(mod_z), mod_z, mod_r_inner, mod_r_outer, reg, "mm"
     )
     mod_lv = g4.LogicalVolume(mod_solid, mod_material, "neutronmoderator", reg)
-    g4.PhysicalVolume([0, 0, 0], [0, 0, -2900], mod_lv, "neutronmoderator", mother_lv, reg)  # -3000
-
+    # g4.PhysicalVolume([0, 0, 0], [0, 0, -2900], mod_lv, "neutronmoderator", mother_lv, reg)  # -3000
+    g4.PhysicalVolume([0, 0, 0], [0, 0, -2397], mod_lv, "neutronmoderator", mother_lv, reg)  # -3000
     # Z value used to be -body_height/2.*(1-bottom_fraction)
     # Could import this if we wanted, but maybe this method has enough arguments already...
 
 
-NECKRADIUSSTART = 1200
+NECKRADIUSSTART = 1176
 
 
 def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.InstrumentationData:
@@ -545,8 +545,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     barrel_radius = 3500 + icryo_thickness + ocryo_thickness + vgap_thickness_barrel
 
     # Parameters for the new reentrance tube with WLSR and metal layers
-    tube_height = 6750  # Height of cylindrical section
-    tube_radius = 1912 / 2  # OD reentrance tube
+    tube_height = 6247  # Height of tube
     curve_fraction = 0.05  # Fraction for curved transition
 
     # WLSR and metal layer parameters (always enabled)
@@ -654,7 +653,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
         instr.registry,
         atmlar_lv,
         atmlar_pv,
-        tube_radius,
+        neck_radius,
         tube_height,
         total_height,
         curve_fraction,
@@ -669,7 +668,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
         log.warning("Warning: neutron moderator not specified. Omitting by default.")
     elif instr.detail["nm_plastic"] == "simple":
         mod_z, mod_r_inn, mod_r_out = make_moderator_z_r_r(
-            mod_height, mod_radius, mod_thickness, neck_radius + 1
+            mod_height, mod_radius, mod_thickness, neck_radius + 2
         )
         construct_moderator_simple(
             instr.materials.pmma, instr.registry, mod_r_inn, mod_r_out, mod_z, mod_n_sides, atmlar_lv
