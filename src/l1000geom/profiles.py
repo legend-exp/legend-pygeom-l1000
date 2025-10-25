@@ -21,7 +21,7 @@ WLSRProfiles = namedtuple(
 WLSR_TPB_THICKNESS = 1 * 1e-3  # 1 um TPB coating (in mm)
 WLSR_TTX_THICKNESS = 254 * 1e-3  # 254 um Tetratex foil (in mm)
 WLSR_THICKNESS = WLSR_TPB_THICKNESS + WLSR_TTX_THICKNESS
-PROTECTION_GAP = 5 * 1e-6  # 5 nm gap in mm
+PROTECTION_GAP = 1  # 1 mm gap in mm
 PROTECTION_GAP_LAYER = 10 * 1e-6  # 10 nm gap in mm
 
 """
