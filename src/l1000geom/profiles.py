@@ -40,9 +40,7 @@ and protection gaps to prevent overlapping volumes in Geant4.
 
 def _steel_thickness_from_top(
     distance_from_top: float,
-    include_wlsr: bool = False,
-    wlsr_height: float = 2179,
-    total_tube_height: float = 6247,
+    tube_height: float,
 ) -> float:
     """Calculate steel thickness at given distance from top of tube."""
 
@@ -51,7 +49,7 @@ def _steel_thickness_from_top(
         steel_thickness = 6.0 - progress * 0.0  # Constant thickness
     else:
         remaining = distance_from_top - 4067
-        max_remaining = total_tube_height - 4067
+        max_remaining = tube_height - 4067
         if max_remaining > 0:
             progress = remaining / max_remaining
             steel_thickness = max(1.5 - progress * 0.0, 1.5)
@@ -126,10 +124,10 @@ def ensure_closed_bottom(
 
 
 def make_outer_profile(
-    neckradius: float,
-    tubeheight: float,
-    totalheight: float,
-    curvefraction: float,
+    neck_radius: float,
+    tube_height: float,
+    total_height: float,
+    curve_fraction: float,
     wls_height: float = 2179,
 ) -> tuple[list[float], list[float]]:
     """
@@ -141,16 +139,16 @@ def make_outer_profile(
     z = []
     r = []
 
-    top_z = totalheight - 1
-    curve_start_z = totalheight - tubeheight * (1 - curvefraction)
-    bottom_z = totalheight - tubeheight
+    top_z = total_height - 1
+    curve_start_z = total_height - tube_height * (1 - curve_fraction)
+    bottom_z = total_height - tube_height
 
     z.append(top_z)
     r.append(0)
     z.append(top_z - 0.00001)
-    r.append(neckradius)
+    r.append(neck_radius)
     z.append(curve_start_z)
-    r.append(neckradius)
+    r.append(neck_radius)
 
     curve_z_fractions = [
         16.39,
@@ -209,8 +207,8 @@ def make_outer_profile(
     for i in range(len(curve_z_fractions)):
         z_frac = curve_z_fractions[i] * 0.01
         r_frac = curve_r_fractions[i] * 0.01
-        z_pos = curve_start_z - (z_frac * curvefraction * tubeheight)
-        r_pos = neckradius * (1 - r_frac)
+        z_pos = curve_start_z - (z_frac * curve_fraction * tube_height)
+        r_pos = neck_radius * (1 - r_frac)
         z.append(z_pos)
         r.append(r_pos)
 
@@ -236,7 +234,7 @@ def make_outer_profile(
             current_z = z_out[i] + 50
             while current_z < z_out[i + 1]:
                 z_filled.append(current_z)
-                r_filled.append(neckradius)
+                r_filled.append(neck_radius)
                 current_z += 50
             z_filled.extend(z_out[i + 1 :])
             r_filled.extend(r_out[i + 1 :])
@@ -279,10 +277,10 @@ def make_outer_profile(
 
 
 def make_inner_profile(
-    neckradius: float,
-    tubeheight: float,
-    totalheight: float,
-    curvefraction: float,
+    neck_radius: float,
+    tube_height: float,
+    total_height: float,
+    curve_fraction: float,
     wls_height: float = 2179,
     outer_z: list[float] | None = None,
     outer_r: list[float] | None = None,
@@ -295,29 +293,29 @@ def make_inner_profile(
         Tuple of (z_coordinates, r_coordinates)
     """
 
-    outer_z, outer_r = make_outer_profile(neckradius, tubeheight, totalheight, curvefraction, wls_height)
-    top_z_original = totalheight - 1
-    bottom_z = totalheight - tubeheight
-    bottom_thickness = _steel_thickness_from_top(totalheight - 1 - bottom_z)
+    outer_z, outer_r = make_outer_profile(neck_radius, tube_height, total_height, curve_fraction, wls_height)
+    top_z_original = total_height - 1
+    bottom_z = total_height - tube_height
+    bottom_thickness = _steel_thickness_from_top(total_height - 1 - bottom_z, tube_height)
 
     inner_z, inner_r = [], []
 
     for z, r in zip(outer_z, outer_r, strict=True):
         z_original = z + 5000
         dist_from_top = top_z_original - z_original
-        thickness = _steel_thickness_from_top(dist_from_top)
+        thickness = _steel_thickness_from_top(dist_from_top, tube_height)
 
         if r == 0:
             # Skip r=0 points during iteration - closures added separately
             continue
-        if r == neckradius:
+        if r == neck_radius:
             # Cylindrical section
             inner_r_value = max(0, r - thickness)
             inner_z.append(z)
             inner_r.append(inner_r_value)
         else:
             # Curved section - scale thickness by radius ratio
-            radius_ratio = r / neckradius
+            radius_ratio = r / neck_radius
             scaled_thickness = thickness * radius_ratio
             inner_r_value = max(0, r - scaled_thickness)
             inner_z.append(z)
@@ -332,8 +330,7 @@ def make_inner_profile(
     inner_r.insert(0, 0)
 
     # Top closure with 6 mm thickness at the top
-    top_thickness = _steel_thickness_from_top(0)  # 6.0 mm at the top
-
+    top_thickness = _steel_thickness_from_top(0, tube_height)  # 6.0 mm at the top
     inner_z.append(top_z_original - 5000 - top_thickness)
     inner_r.append(0)
 
@@ -344,19 +341,21 @@ def make_inner_profile(
 
 
 def make_inner_wlsr_profiles(
-    neckradius: float,
-    tubeheight: float,
-    totalheight: float,
-    curvefraction: float,
+    neck_radius: float,
+    tube_height: float,
+    total_height: float,
+    curve_fraction: float,
     wls_height: float = 2179,
     inner_z: list[float] | None = None,
     inner_r: list[float] | None = None,
 ) -> WLSRProfiles:
     """Create inner WLSR profiles..."""
     if inner_z is None or inner_r is None:
-        inner_z, inner_r = make_inner_profile(neckradius, tubeheight, totalheight, curvefraction, wls_height)
+        inner_z, inner_r = make_inner_profile(
+            neck_radius, tube_height, total_height, curve_fraction, wls_height
+        )
 
-    bottom_z = totalheight - tubeheight - 5000
+    bottom_z = total_height - tube_height - 5000
     top_wls_z = bottom_z + wls_height
 
     tpb_inner_z, tpb_inner_r = [], []
@@ -459,19 +458,21 @@ def make_inner_wlsr_profiles(
 
 
 def make_outer_wlsr_profiles(
-    neckradius: float,
-    tubeheight: float,
-    totalheight: float,
-    curvefraction: float,
+    neck_radius: float,
+    tube_height: float,
+    total_height: float,
+    curve_fraction: float,
     wls_height: float = 2179,
     outer_z: list[float] | None = None,
     outer_r: list[float] | None = None,
 ) -> WLSRProfiles:
     """Create outer WLSR profiles..."""
     if outer_z is None or outer_r is None:
-        outer_z, outer_r = make_outer_profile(neckradius, tubeheight, totalheight, curvefraction, wls_height)
+        outer_z, outer_r = make_outer_profile(
+            neck_radius, tube_height, total_height, curve_fraction, wls_height
+        )
 
-    bottom_z = totalheight - tubeheight - 5000
+    bottom_z = total_height - tube_height - 5000
     top_wls_z = bottom_z + wls_height
 
     tpb_inner_z, tpb_inner_r = [], []
@@ -576,10 +577,10 @@ def make_outer_wlsr_profiles(
 
 
 def make_ofhc_cu_profiles(
-    neckradius: float,
-    tubeheight: float,
-    totalheight: float,
-    curvefraction: float,
+    neck_radius: float,
+    tube_height: float,
+    total_height: float,
+    curve_fraction: float,
     ofhc_start_height: float,
     ofhc_end_height: float,
     outer_z: list[float],
@@ -594,7 +595,7 @@ def make_ofhc_cu_profiles(
         Tuple of (outer_z, outer_r, inner_z, inner_r)
     """
 
-    bottom_z = (totalheight - tubeheight) - 5000
+    bottom_z = (total_height - tube_height) - 5000
     ofhc_start_z = bottom_z + ofhc_start_height
     ofhc_end_z = bottom_z + ofhc_end_height
 
@@ -617,15 +618,15 @@ def make_ofhc_cu_profiles(
     # Ensure boundaries
     if ofhc_outer_z and ofhc_outer_z[0] > ofhc_start_z + 1:
         ofhc_outer_z.insert(0, ofhc_start_z)
-        ofhc_outer_r.insert(0, neckradius - PROTECTION_GAP_LAYER)
-        inner_start_r = neckradius - _steel_thickness_from_top(tubeheight - ofhc_start_height)
+        ofhc_outer_r.insert(0, neck_radius - PROTECTION_GAP_LAYER)
+        inner_start_r = neck_radius - _steel_thickness_from_top(tube_height - ofhc_start_height, tube_height)
         ofhc_inner_z.insert(0, ofhc_start_z)
         ofhc_inner_r.insert(0, inner_start_r + PROTECTION_GAP_LAYER)
 
     if ofhc_outer_z and ofhc_outer_z[-1] < ofhc_end_z - 1:
         ofhc_outer_z.append(ofhc_end_z)
-        ofhc_outer_r.append(neckradius - PROTECTION_GAP_LAYER)
-        inner_end_r = neckradius - _steel_thickness_from_top(tubeheight - ofhc_end_height)
+        ofhc_outer_r.append(neck_radius - PROTECTION_GAP_LAYER)
+        inner_end_r = neck_radius - _steel_thickness_from_top(tube_height - ofhc_end_height, tube_height)
         ofhc_inner_z.append(ofhc_end_z)
         ofhc_inner_r.append(inner_end_r + PROTECTION_GAP_LAYER)
 
@@ -644,10 +645,10 @@ def make_ofhc_cu_profiles(
 
 
 def make_316l_ss_profiles(
-    neckradius: float,
-    tubeheight: float,
-    totalheight: float,
-    curvefraction: float,
+    neck_radius: float,
+    tube_height: float,
+    total_height: float,
+    curve_fraction: float,
     ss_start_height: float,
     outer_z: list[float],
     outer_r: list[float],
@@ -661,9 +662,9 @@ def make_316l_ss_profiles(
         Tuple of (outer_z, outer_r, inner_z, inner_r)
     """
 
-    bottom_z = (totalheight - tubeheight) - 5000
+    bottom_z = (total_height - tube_height) - 5000
     ss_start_z = bottom_z + ss_start_height
-    ss_end_z = (totalheight - 1) - 5000
+    ss_end_z = (total_height - 1) - 5000
 
     ss_outer_z, ss_outer_r = [], []
     ss_inner_z, ss_inner_r = [], []
@@ -683,16 +684,16 @@ def make_316l_ss_profiles(
 
     # Ensure boundaries
     if not ss_outer_z or ss_outer_z[0] > ss_start_z + 1:
-        inner_start_r = neckradius - _steel_thickness_from_top(tubeheight - ss_start_height)
+        inner_start_r = neck_radius - _steel_thickness_from_top(tube_height - ss_start_height, tube_height)
         ss_outer_z.insert(0, ss_start_z)
-        ss_outer_r.insert(0, neckradius - PROTECTION_GAP_LAYER)
+        ss_outer_r.insert(0, neck_radius - PROTECTION_GAP_LAYER)
         ss_inner_z.insert(0, ss_start_z)
         ss_inner_r.insert(0, inner_start_r + PROTECTION_GAP_LAYER)
 
     if ss_outer_z and ss_outer_z[-1] < ss_end_z - 1:
-        inner_end_r = neckradius - _steel_thickness_from_top(0)
+        inner_end_r = neck_radius - _steel_thickness_from_top(0, tube_height)
         ss_outer_z.append(ss_end_z)
-        ss_outer_r.append(neckradius - PROTECTION_GAP_LAYER)
+        ss_outer_r.append(neck_radius - PROTECTION_GAP_LAYER)
         ss_inner_z.append(ss_end_z)
         ss_inner_r.append(inner_end_r + PROTECTION_GAP_LAYER)
 

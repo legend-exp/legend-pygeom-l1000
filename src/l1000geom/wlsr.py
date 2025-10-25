@@ -37,10 +37,10 @@ def place_inner_wlsr_in_argon(
     registry: g4.Registry,
     lar_cavity_lv: g4.LogicalVolume,
     lar_cavity_pv: g4.PhysicalVolume,
-    neckradius: float,
-    tubeheight: float,
-    totalheight: float,
-    curvefraction: float,
+    neck_radius: float,
+    tube_height: float,
+    total_height: float,
+    curve_fraction: float,
     wls_height: float,
     inner_z: list[float],
     inner_r: list[float],
@@ -51,7 +51,7 @@ def place_inner_wlsr_in_argon(
     Place inner WLS layers in the underground argon.
     """
     result = make_inner_wlsr_profiles(
-        neckradius, tubeheight, totalheight, curvefraction, wls_height, inner_z, inner_r
+        neck_radius, tube_height, total_height, curve_fraction, wls_height, inner_z, inner_r
     )
 
     # Create TPB polycones (PARENT/MOTHER volume)
@@ -128,10 +128,10 @@ def place_outer_wlsr_in_atmospheric(
     registry: g4.Registry,
     lar_mother_lv: g4.LogicalVolume,
     lar_mother_pv: g4.PhysicalVolume,
-    neckradius: float,
-    tubeheight: float,
-    totalheight: float,
-    curvefraction: float,
+    neck_radius: float,
+    tube_height: float,
+    total_height: float,
+    curve_fraction: float,
     wls_height: float,
     outer_z: list[float],
     outer_r: list[float],
@@ -140,7 +140,7 @@ def place_outer_wlsr_in_atmospheric(
     Place outer WLS layers in the atmospheric argon.
     """
     result = make_outer_wlsr_profiles(
-        neckradius, tubeheight, totalheight, curvefraction, wls_height, outer_z, outer_r
+        neck_radius, tube_height, total_height, curve_fraction, wls_height, outer_z, outer_r
     )
 
     # Create TPB polycones (PARENT/MOTHER volume)
