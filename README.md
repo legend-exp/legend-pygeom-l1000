@@ -1,6 +1,7 @@
 # legend-pygeom-l1000
 
 [![PyPI](https://img.shields.io/pypi/v/legend-pygeom-l1000?logo=pypi)](https://pypi.org/project/legend-pygeom-l1000/)
+[![conda-forge](https://img.shields.io/conda/vn/conda-forge/legend-pygeom-l1000.svg)](https://anaconda.org/conda-forge/legend-pygeom-l1000)
 ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/legend-exp/legend-pygeom-l1000?logo=git)
 [![GitHub Workflow Status](https://img.shields.io/github/checks-status/legend-exp/legend-pygeom-l1000/main?label=main%20branch&logo=github)](https://github.com/legend-exp/legend-pygeom-l1000/actions)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
