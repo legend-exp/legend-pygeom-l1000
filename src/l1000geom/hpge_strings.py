@@ -7,8 +7,8 @@ from importlib import resources
 
 import numpy as np
 import pyg4ometry
+from dbetto import AttrsDict
 from legendhpges import make_hpge
-from legendmeta import AttrsDict
 from pyg4ometry import geant4
 from pygeomtools import RemageDetectorInfo
 from scipy.spatial.transform import Rotation
