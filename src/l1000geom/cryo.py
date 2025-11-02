@@ -638,7 +638,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
         total_height, neck_height, body_height, neck_radius, barrel_radius, shoulder_fraction, bottom_fraction
     )
 
-    icryo_lv = construct_inner_cryostat(instr.materials.liquidargon, instr.registry, icryo_r, icryo_z)
+    icryo_lv = construct_inner_cryostat(instr.materials.metal_steel, instr.registry, icryo_r, icryo_z)
     icryo_lv.pygeom_color_rgba = [0.5, 0.5, 0.5, 0.25]
 
     # The next layer should be again just subtracting by the inner cryo thickness everywhere
