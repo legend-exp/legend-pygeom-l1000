@@ -511,7 +511,7 @@ def construct_moderator_simple(
     # Could import this if we wanted, but maybe this method has enough arguments already...
 
 
-NECKRADIUSSTART = 1176
+NECKRADIUS_START = 1176
 
 
 def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.InstrumentationData:
@@ -527,7 +527,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     total_height = 10000  # 10200
     neck_height = 1940  # 2000
     body_height = 7750  # 8000 #7000
-    neck_radius = NECKRADIUSSTART
+    neck_radius = NECKRADIUS_START
     # neck_radius = 1900 / 2. # 1.9m diameter
     # barrel_radius = 3800
     shoulder_fraction = 0.233
@@ -564,10 +564,13 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     mod_n_sides = 12
 
     skirt_height = total_height - neck_height - (body_height * (1 - bottom_fraction))
+    actual_skirt_height = skirt_height - (
+        ocryo_thickness * 6
+    )  # Take a little bit away to avoid overlaps with the cryo
     skirt_radius = barrel_radius
     # Due to the curvature of the bottom it is hard to remove exactly enough
     # To close flush with the cryo but not have overlaps.
-    skirt_z = -body_height / 2 - ocryo_thickness
+    skirt_z = -body_height / 2 - ocryo_thickness * 3
     skirt_thickness = 60  # A guess
     foot_height = 250
     foot_width = 150  # Not really a guess so much as a placeholder...
@@ -576,7 +579,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
         "skirt_sol",
         skirt_radius - skirt_thickness,
         skirt_radius,
-        skirt_height - (ocryo_thickness * 2),  # Take a little bit away to avoid overlaps with the cryo
+        actual_skirt_height,
         0,
         2 * pi,
         instr.registry,
@@ -584,7 +587,14 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     )
     skirt_lv = g4.LogicalVolume(skirt_solid, instr.materials.metal_steel, "skirt", instr.registry)
     foot_solid = g4.solid.Tubs(
-        "foot_sol", skirt_radius, skirt_radius + foot_width, foot_height, 0, 2 * pi, instr.registry, "mm"
+        "foot_sol",
+        skirt_radius + 1e-9,
+        skirt_radius + foot_width,
+        foot_height,
+        0,
+        2 * pi,
+        instr.registry,
+        "mm",
     )
     foot_lv = g4.LogicalVolume(foot_solid, instr.materials.metal_steel, "foot", instr.registry)
 
@@ -653,7 +663,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
         instr.registry,
         atmlar_lv,
         atmlar_pv,
-        neck_radius,
+        neck_radius - 1e-9,
         tube_height,
         total_height,
         curve_fraction,
@@ -678,10 +688,17 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     # Move the cryostat back in a central position
 
     if instr.detail["watertank"] == "omit":
-        g4.PhysicalVolume([0, 0, 0], [0, 0, skirt_z], skirt_lv, "skirt", instr.mother_lv, instr.registry)
         g4.PhysicalVolume(
             [0, 0, 0],
-            [0, 0, skirt_z - skirt_height / 2 + foot_height / 2],
+            [0, 0, skirt_z - instr.mother_z_displacement],
+            skirt_lv,
+            "skirt",
+            instr.mother_lv,
+            instr.registry,
+        )
+        g4.PhysicalVolume(
+            [0, 0, 0],
+            [0, 0, skirt_z - actual_skirt_height / 2 + foot_height / 2 - instr.mother_z_displacement],
             foot_lv,
             "foot",
             instr.mother_lv,
