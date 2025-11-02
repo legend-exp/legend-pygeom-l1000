@@ -56,7 +56,9 @@ tank_manhole_depth = 135.37  # How far the manhole extends outside the tank (fro
 # Missing: Top catwalk
 
 
-def construct_base(name: str, reg: g4.Registry, v_wall: float = 0.0, h_wall: float = 0.0) -> g4.solid:
+def construct_base(
+    name: str, reg: g4.Registry, v_wall: float = 0.0, h_wall: float = 0.0, neck_safety: float = 0.0
+) -> g4.solid:
     """Construct the base shape of the tank.
 
     name: Prefix to add to the volume name
@@ -75,8 +77,8 @@ def construct_base(name: str, reg: g4.Registry, v_wall: float = 0.0, h_wall: flo
         tank_base_radius - v_wall,
         tank_top_bulge_hwidth + v_wall,
         tank_top_bulge_hwidth + v_wall,
-        cryo.NECKRADIUS_START,
-        cryo.NECKRADIUS_START,
+        cryo.NECKRADIUS_START - neck_safety,
+        cryo.NECKRADIUS_START - neck_safety,
         0,
     ]
     z_base = [
@@ -328,7 +330,9 @@ def construct_water(
     simple: Only the base polycone of the water is constructed.
     detailed: The base polycone and the bulge on top of the tank are constructed.
     """
-    base = construct_base("water", reg, v_wall=tank_vertical_wall, h_wall=tank_horizontal_wall)
+    base = construct_base(
+        "water", reg, v_wall=tank_vertical_wall, h_wall=tank_horizontal_wall, neck_safety=1e-9
+    )
     if detail == "simple":
         return g4.LogicalVolume(base, water_material, "tank_water", reg)
 

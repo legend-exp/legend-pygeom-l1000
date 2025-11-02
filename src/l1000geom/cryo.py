@@ -527,7 +527,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     total_height = 10000  # 10200
     neck_height = 1940  # 2000
     body_height = 7750  # 8000 #7000
-    neck_radius = NECKRADIUS_START
+    neck_radius = NECKRADIUS_START - 2e-9
     # neck_radius = 1900 / 2. # 1.9m diameter
     # barrel_radius = 3800
     shoulder_fraction = 0.233
@@ -706,10 +706,10 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
         )
     else:
         g4.PhysicalVolume(
-            [0, 0, 0], [0, 0, skirt_height / 2.0], skirt_lv, "skirt", instr.mother_lv, instr.registry
+            [0, 0, 0], [0, 0, skirt_height / 2.0 + 1e-9], skirt_lv, "skirt", instr.mother_lv, instr.registry
         )
         g4.PhysicalVolume(
-            [0, 0, 0], [0, 0, foot_height / 2.0 + 20], foot_lv, "foot", instr.mother_lv, instr.registry
+            [0, 0, 0], [0, 0, foot_height / 2.0 + 20 + 1e-9], foot_lv, "foot", instr.mother_lv, instr.registry
         )
 
     g4.PhysicalVolume(
