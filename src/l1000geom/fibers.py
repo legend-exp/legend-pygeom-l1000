@@ -114,7 +114,7 @@ class ModuleFactoryBase(ABC):
     # To also stop stray light from directions more close to the fibers, the envelope extends a bit more
     # along the fibers:
     SIPM_OVERLAP = 0.3  # mm
-    SIPM_GAP_SIDE = 0.01  # mm, for fitting problems with round "SiPMs" and square fibers.
+    SIPM_GAP_SIDE = 0.02  # mm, for fitting problems with round "SiPMs" and square fibers.
 
     ANGLE_SAFETY = 1e-9  # rad
 
