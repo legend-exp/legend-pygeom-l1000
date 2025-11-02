@@ -18,7 +18,9 @@ from . import core, materials
 log = logging.getLogger(__name__)
 
 # top of the top plate, this is still a dummy value! (Moved here from core)
-top_plate_z_pos = 11.1
+# top_plate_z_pos = 11.1
+# modified to keep relative distance with new tube
+top_plate_z_pos = 514.1
 
 
 def place_hpge_strings(b: core.InstrumentationData) -> None:
