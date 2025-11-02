@@ -23,6 +23,7 @@ WLSR_TTX_THICKNESS = 254 * 1e-3  # 254 um Tetratex foil (in mm)
 WLSR_THICKNESS = WLSR_TPB_THICKNESS + WLSR_TTX_THICKNESS
 PROTECTION_GAP = 1  # 1 mm gap in mm
 PROTECTION_GAP_LAYER = 10 * 1e-6  # 10 nm gap in mm
+PROTECTION_GAP_POLYCONE = 1e-3  # mm
 
 """
 Profile generation functions for L1000 geometry components.
@@ -145,7 +146,7 @@ def make_outer_profile(
 
     z.append(top_z)
     r.append(0)
-    z.append(top_z - 0.00001)
+    z.append(top_z)
     r.append(neck_radius)
     z.append(curve_start_z)
     r.append(neck_radius)
@@ -631,12 +632,12 @@ def make_ofhc_cu_profiles(
         ofhc_inner_r.append(inner_end_r + PROTECTION_GAP_LAYER)
 
     # Add r=0 closure caps at both ends
-    ofhc_outer_z.insert(0, ofhc_start_z + PROTECTION_GAP_LAYER)
+    ofhc_outer_z.insert(0, ofhc_start_z + PROTECTION_GAP_POLYCONE)
     ofhc_outer_r.insert(0, 0)
     ofhc_inner_z.insert(0, ofhc_start_z)
     ofhc_inner_r.insert(0, 0)
 
-    ofhc_outer_z.append(ofhc_end_z - PROTECTION_GAP_LAYER)
+    ofhc_outer_z.append(ofhc_end_z - PROTECTION_GAP_POLYCONE)
     ofhc_outer_r.append(0)
     ofhc_inner_z.append(ofhc_end_z)
     ofhc_inner_r.append(0)
@@ -698,12 +699,12 @@ def make_316l_ss_profiles(
         ss_inner_r.append(inner_end_r + PROTECTION_GAP_LAYER)
 
     # Add r=0 closure caps at BOTH ends with protection gap
-    ss_outer_z.insert(0, ss_start_z + PROTECTION_GAP_LAYER)
+    ss_outer_z.insert(0, ss_start_z + PROTECTION_GAP_POLYCONE)
     ss_outer_r.insert(0, 0)
     ss_inner_z.insert(0, ss_start_z)
     ss_inner_r.insert(0, 0)
 
-    ss_outer_z.append(ss_end_z - PROTECTION_GAP_LAYER)
+    ss_outer_z.append(ss_end_z - PROTECTION_GAP_POLYCONE)
     ss_outer_r.append(0)
     ss_inner_z.append(ss_end_z)
     ss_inner_r.append(0)
