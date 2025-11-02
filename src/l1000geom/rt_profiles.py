@@ -1,32 +1,4 @@
-from __future__ import annotations
-
-from collections import namedtuple
-
-# Define named tuple types
-WLSRProfiles = namedtuple(
-    "WLSRProfiles",
-    [
-        "tpb_outer_z",
-        "tpb_outer_r",
-        "tpb_inner_z",
-        "tpb_inner_r",
-        "ttx_outer_z",
-        "ttx_outer_r",
-        "ttx_inner_z",
-        "ttx_inner_r",
-    ],
-)
-
-# Constants
-WLSR_TPB_THICKNESS = 1 * 1e-3  # 1 um TPB coating (in mm)
-WLSR_TTX_THICKNESS = 254 * 1e-3  # 254 um Tetratex foil (in mm)
-WLSR_THICKNESS = WLSR_TPB_THICKNESS + WLSR_TTX_THICKNESS
-PROTECTION_GAP = 1  # 1 mm gap in mm
-PROTECTION_GAP_LAYER = 10 * 1e-6  # 10 nm gap in mm
-PROTECTION_GAP_POLYCONE = 1e-3  # mm
-
-"""
-Profile generation functions for L1000 geometry components.
+"""Profile generation functions for L1000 geometry components.
 
 This module contains functions to generate z-r profile coordinates for:
 - Reentrance tube outer and inner boundaries
@@ -37,6 +9,29 @@ This module contains functions to generate z-r profile coordinates for:
 The profiles define GenericPolycone geometries with proper closure conditions
 and protection gaps to prevent overlapping volumes in Geant4.
 """
+
+from __future__ import annotations
+
+from typing import NamedTuple
+
+
+class WLSRProfiles(NamedTuple):
+    tpb_outer_z: list[float]
+    tpb_outer_r: list[float]
+    tpb_inner_z: list[float]
+    tpb_inner_r: list[float]
+    ttx_outer_z: list[float]
+    ttx_outer_r: list[float]
+    ttx_inner_z: list[float]
+    ttx_inner_r: list[float]
+
+
+WLSR_TPB_THICKNESS = 1 * 1e-3  # 1 um TPB coating (in mm)
+WLSR_TTX_THICKNESS = 254 * 1e-3  # 254 um Tetratex foil (in mm)
+WLSR_THICKNESS = WLSR_TPB_THICKNESS + WLSR_TTX_THICKNESS
+PROTECTION_GAP = 1  # 1 mm gap in mm
+PROTECTION_GAP_LAYER = 10 * 1e-6  # 10 nm gap in mm
+PROTECTION_GAP_POLYCONE = 1e-3  # mm
 
 
 def _steel_thickness_from_top(

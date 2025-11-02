@@ -9,7 +9,7 @@ import pyg4ometry.geant4 as g4
 from . import core
 
 # Import new reentrance tube profile and WLSR functions
-from .profiles import (
+from .rt_profiles import (
     make_316l_ss_profiles,
     make_inner_profile,
     make_ofhc_cu_profiles,

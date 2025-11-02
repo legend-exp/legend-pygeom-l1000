@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pyg4ometry.geant4 as g4
 
-from .profiles import (
+from .rt_profiles import (
     make_inner_wlsr_profiles,
     make_outer_wlsr_profiles,
 )
