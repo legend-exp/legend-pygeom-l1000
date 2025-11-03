@@ -68,7 +68,7 @@ def place_inner_wlsr_in_argon(
     wls_tpb_inner_lv = g4.LogicalVolume(
         tpb_solid, materials.tpb_on_tetratex, "wls_tpb_inner_argon_lv", registry
     )
-    wls_tpb_inner_lv.pygeom_color_rgba = [0.0, 0.5, 1.0, 0.7]
+    wls_tpb_inner_lv.pygeom_color_rgba = False
     tpb_inner_pv = g4.PhysicalVolume(
         [0, 0, 0],
         [0, 0, 0, "mm"],
@@ -108,7 +108,7 @@ def place_inner_wlsr_in_argon(
     wls_tetratex_inner_lv = g4.LogicalVolume(
         tetratex_solid, materials.tetratex, "wls_tetratex_inner_argon_lv", registry
     )
-    wls_tetratex_inner_lv.pygeom_color_rgba = [1.0, 0.5, 0.0, 0.7]
+    wls_tetratex_inner_lv.pygeom_color_rgba = (1.0, 1.0, 1.0, 0.1)
 
     # Place TTX INSIDE TPB (parent is TPB logical volume)
     tetratex_inner_pv = g4.PhysicalVolume(
@@ -173,7 +173,7 @@ def place_outer_wlsr_in_atmospheric(
     wls_tpb_outer_lv = g4.LogicalVolume(
         tpb_solid, materials.tpb_on_tetratex, "wls_tpb_outer_atmospheric_lv", registry
     )
-    wls_tpb_outer_lv.pygeom_color_rgba = [0.0, 1.0, 0.0, 0.7]
+    wls_tpb_outer_lv.pygeom_color_rgba = False
     tpb_outer_pv = g4.PhysicalVolume(
         [0, 0, 0],
         [0, 0, 0, "mm"],
@@ -213,7 +213,7 @@ def place_outer_wlsr_in_atmospheric(
     wls_tetratex_outer_lv = g4.LogicalVolume(
         tetratex_solid, materials.tetratex, "wls_tetratex_outer_atmospheric_lv", registry
     )
-    wls_tetratex_outer_lv.pygeom_color_rgba = [1.0, 0.0, 0.0, 0.7]
+    wls_tetratex_outer_lv.pygeom_color_rgba = (1.0, 1.0, 1.0, 0.1)
 
     # Place TTX INSIDE TPB (parent is TPB logical volume)
     tetratex_outer_pv = g4.PhysicalVolume(

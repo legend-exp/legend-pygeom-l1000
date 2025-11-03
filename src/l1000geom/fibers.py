@@ -472,22 +472,28 @@ class ModuleFactorySingleFibers(ModuleFactoryBase):
             self.fiber_cl2_lv[fiber_length] = g4.LogicalVolume(
                 fiber_cl2[fiber_length], self.materials.pmma_out, f"fiber_cl2{fiber_name}", self.registry
             )
+            self.fiber_cl2_lv[fiber_length].pygeom_color_rgba = False
             fiber_cl1_lv[fiber_length] = g4.LogicalVolume(
                 fiber_cl1[fiber_length], self.materials.pmma, f"fiber_cl1{fiber_name}", self.registry
             )
+            fiber_cl1_lv[fiber_length].pygeom_color_rgba = False
             fiber_core_lv[fiber_length] = g4.LogicalVolume(
                 fiber_core[fiber_length], self.materials.ps_fibers, f"fiber_core{fiber_name}", self.registry
             )
+            fiber_core_lv[fiber_length].pygeom_color_rgba = False
         if self.bend_radius_mm is not None:
             self.fiber_cl2_bend_lv = g4.LogicalVolume(
                 fiber_cl2_bend, self.materials.pmma_out, f"fiber_cl2_bend{v_suffix}", self.registry
             )
+            self.fiber_cl2_bend_lv.pygeom_color_rgba = False
             fiber_cl1_bend_lv = g4.LogicalVolume(
                 fiber_cl1_bend, self.materials.pmma, f"fiber_cl1_bend{v_suffix}", self.registry
             )
+            fiber_cl1_bend_lv.pygeom_color_rgba = False
             fiber_core_bend_lv = g4.LogicalVolume(
                 fiber_core_bend, self.materials.ps_fibers, f"fiber_core_bend{v_suffix}", self.registry
             )
+            fiber_core_bend_lv.pygeom_color_rgba = False
 
         for [fiber_name, fiber_length] in fibers_to_gen:
             g4.PhysicalVolume(
@@ -564,7 +570,7 @@ class ModuleFactorySingleFibers(ModuleFactoryBase):
         coating_lv = g4.LogicalVolume(coating, self.materials.tpb_on_fibers, v_name, self.registry)
         g4.PhysicalVolume([0, 0, 0], [0, 0, 0], inner_lv, f"fiber_cl2{v_suffix}", coating_lv, self.registry)
 
-        coating_lv.pygeom_color_rgba = [0, 1, 0, 0.0125]
+        coating_lv.pygeom_color_rgba = [0, 1, 0.165, 0.01]  # 520 nm
 
         return coating_lv
 
@@ -848,20 +854,26 @@ class ModuleFactorySegment(ModuleFactoryBase):
         self.fiber_cl2_lv = g4.LogicalVolume(
             fiber_cl2, self.materials.pmma_out, f"fiber_cl2{v_suffix}", self.registry
         )
+        self.fiber_cl2_lv.pygeom_color_rgba = False
         fiber_cl1_lv = g4.LogicalVolume(fiber_cl1, self.materials.pmma, f"fiber_cl1{v_suffix}", self.registry)
+        fiber_cl1_lv.pygeom_color_rgba = False
         fiber_core_lv = g4.LogicalVolume(
             fiber_core, self.materials.ps_fibers, f"fiber_core{v_suffix}", self.registry
         )
+        fiber_core_lv.pygeom_color_rgba = False
         if self.bend_radius_mm is not None:
             self.fiber_cl2_bend_lv = g4.LogicalVolume(
                 fiber_cl2_bend, self.materials.pmma_out, f"fiber_cl2_bend{v_suffix}", self.registry
             )
+            self.fiber_cl2_bend_lv.pygeom_color_rgba = False
             fiber_cl1_bend_lv = g4.LogicalVolume(
                 fiber_cl1_bend, self.materials.pmma, f"fiber_cl1_bend{v_suffix}", self.registry
             )
+            fiber_cl1_bend_lv.pygeom_color_rgba = False
             fiber_core_bend_lv = g4.LogicalVolume(
                 fiber_core_bend, self.materials.ps_fibers, f"fiber_core_bend{v_suffix}", self.registry
             )
+            fiber_core_bend_lv.pygeom_color_rgba = False
 
         g4.PhysicalVolume(
             [0, 0, 0],
@@ -936,7 +948,7 @@ class ModuleFactorySegment(ModuleFactoryBase):
             self.registry,
         )
 
-        coating_lv.pygeom_color_rgba = [0, 1, 0, 0.0125]
+        coating_lv.pygeom_color_rgba = [0, 1, 0.165, 0.01]  # 520 nm
 
         return coating_lv
 
