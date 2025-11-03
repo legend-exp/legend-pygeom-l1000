@@ -385,13 +385,13 @@ def construct_reentrance_tube_with_layers(
     # Construct steel tube
     tube_solid = g4.solid.GenericPolycone("reentrancetube", 0, 2 * np.pi, outer_r, outer_z, reg, "mm")
     tube_lv = g4.LogicalVolume(tube_solid, materials.metal_copper, "reentrancetube", reg)
-    tube_lv.pygeom_color_rgba = [0.5, 0.5, 0.5, 0.8]
+    tube_lv.pygeom_color_rgba = False  # all parts of the tube are covered by the WLSRs or the inner tubes.
     g4.PhysicalVolume([0, 0, 0], [0, 0, 0, "mm"], tube_lv, "reentrancetube", atmlar_lv, registry=reg)
 
     # Construct underground argon cavity
     uglar_solid = g4.solid.GenericPolycone("undergroundlar", 0, 2 * np.pi, inner_r, inner_z, reg, "mm")
     uglar_lv = g4.LogicalVolume(uglar_solid, materials.liquidargon, "undergroundlar", reg)
-    uglar_lv.pygeom_color_rgba = [0.1, 0.8, 0.3, 0.1]
+    uglar_lv.pygeom_color_rgba = False  # we show the reentrance tube.
     uglar_pv = g4.PhysicalVolume(
         [0, 0, 0], [0, 0, 0, "mm"], uglar_lv, "undergroundlar", tube_lv, registry=reg
     )
@@ -456,7 +456,7 @@ def construct_reentrance_tube_with_layers(
         reg,
     )
     ofhc_lv = g4.LogicalVolume(ofhc_solid, materials.metal_copper, "ofhc_cu", reg)
-    ofhc_lv.pygeom_color_rgba = [1.0, 0.5, 0.0, 1.0]
+    ofhc_lv.pygeom_color_rgba = (0.72, 0.45, 0.2, 1)
     g4.PhysicalVolume([0, 0, 0], [0, 0, 0, "mm"], ofhc_lv, "ofhc_cu", tube_lv, registry=reg)
 
     # Construct 316L stainless steel layer (always present)
@@ -486,7 +486,7 @@ def construct_reentrance_tube_with_layers(
         reg,
     )
     ss_lv = g4.LogicalVolume(ss_solid, materials.metal_steel, "ss_316l", reg)
-    ss_lv.pygeom_color_rgba = [0.7, 0.7, 0.8, 1.0]
+    ss_lv.pygeom_color_rgba = (0.7, 0.7, 0.8, 1.0)
     g4.PhysicalVolume([0, 0, 0], [0, 0, 0, "mm"], ss_lv, "ss_316l", tube_lv, registry=reg)
 
     return uglar_lv, uglar_pv
@@ -505,6 +505,7 @@ def construct_moderator_simple(
         "mod_sol", 0, 2 * pi, mod_n_sides, len(mod_z), mod_z, mod_r_inner, mod_r_outer, reg, "mm"
     )
     mod_lv = g4.LogicalVolume(mod_solid, mod_material, "neutronmoderator", reg)
+    mod_lv.pygeom_color_rgba = (0.5, 0.5, 0.5, 0.1)
     # g4.PhysicalVolume([0, 0, 0], [0, 0, -2900], mod_lv, "neutronmoderator", mother_lv, reg)  # -3000
     g4.PhysicalVolume([0, 0, 0], [0, 0, -2397], mod_lv, "neutronmoderator", mother_lv, reg)  # -3000
     # Z value used to be -body_height/2.*(1-bottom_fraction)
@@ -586,6 +587,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
         "mm",
     )
     skirt_lv = g4.LogicalVolume(skirt_solid, instr.materials.metal_steel, "skirt", instr.registry)
+    skirt_lv.pygeom_color_rgba = (0.5, 0.5, 0.5, 0.1)
     foot_solid = g4.solid.Tubs(
         "foot_sol",
         skirt_radius + 1e-9,
@@ -597,13 +599,14 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
         "mm",
     )
     foot_lv = g4.LogicalVolume(foot_solid, instr.materials.metal_steel, "foot", instr.registry)
+    foot_lv.pygeom_color_rgba = (0.5, 0.5, 0.5, 0.1)
 
     ocryo_z, ocryo_r = make_z_and_r(
         total_height, neck_height, body_height, neck_radius, barrel_radius, shoulder_fraction, bottom_fraction
     )
 
     outercryo_lv = construct_outer_cryostat(instr.materials.metal_steel, instr.registry, ocryo_r, ocryo_z)
-    outercryo_lv.pygeom_color_rgba = [0.5, 0.5, 0.5, 0.25]
+    outercryo_lv.pygeom_color_rgba = (0.5, 0.5, 0.5, 0.1)
 
     # For the vacuum gap, it should be as simple as subtracting the outer cryostat thicknesses
     # The neck height stays the same, effectively lowering the body by the thickness
@@ -621,7 +624,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     )
 
     vac_lv = construct_vacuum_gap(instr.materials.vacuum, instr.registry, vac_r, vac_z)
-    vac_lv.pygeom_color_rgba = [0.6, 0.0, 0.6, 0.1]
+    vac_lv.pygeom_color_rgba = False
 
     # Here things are a bit more complicated with the asymmetric vacuum gap
     # Of course, there is no vacuum gap at the top of the neck - that's where the lock goes
@@ -639,7 +642,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     )
 
     icryo_lv = construct_inner_cryostat(instr.materials.metal_steel, instr.registry, icryo_r, icryo_z)
-    icryo_lv.pygeom_color_rgba = [0.5, 0.5, 0.5, 0.25]
+    icryo_lv.pygeom_color_rgba = (0.5, 0.5, 0.5, 0.1)
 
     # The next layer should be again just subtracting by the inner cryo thickness everywhere
     total_height = total_height - icryo_thickness
@@ -652,7 +655,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     )
 
     atmlar_lv = construct_atmospheric_lar(instr.materials.liquidargon, instr.registry, atmlar_r, atmlar_z)
-    atmlar_lv.pygeom_color_rgba = [0.1, 0.8, 0.3, 0.1]
+    atmlar_lv.pygeom_color_rgba = False  # we already show the cryostat
 
     # Place atmospheric argon first (needed as mother volume for reentrance tube)
     atmlar_pv = g4.PhysicalVolume([0, 0, 0], [0, 0, 0], atmlar_lv, "atmosphericlar", icryo_lv, instr.registry)

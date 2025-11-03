@@ -282,7 +282,7 @@ def _place_hpge_unit(
         b.registry,
     )
     det_pv.pygeom_active_detector = RemageDetectorInfo("germanium", det_unit.rawid, det_unit.meta)
-    det_unit.lv.pygeom_color_rgba = (0, 1, 1, 1)
+    det_unit.lv.pygeom_color_rgba = (0.5, 0.5, 0.5, 1)
 
     # add germanium reflective surface.
     geant4.BorderSurface(
@@ -447,16 +447,6 @@ def _get_pen_plate(
         msg = f"Invalid PEN-plate size {size}"
         raise ValueError(msg)
 
-    # just for vis purposes...
-    colors = {
-        "small": (1, 0, 0, 1),
-        "medium": (0, 1, 0, 1),
-        "medium_ortec": (1, 0, 1, 1),
-        "large": (0, 0, 1, 1),
-        "xlarge": (1, 1, 0, 1),
-        "ppc_small": (1, 0, 0, 1),
-    }
-
     pen_lv_name = f"pen_{size}"
     if pen_lv_name not in registry.logicalVolumeDict:
         if size != "ppc_small":
@@ -468,7 +458,7 @@ def _get_pen_plate(
             pen_file, solidname=f"pen_{size}", centre=False, registry=registry
         ).getSolid()
         pen_lv = geant4.LogicalVolume(pen_solid, materials.pen, pen_lv_name, registry)
-        pen_lv.pygeom_color_rgba = colors[size]
+        pen_lv.pygeom_color_rgba = (1, 1, 1, 0.3)
 
     return registry.logicalVolumeDict[pen_lv_name]
 
