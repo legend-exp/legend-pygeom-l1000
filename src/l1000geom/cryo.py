@@ -549,7 +549,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
 
     neck_ar_thickness = 59  # Thickness of atmospheric argon around the neck assuming 6mm neck thickness
 
-    barrel_radius = 3500 + icryo_thickness + ocryo_thickness + vgap_thickness_barrel
+    barrel_radius = 3200 + icryo_thickness + ocryo_thickness + vgap_thickness_barrel
 
     # Parameters for the new reentrance tube with WLSR and metal layers
     tube_height = 6247  # Height of tube
@@ -566,7 +566,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     # The one thing we can define about the moderator is that the aperture should be just slightly bigger than the neck_radius
 
     mod_height = 3200
-    mod_radius = 1820
+    mod_radius = 1750
     mod_thickness = 100
     mod_n_sides = 12
 

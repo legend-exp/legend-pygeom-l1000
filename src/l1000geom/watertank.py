@@ -16,7 +16,7 @@ from . import core, cryo
 
 # Everything in mm
 # Basic tank
-tank_pit_radius = 9950.0 / 2  # Radius of the outer tank wall inside icarus pit
+tank_pit_radius = 5000  # Radius of the outer tank wall inside icarus pit
 tank_vertical_wall = 10.0
 tank_horizontal_wall = 20.0  # If i read the drawing correctly the horizontal wall is thicker
 tank_base_radius = 12000.0 / 2  # Radius of the base of the tank
@@ -298,7 +298,7 @@ def construct_and_place_tank(instr: core.InstrumentationData) -> core.Instrument
         return instr
     tank_lv = construct_tank(instr.materials.metal_steel, instr.registry, instr.detail["watertank"])
     tank_lv.pygeom_color_rgba = False
-    g4.SkinSurface("tank_steel_surface", tank_lv, instr.materials.surfaces.to_steel, instr.registry)
+    g4.SkinSurface("tank_steel_surface", tank_lv, instr.materials.surfaces.to_tyvek, instr.registry)
     # Polycones are placed with the bottom positioned at the given coordinates.
     # But we want it such that the polycone is centered around (0,0,0)
     # Displace it so the center of the middle straight part is at (0,0,0)
