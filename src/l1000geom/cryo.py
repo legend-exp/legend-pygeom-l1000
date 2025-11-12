@@ -1,3 +1,7 @@
+"""
+Updated to the CAD status shown by Matthew Busch on 2025-11-05 LEGEND Collaboration Meeting.
+"""
+
 from __future__ import annotations
 
 import logging
@@ -512,7 +516,7 @@ def construct_moderator_simple(
     # Could import this if we wanted, but maybe this method has enough arguments already...
 
 
-NECKRADIUS_START = 1176
+NECKRADIUS_START = 1135
 
 
 def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.InstrumentationData:
@@ -538,10 +542,12 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     # two places mentioned before
     ocryo_thickness = 60
     # However, I should mention the vacuum gap is asymmetric - it has distinct values at the neck, barrel, and bottom
-    vgap_thickness_neck = 120
-    vgap_thickness_barrel = 200  # 500  # 400
+    vgap_thickness_neck = 45
+    vgap_thickness_barrel = 180  # 500  # 400
     vgap_thickness_bottom = 150  # 100
     icryo_thickness = 40
+
+    neck_ar_thickness = 59  # Thickness of atmospheric argon around the neck assuming 6mm neck thickness
 
     barrel_radius = 3500 + icryo_thickness + ocryo_thickness + vgap_thickness_barrel
 
@@ -616,7 +622,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
 
     total_height = total_height - ocryo_thickness
     body_height = body_height - 2 * ocryo_thickness
-    neck_radius = neck_radius - ocryo_thickness
+    neck_radius = neck_radius - ocryo_thickness  # Is the steel the same thickness at the neck?
     barrel_radius = barrel_radius - ocryo_thickness
 
     vac_z, vac_r = make_z_and_r(
@@ -647,7 +653,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     # The next layer should be again just subtracting by the inner cryo thickness everywhere
     total_height = total_height - icryo_thickness
     body_height = body_height - 2 * icryo_thickness
-    neck_radius = neck_radius - icryo_thickness
+    neck_radius = neck_radius - icryo_thickness  # Is the steel the same thickness at the neck?
     barrel_radius = barrel_radius - icryo_thickness
 
     atmlar_z, atmlar_r = make_z_and_r(
@@ -660,13 +666,15 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     # Place atmospheric argon first (needed as mother volume for reentrance tube)
     atmlar_pv = g4.PhysicalVolume([0, 0, 0], [0, 0, 0], atmlar_lv, "atmosphericlar", icryo_lv, instr.registry)
 
+    neck_radius = neck_radius - neck_ar_thickness
+
     # Construct the new reentrance tube with all layers (WLSR, OFHC Cu, 316L SS, UAr)
     uglar_lv, uglar_pv = construct_reentrance_tube_with_layers(
         instr.materials,
         instr.registry,
         atmlar_lv,
         atmlar_pv,
-        neck_radius - 1e-9,
+        neck_radius,
         tube_height,
         total_height,
         curve_fraction,
@@ -723,6 +731,10 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
         instr.mother_lv,
         instr.registry,
     )
+
+    g4.SkinSurface("ocryo_surface", outercryo_lv, instr.materials.surfaces.to_tyvek, instr.registry)
+    g4.SkinSurface("skirt_surface", skirt_lv, instr.materials.surfaces.to_tyvek, instr.registry)
+    g4.SkinSurface("foot_surface", foot_lv, instr.materials.surfaces.to_tyvek, instr.registry)
 
     g4.PhysicalVolume([0, 0, 0], [0, 0, 0], vac_lv, "vacuumgap", outercryo_lv, instr.registry)
     g4.PhysicalVolume([0, 0, 0], [0, 0, 0], icryo_lv, "innercryostat", vac_lv, instr.registry)
