@@ -67,10 +67,11 @@ class OpticalMaterialRegistry(BaseMaterialRegistry):
             registry=self.g4_registry,
         )
         _metal_steel.add_element_massfraction(self.get_element("Si"), massfraction=0.01)
-        _metal_steel.add_element_massfraction(self.get_element("Cr"), massfraction=0.20)
+        _metal_steel.add_element_massfraction(self.get_element("Cr"), massfraction=0.175)
         _metal_steel.add_element_massfraction(self.get_element("Mn"), massfraction=0.02)
-        _metal_steel.add_element_massfraction(self.get_element("Fe"), massfraction=0.67)
-        _metal_steel.add_element_massfraction(self.get_element("Ni"), massfraction=0.10)
+        _metal_steel.add_element_massfraction(self.get_element("Fe"), massfraction=0.6575)
+        _metal_steel.add_element_massfraction(self.get_element("Ni"), massfraction=0.115)
+        _metal_steel.add_element_massfraction(self.get_element("Mo"), massfraction=0.0225)
 
         return _metal_steel
 

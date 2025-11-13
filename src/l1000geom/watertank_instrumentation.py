@@ -15,12 +15,11 @@ from scipy.spatial.transform import Rotation as R
 
 from . import core, materials, watertank
 
-# The reflective tyvek foil that separates the active optical volume
-tyvek_outer_radius = 5000  # rough estimation, the real radius should be smaller than this value
-# Some trygonometry to get the effective height of the tyvek foil
-offset = (
-    watertank.tank_horizontal_wall
-)  # The water is shifted this much up in z-direction, as the tank wall starts at z=0.
+# This is some rough calculation of the effective height of the tyvek foil inside of the tank.
+# This is to avoid overlaps with the curved top part of the water tank, while keeping the gap as
+# small as possible.
+tyvek_outer_radius = 4000  # rough estimation, the real radius should be smaller than this value
+offset = watertank.tank_horizontal_wall
 out = watertank.tank_base_radius - watertank.tank_vertical_wall - tyvek_outer_radius
 h_diff = watertank.tank_top_height - watertank.tank_base_height
 inner = watertank.tank_base_radius - offset - watertank.tank_top_bulge_width / 2
