@@ -7,17 +7,17 @@ from pyg4ometry import gdml
 
 
 def test_import():
-    import l1000geom
+    import pygeoml1000
 
 
 def test_construct(tmp_path):
-    from l1000geom import core
+    from pygeoml1000 import core
 
     core.construct()
 
 
 def test_read_back(tmp_path):
-    from l1000geom import core
+    from pygeoml1000 import core
 
     registry = core.construct()
     # write a GDML file.
@@ -37,7 +37,7 @@ def test_material_store():
     from legendoptics import store
     from legendoptics.fibers import fiber_core_refractive_index
 
-    from l1000geom import core
+    from pygeoml1000 import core
 
     # test that replaced material properties are reflected in the GDML.
     fiber_core_refractive_index.replace_implementation(lambda: 1234)

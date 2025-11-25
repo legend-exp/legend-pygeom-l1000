@@ -8,7 +8,7 @@ required for the usage of this package.
 ## Dummy-metadata
 
 This package adds the option `legend-pygeom-l1000 --generate-metadata`. This
-option will use the `config.json` file found in `src/l1000geom/configs/` to
+option will use the `config.json` file found in `src/pygeoml1000/configs/` to
 create the essential `channelmap.json` and `special_metadata.yaml` file in the
 formerly named folder. The context of these files massively governs the geometry
 creation. Especially the `special_metadata.yaml` file contains plenty of

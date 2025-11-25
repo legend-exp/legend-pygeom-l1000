@@ -1,4 +1,4 @@
-# l1000geom
+# pygeoml1000
 
 ```{warning}
 This is an early version of the LEGEND-1000 geometry implemented with the

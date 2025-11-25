@@ -160,5 +160,5 @@ Thumbs.db
 
 
 # Setup configs for the repo
-src/l1000geom/configs/channelmap.json
-src/l1000geom/configs/special_metadata.yaml
+src/pygeoml1000/configs/channelmap.json
+src/pygeoml1000/configs/special_metadata.yaml

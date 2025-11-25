@@ -134,7 +134,7 @@ def dump_gdml_cli() -> None:
         parser.error("writing macro file(s) without gdml file is not possible")
 
     if args.verbose:
-        logging.getLogger("l1000geom").setLevel(logging.DEBUG)
+        logging.getLogger("pygeoml1000").setLevel(logging.DEBUG)
     if args.debug:
         logging.root.setLevel(logging.DEBUG)
 
