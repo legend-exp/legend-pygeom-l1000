@@ -24,7 +24,7 @@ top_plate_z_pos = (
     4913.0  # max of underground lar
     + 107  # distance from outer cryostat max z to underground lar max z
     + 11.8  # distance from water tank max z to outer cryostat max z
-    + 769  # distance from underground lar max z to lock flange sealing surface
+    + 769  # distance from lock flange sealing surface to water tank max z
     - (5606.3 - 465 - 12)  # distance from lock flange sealing surface to top plate
 )
 
