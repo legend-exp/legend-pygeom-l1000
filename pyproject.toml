@@ -52,7 +52,7 @@ Discussions = "https://github.com/legend-exp/legend-pygeom-l1000/discussions"
 Changelog = "https://github.com/legend-exp/legend-pygeom-l1000/releases"
 
 [tool.setuptools_scm]
-write_to = "src/l1000geom/_version.py"
+write_to = "src/pygeoml1000/_version.py"
 
 [project.optional-dependencies]
 all = [
@@ -73,7 +73,7 @@ test = [
 ]
 
 [project.scripts]
-legend-pygeom-l1000 = "l1000geom.cli:dump_gdml_cli"
+legend-pygeom-l1000 = "pygeoml1000.cli:dump_gdml_cli"
 
 [tool.setuptools]
 include-package-data = true

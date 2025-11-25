@@ -30,7 +30,7 @@ def pylint(session: nox.Session) -> None:
     # This needs to be installed into the package environment, and is slower
     # than a pre-commit check
     session.install("--force-reinstall", ".", "pylint>=3.2")
-    session.run("pylint", "l1000geom", *session.posargs)
+    session.run("pylint", "pygeoml1000", *session.posargs)
 
 
 @nox.session
@@ -87,7 +87,7 @@ def build_api_docs(session: nox.Session) -> None:
         "--module-first",
         "--no-toc",
         "--force",
-        "src/l1000geom",
+        "src/pygeoml1000",
     )
 
 

@@ -20,7 +20,7 @@ from . import (
 )
 
 logger = logging.getLogger(__name__)
-configs = TextDB(resources.files("l1000geom") / "configs")
+configs = TextDB(resources.files("pygeoml1000") / "configs")
 
 
 class InstrumentationData(NamedTuple):

@@ -17,7 +17,7 @@ env:
 
 jobs:
   build-and-test:
-    name: Test l1000geom with Python
+    name: Test pygeoml1000 with Python
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -36,7 +36,7 @@ jobs:
         run: |
           brew update
           brew install opencascade cgal gmp mpfr boost
-      - name: Get dependencies and install l1000geom
+      - name: Get dependencies and install pygeoml1000
         run: |
           python -m pip install --upgrade pip wheel setuptools
           python -m pip install --upgrade .[test]
@@ -101,7 +101,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip wheel setuptools
           python -m pip install --upgrade .[test]
-          python -m pytest --cov=l1000geom --cov-report=xml
+          python -m pytest --cov=pygeoml1000 --cov-report=xml
       - name: Upload Coverage to codecov.io
         uses: codecov/codecov-action@v5
         with:
