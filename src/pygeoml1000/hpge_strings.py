@@ -20,7 +20,18 @@ log = logging.getLogger(__name__)
 # top of the top plate, this is still a dummy value! (Moved here from core)
 # top_plate_z_pos = 11.1
 # modified to keep relative distance with new tube
-top_plate_z_pos = 514.1
+top_plate_z_pos = (
+    4913.0  # max of underground lar
+    + 107  # distance from outer cryostat max z to underground lar max z
+    + 11.8  # distance from water tank max z to outer cryostat max z
+    + 769  # distance from lock flange sealing surface to water tank max z
+    - (5606.3 - 465 - 12)  # distance from lock flange sealing surface to top plate
+)
+
+
+# 1121/2.+ 465 + 12 #514.1
+# Use a dict to avoid global statement (mutable container pattern)
+_copper_rod_state = {"length_from_z0": None}
 
 
 def place_hpge_strings(b: core.InstrumentationData) -> None:
@@ -364,7 +375,7 @@ def _place_hpge_string(
     # z0_string is the upper z coordinate of the topmost detector unit.
     # TODO: real measurements (slides of M. Bush on 2024-07-08) show an additional offset -0.6 mm.
     # TODO: this is also still a warm length.
-    z0_string = top_plate_z_pos - 410.1 - 12  # from CAD model.
+    z0_string = top_plate_z_pos - 465 - 12  # from CAD model.
 
     # deliberately use max and range here. The code does not support sparse strings (i.e. with
     # unpopulated slots, that are _not_ at the end. In those cases it should produce a KeyError.
@@ -399,6 +410,12 @@ def _place_hpge_string(
 
     # the copper rod is slightly longer after the last detector.
     copper_rod_length_from_z0 = total_rod_length + 3.5
+    if (
+        _copper_rod_state["length_from_z0"] is None
+        or copper_rod_length_from_z0 > _copper_rod_state["length_from_z0"]
+    ):
+        _copper_rod_state["length_from_z0"] = copper_rod_length_from_z0
+
     copper_rod_length = copper_rod_length_from_z0 + 12
 
     support, tristar = _get_support_structure(string_slots[1].baseplate, b.materials, b.registry)
