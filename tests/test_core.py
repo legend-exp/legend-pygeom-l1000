@@ -3,7 +3,13 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 from pyg4ometry import gdml
+
+
+def test_import_legacy():
+    with pytest.deprecated_call():
+        import l1000geom
 
 
 def test_import():

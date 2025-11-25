@@ -158,3 +158,6 @@ messages_control.disable = [
   "wrong-import-position",
   "too-many-nested-blocks"
 ]
+
+[tool.check-wheel-contents]
+toplevel = ["pygeoml1000", "l1000geom"]
