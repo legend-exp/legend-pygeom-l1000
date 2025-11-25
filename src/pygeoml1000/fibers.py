@@ -54,11 +54,6 @@ def place_fiber_modules(b: core.InstrumentationData) -> None:
 
     factory = ModuleFactorySingleFibers if use_detailed_fiber_model else ModuleFactorySegment
 
-    z_displacement_fiber_assembly = (
-        # avoid the overlap of the top SiPMs with the top plate.
-        hpge_strings.top_plate_z_pos - ModuleFactoryBase.SIPM_HEIGHT - ModuleFactoryBase.SIPM_OUTER_EXTRA
-    )
-
     # note: actually the radius is only 150mm and another short straight segment of 60mm is following after
     # the bend. to simplify things here, those two are combined to one bent shape, to have at least the same
     # covered solid angle.
@@ -66,7 +61,15 @@ def place_fiber_modules(b: core.InstrumentationData) -> None:
     # that makes the bottom of the OB cover the whole area between the straight OB and IB fibers.
 
     radius_in_mm = 70
-    fiber_length_mm = 1622.3  # 1200.2 # 1000.2 + 200
+    fiber_length_mm = 1333  # 1622.3  # 1200.2 # 1000.2 + 200
+
+    z_displacement_fiber_assembly = (
+        # avoid the overlap of the top SiPMs with the top plate.
+        hpge_strings.top_plate_z_pos
+        - 465
+        - 12
+        + (fiber_length_mm - hpge_strings._copper_rod_state["length_from_z0"]) / 2.0  # from CAD model.
+    )
 
     single_string_factory = factory(
         radius_mm=radius_in_mm,
