@@ -30,9 +30,9 @@ classifiers = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "legend-pygeom-hpges >=0.7.0,<0.9",
-    "legend-pygeom-optics >=0.13,<0.15",
-    "legend-pygeom-tools >=0.0.24",
+    "legend-pygeom-hpges >=0.9.0",
+    "legend-pygeom-optics >=0.15",
+    "legend-pygeom-tools >=0.0.25",
     "numpy",
     "pint",
     "pyg4ometry",

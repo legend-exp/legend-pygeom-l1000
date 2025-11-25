@@ -1,4 +1,4 @@
-"""Efficiency for the KETEK SiPMs. This is not part of legendoptics."""
+"""Efficiency for the KETEK SiPMs. This is not part of pygeomoptics."""
 
 from __future__ import annotations
 
@@ -6,8 +6,8 @@ import logging
 
 import numpy as np
 import pint
-from legendoptics import store
 from pint import Quantity
+from pygeomoptics import store
 
 log = logging.getLogger(__name__)
 u = pint.get_application_registry()

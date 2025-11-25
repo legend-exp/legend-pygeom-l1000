@@ -40,8 +40,8 @@ def test_material_store():
     # we have to make sure that replaced material properties from the optics package are
     # propagated correctly to the generated GDML files.
 
-    from legendoptics import store
-    from legendoptics.fibers import fiber_core_refractive_index
+    from pygeomoptics import store
+    from pygeomoptics.fibers import fiber_core_refractive_index
 
     from pygeoml1000 import core
 

@@ -2,17 +2,17 @@
 
 from __future__ import annotations
 
-import legendoptics.fibers
-import legendoptics.lar
-import legendoptics.nylon
-import legendoptics.pen
-import legendoptics.pmts
-import legendoptics.tpb
-import legendoptics.vm2000
-import legendoptics.water
 import numpy as np
 import pint
 import pyg4ometry.geant4 as g4
+import pygeomoptics.fibers
+import pygeomoptics.lar
+import pygeomoptics.nylon
+import pygeomoptics.pen
+import pygeomoptics.pmts
+import pygeomoptics.tpb
+import pygeomoptics.vm2000
+import pygeomoptics.water
 from pygeomtools.materials import BaseMaterialRegistry, cached_property
 
 from .surfaces import OpticalSurfaceRegistry
@@ -40,16 +40,16 @@ class OpticalMaterialRegistry(BaseMaterialRegistry):
         _liquidargon.add_element_natoms(self.get_element("Ar"), natoms=1)
 
         u = pint.get_application_registry().get()
-        legendoptics.lar.pyg4_lar_attach_rindex(
+        pygeomoptics.lar.pyg4_lar_attach_rindex(
             _liquidargon,
             self.g4_registry,
         )
-        legendoptics.lar.pyg4_lar_attach_attenuation(
+        pygeomoptics.lar.pyg4_lar_attach_attenuation(
             _liquidargon,
             self.g4_registry,
             self.lar_temperature * u.K,
         )
-        legendoptics.lar.pyg4_lar_attach_scintillation(
+        pygeomoptics.lar.pyg4_lar_attach_scintillation(
             _liquidargon,
             self.g4_registry,
             triplet_lifetime_method="legend200-llama",
@@ -159,7 +159,7 @@ class OpticalMaterialRegistry(BaseMaterialRegistry):
         _pmma.add_element_natoms(self.get_element("C"), natoms=5)
         _pmma.add_element_natoms(self.get_element("O"), natoms=2)
 
-        legendoptics.fibers.pyg4_fiber_cladding1_attach_rindex(_pmma, self.g4_registry)
+        pygeomoptics.fibers.pyg4_fiber_cladding1_attach_rindex(_pmma, self.g4_registry)
 
         return _pmma
 
@@ -176,7 +176,7 @@ class OpticalMaterialRegistry(BaseMaterialRegistry):
         _pmma_out.add_element_natoms(self.get_element("C"), natoms=5)
         _pmma_out.add_element_natoms(self.get_element("O"), natoms=2)
 
-        legendoptics.fibers.pyg4_fiber_cladding2_attach_rindex(_pmma_out, self.g4_registry)
+        pygeomoptics.fibers.pyg4_fiber_cladding2_attach_rindex(_pmma_out, self.g4_registry)
 
         return _pmma_out
 
@@ -192,10 +192,10 @@ class OpticalMaterialRegistry(BaseMaterialRegistry):
         _ps_fibers.add_element_natoms(self.get_element("H"), natoms=8)
         _ps_fibers.add_element_natoms(self.get_element("C"), natoms=8)
 
-        legendoptics.fibers.pyg4_fiber_core_attach_rindex(_ps_fibers, self.g4_registry)
-        legendoptics.fibers.pyg4_fiber_core_attach_absorption(_ps_fibers, self.g4_registry)
-        legendoptics.fibers.pyg4_fiber_core_attach_wls(_ps_fibers, self.g4_registry)
-        legendoptics.fibers.pyg4_fiber_core_attach_scintillation(_ps_fibers, self.g4_registry)
+        pygeomoptics.fibers.pyg4_fiber_core_attach_rindex(_ps_fibers, self.g4_registry)
+        pygeomoptics.fibers.pyg4_fiber_core_attach_absorption(_ps_fibers, self.g4_registry)
+        pygeomoptics.fibers.pyg4_fiber_core_attach_wls(_ps_fibers, self.g4_registry)
+        pygeomoptics.fibers.pyg4_fiber_core_attach_scintillation(_ps_fibers, self.g4_registry)
 
         return _ps_fibers
 
@@ -210,8 +210,8 @@ class OpticalMaterialRegistry(BaseMaterialRegistry):
         t.add_element_natoms(self.get_element("H"), natoms=22)
         t.add_element_natoms(self.get_element("C"), natoms=28)
 
-        legendoptics.tpb.pyg4_tpb_attach_rindex(t, self.g4_registry)
-        legendoptics.tpb.pyg4_tpb_attach_wls(t, self.g4_registry, **wls_opts)
+        pygeomoptics.tpb.pyg4_tpb_attach_rindex(t, self.g4_registry)
+        pygeomoptics.tpb.pyg4_tpb_attach_wls(t, self.g4_registry, **wls_opts)
 
         return t
 
@@ -232,13 +232,13 @@ class OpticalMaterialRegistry(BaseMaterialRegistry):
         _tpb_on_nylon = self._tpb(
             "tpb_on_nylon",
             # For 30% TPB 70% PS the WLS light yield is reduced by 30% [Alexey]
-            quantum_efficiency=0.7 * legendoptics.tpb.tpb_quantum_efficiency(),
+            quantum_efficiency=0.7 * pygeomoptics.tpb.tpb_quantum_efficiency(),
             # the emission spectrum differs significantly.
             emission_spectrum="polystyrene_matrix",
         )
 
         # add absorption length from nylon.
-        legendoptics.nylon.pyg4_nylon_attach_absorption(_tpb_on_nylon, self.g4_registry)
+        pygeomoptics.nylon.pyg4_nylon_attach_absorption(_tpb_on_nylon, self.g4_registry)
 
         return _tpb_on_nylon
 
@@ -274,8 +274,8 @@ class OpticalMaterialRegistry(BaseMaterialRegistry):
         _nylon.add_element_natoms(self.get_element("O"), natoms=3)
         _nylon.add_element_natoms(self.get_element("C"), natoms=13)
 
-        legendoptics.nylon.pyg4_nylon_attach_rindex(_nylon, self.g4_registry)
-        legendoptics.nylon.pyg4_nylon_attach_absorption(_nylon, self.g4_registry)
+        pygeomoptics.nylon.pyg4_nylon_attach_rindex(_nylon, self.g4_registry)
+        pygeomoptics.nylon.pyg4_nylon_attach_absorption(_nylon, self.g4_registry)
 
         return _nylon
 
@@ -292,10 +292,10 @@ class OpticalMaterialRegistry(BaseMaterialRegistry):
         _pen.add_element_natoms(self.get_element("H"), natoms=10)
         _pen.add_element_natoms(self.get_element("O"), natoms=4)
 
-        legendoptics.pen.pyg4_pen_attach_rindex(_pen, self.g4_registry)
-        legendoptics.pen.pyg4_pen_attach_attenuation(_pen, self.g4_registry)
-        legendoptics.pen.pyg4_pen_attach_wls(_pen, self.g4_registry)
-        legendoptics.pen.pyg4_pen_attach_scintillation(_pen, self.g4_registry)
+        pygeomoptics.pen.pyg4_pen_attach_rindex(_pen, self.g4_registry)
+        pygeomoptics.pen.pyg4_pen_attach_attenuation(_pen, self.g4_registry)
+        pygeomoptics.pen.pyg4_pen_attach_wls(_pen, self.g4_registry)
+        pygeomoptics.pen.pyg4_pen_attach_scintillation(_pen, self.g4_registry)
 
         return _pen
 
@@ -385,8 +385,8 @@ class OpticalMaterialRegistry(BaseMaterialRegistry):
         _water.add_element_natoms(self.get_element("H"), natoms=2)
         _water.add_element_natoms(self.get_element("O"), natoms=1)
 
-        legendoptics.water.pyg4_water_attach_rindex(_water, self.g4_registry)
-        legendoptics.water.pyg4_water_attach_absorption(_water, self.g4_registry)
+        pygeomoptics.water.pyg4_water_attach_rindex(_water, self.g4_registry)
+        pygeomoptics.water.pyg4_water_attach_absorption(_water, self.g4_registry)
 
         return _water
 
@@ -406,8 +406,8 @@ class OpticalMaterialRegistry(BaseMaterialRegistry):
         _borosilicate.add_element_massfraction(self.get_element("Na"), 0.029)
         _borosilicate.add_element_massfraction(self.get_element("Al"), 0.012)
 
-        legendoptics.pmts.pyg4_pmt_attach_borosilicate_rindex(_borosilicate, self.g4_registry)
-        legendoptics.pmts.pyg4_pmt_attach_borosilicate_absorption_length(_borosilicate, self.g4_registry)
+        pygeomoptics.pmts.pyg4_pmt_attach_borosilicate_rindex(_borosilicate, self.g4_registry)
+        pygeomoptics.pmts.pyg4_pmt_attach_borosilicate_absorption_length(_borosilicate, self.g4_registry)
 
         return _borosilicate
 
@@ -439,6 +439,6 @@ class OpticalMaterialRegistry(BaseMaterialRegistry):
         )
         _vacuum.add_element_natoms(self.get_element("H"), natoms=1)
         # Vacuum has refractive index of 1.0, air also is defined as 1.0 for optical properties.
-        legendoptics.pmts.pyg4_pmt_attach_air_rindex(_vacuum, self.g4_registry)
+        pygeomoptics.pmts.pyg4_pmt_attach_air_rindex(_vacuum, self.g4_registry)
 
         return _vacuum

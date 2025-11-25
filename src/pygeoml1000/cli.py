@@ -5,8 +5,8 @@ from __future__ import annotations
 import argparse
 import logging
 
-from legendoptics.store import load_user_material_code
 from pyg4ometry import config as meshconfig
+from pygeomoptics.store import load_user_material_code
 from pygeomtools import detectors, utils, visualization, write_pygeom
 
 from . import _version, core, dummy_metadata_generator

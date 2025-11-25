@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-import legendoptics.copper
-import legendoptics.germanium
-import legendoptics.silicon
-import legendoptics.tetratex
-import legendoptics.tyvek
 import numpy as np
 import pint
 import pyg4ometry.geant4 as g4
+import pygeomoptics.copper
+import pygeomoptics.germanium
+import pygeomoptics.silicon
+import pygeomoptics.tetratex
+import pygeomoptics.tyvek
 from pygeomtools.materials import cached_property
 
 from .ketek_sipm import ketek_sipm_efficiency
@@ -54,7 +54,7 @@ class OpticalSurfaceRegistry:
             registry=self.g4_registry,
         )
 
-        legendoptics.copper.pyg4_copper_attach_reflectivity(_to_copper, self.g4_registry)
+        pygeomoptics.copper.pyg4_copper_attach_reflectivity(_to_copper, self.g4_registry)
 
         return _to_copper
 
@@ -70,7 +70,7 @@ class OpticalSurfaceRegistry:
             registry=self.g4_registry,
         )
 
-        legendoptics.germanium.pyg4_germanium_attach_reflectivity(_to_germanium, self.g4_registry)
+        pygeomoptics.germanium.pyg4_germanium_attach_reflectivity(_to_germanium, self.g4_registry)
 
         return _to_germanium
 
@@ -86,7 +86,7 @@ class OpticalSurfaceRegistry:
             registry=self.g4_registry,
         )
 
-        legendoptics.tetratex.pyg4_tetratex_attach_reflectivity(_wlsr_tpb_to_tetratex, self.g4_registry)
+        pygeomoptics.tetratex.pyg4_tetratex_attach_reflectivity(_wlsr_tpb_to_tetratex, self.g4_registry)
 
         return _wlsr_tpb_to_tetratex
 
@@ -102,9 +102,9 @@ class OpticalSurfaceRegistry:
             registry=self.g4_registry,
         )
 
-        legendoptics.silicon.pyg4_silicon_attach_complex_rindex(_to_sipm_silicon, self.g4_registry)
+        pygeomoptics.silicon.pyg4_silicon_attach_complex_rindex(_to_sipm_silicon, self.g4_registry)
 
-        # add custom efficiency for the KETEK SiPMs. This is not part of legendoptics.
+        # add custom efficiency for the KETEK SiPMs. This is not part of pygeomoptics.
         λ, eff = ketek_sipm_efficiency()
         with u.context("sp"):
             _to_sipm_silicon.addVecPropertyPint("EFFICIENCY", λ.to("eV"), eff)
@@ -162,7 +162,7 @@ class OpticalSurfaceRegistry:
             registry=self.g4_registry,
         )
 
-        legendoptics.pmts.pyg4_pmt_attach_steel_reflectivity(_to_steel, self.g4_registry)
+        pygeomoptics.pmts.pyg4_pmt_attach_steel_reflectivity(_to_steel, self.g4_registry)
 
         return _to_steel
 
@@ -179,7 +179,7 @@ class OpticalSurfaceRegistry:
             registry=self.g4_registry,
         )
 
-        legendoptics.tyvek.pyg4_tyvek_attach_reflectivity(_to_tyvek, self.g4_registry)
+        pygeomoptics.tyvek.pyg4_tyvek_attach_reflectivity(_to_tyvek, self.g4_registry)
 
         return _to_tyvek
 
@@ -197,8 +197,8 @@ class OpticalSurfaceRegistry:
         )
 
         # Need reflectivity. Otherwise Geant4 just assumes 1 and ignores the efficiency (dont ask why)
-        legendoptics.pmts.pyg4_pmt_attach_photocathode_reflectivity(_to_photocathode, self.g4_registry)
-        legendoptics.pmts.pyg4_pmt_attach_photocathode_efficiency(
+        pygeomoptics.pmts.pyg4_pmt_attach_photocathode_reflectivity(_to_photocathode, self.g4_registry)
+        pygeomoptics.pmts.pyg4_pmt_attach_photocathode_efficiency(
             _to_photocathode, self.g4_registry, name="r7081"
         )
 
