@@ -84,18 +84,18 @@ camera position, rendering options, and mesh quality. Example scene file:
 More details can be found in
 [legend-pygeom-tools](https://legend-pygeom-tools.readthedocs.io/en/stable/vis.html).
 
-#### Generating Visualization Macros
+#### Generating Macros for Visualization and Detectors Registration (if necessary)
 
 Generate a Geant4 macro file with visualization attributes:
 
 ```console
-legend-pygeom-l1000 --vis-macro-file vis.mac l1000.gdml
+legend-pygeom-l1000 l1000.gdml --vis-macro-file vis.mac
 ```
 
 Generate a Geant4 macro file for remage with active detector definitions:
 
 ```console
-legend-pygeom-l1000 --det-macro-file detectors.mac l1000.gdml
+legend-pygeom-l1000 l1000.gdml --det-macro-file detectors.mac
 ```
 
 ### Geometry Options
@@ -106,20 +106,20 @@ Control the level of detail in the generated geometry using the `--detail`
 option:
 
 ```console
-legend-pygeom-l1000 --detail radiogenic l1000.gdml
+legend-pygeom-l1000 l1000.gdml --detail radiogenic
 ```
 
 Available detail levels:
 
-- `radiogenic`: Includes relevant components for radiogenic background studies,
-  i.e., a lot of details around the HPGe detector strings (default)
+- `radiogenic`: (default) Includes relevant components for radiogenic background
+  studies, i.e., a lot of details around the HPGe detector strings
 - `cosmogenic`: Includes larger structures such as the water tank and hall, less
-  detail around the HPGe detectors used for cosmogenic simulations
+  detail around the HPGe detectors, used for cosmogenic simulations
 
 Example:
 
 ```console
-legend-pygeom-l1000 --detail cosmogenic l1000_cosmogenic.gdml
+legend-pygeom-l1000 l1000_cosmogenic.gdml --detail cosmogenic
 ```
 
 #### Assembly Selection
@@ -141,14 +141,15 @@ the geometry. Available assemblies include:
   structure
 - `PEN_plates`: PEN baseplates
 - `HPGe_dets`: HPGe detectors
-- Additional assemblies (see geometry components documentation)
+
+For more details see `src/pygeoml1000/configs/config.json`.
 
 #### Custom Configuration
 
 Use a custom configuration file to override default geometry parameters:
 
 ```console
-legend-pygeom-l1000 --config custom_config.json l1000.gdml
+legend-pygeom-l1000 l1000.gdml --config custom_config.json
 ```
 
 The configuration file is a JSON file that can specify various geometry
@@ -162,7 +163,7 @@ substitute for `src/pygeoml1000/configs/config.json`.
 Check for overlaps in the geometry using pyg4ometry:
 
 ```console
-legend-pygeom-l1000 --check-overlaps l1000.gdml
+legend-pygeom-l1000 l1000.gdml --check-overlaps
 ```
 
 ```{note}
@@ -176,7 +177,7 @@ Overlap checking can be slow for complex geometries and may not catch all overla
 Load custom material properties before geometry construction:
 
 ```console
-legend-pygeom-l1000 --pygeom-optics-plugin my_materials.py l1000.gdml
+legend-pygeom-l1000 l1000.gdml --pygeom-optics-plugin my_materials.py
 ```
 
 This allows you to define or modify optical properties of materials used in the

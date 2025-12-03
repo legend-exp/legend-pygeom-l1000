@@ -1,4 +1,4 @@
-# pygeoml1000
+# Welcome to l1000geom’s documentation!
 
 ```{warning}
 This is a still-in-development version of the LEGEND-1000 geometry implemented with the
@@ -16,6 +16,14 @@ This package is based on {doc}`pyg4ometry <pyg4ometry:index>`,
 {doc}`legend-pygeom-hpges <pygeomhpges:index>` (implementation of HPGe
 detectors), {doc}`legend-pygeom-optics <pygeomoptics:index>` (optical properties
 of materials) and {doc}`legend-pygeom-tools <pygeomtools:index>`.
+
+A separate package for the LEGEND-200 geometry is available at
+{doc}`legend-pygeom-l200:index`. In comparison, it is more mature and also
+includes detailed documentation on the geometry components and development
+workflow.
+
+This package can run entirely without access to the
+[legend-metadata](https://legend-metadata.readthedocs.io/en/stable/).
 
 ## Installation
 
@@ -60,7 +68,7 @@ legend-pygeom-l1000 --visualize
 Generate with specific detail level:
 
 ```console
-legend-pygeom-l1000 --detail comsogenic l1000.gdml
+legend-pygeom-l1000 l1000.gdml --detail comsogenic
 ```
 
 For detailed usage information, see the {doc}`cli_usage`.
@@ -79,6 +87,7 @@ description
 
 ```{toctree}
 :maxdepth: 2
-:caption: Developer Guide
-metadata.md
+:caption: Developer
+metadata
+Package API reference <api/modules>
 ```

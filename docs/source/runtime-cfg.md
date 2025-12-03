@@ -3,6 +3,12 @@
 For frequently-changing details of the geometry, configuration is managed using
 runtime configuration files. This allows flexibility without modifying code.
 
+```{warning}
+
+This might be subject to change as discussed in metadata documentation.
+
+```
+
 ## Configuration file format
 
 Runtime configuration files use **JSON** or **YAML** format and are specified
@@ -10,19 +16,6 @@ using the `--config` parameter:
 
 ```console
 legend-pygeom-l1000 l1000.gdml --config my_config.json
-```
-
-## Configurable subsystems
-
-Detailed information about the configurable subsystems is available in the
-following pages:
-
-```{toctree}
-:maxdepth: 1
-
-metadata
-cli_usage
-geometry_components
 ```
 
 ## Configuration structure
@@ -264,5 +257,3 @@ Minimal geometry for fast generation and testing.
 
 - Metadata configuration details: {doc}`metadata`
 - CLI options: {doc}`cli_usage`
-- Component details: {doc}`geometry_components`
-- Development workflow: {doc}`geom-dev`

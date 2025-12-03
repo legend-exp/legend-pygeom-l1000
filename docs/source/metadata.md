@@ -5,7 +5,7 @@ default to create the geometry. This means that a working setup of
 [`legend-metadata`](https://github.com/legend-exp/legend-metadata) should not be
 required for the usage of this package.
 
-:::warning
+```{warning}
 
 This functionality was implemented as a quick fix after copying over the source
 code from the L200 geometry package. There it is useful to consider different
@@ -17,9 +17,9 @@ What it does offer is potential for systematic studies, i.e., scanning through
 different options and testing the impact on the background model. However,
 rather than having a base config file, the base parameters should be hardcoded,
 but with the option to override them via an additional config file or CLI
-options. Therefore, this functionality should be refactored in the future.
+options. __Therefore, this functionality should be refactored in the future.__
 
-:::
+```
 
 ## Dummy-metadata
 
