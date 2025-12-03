@@ -27,7 +27,17 @@ This package can run entirely without access to the
 
 ## Installation
 
-Following a git checkout, the package and its other python dependencies can be
+The latest tagged version and all its dependencies can be installed from PyPI:
+`pip install legend-pygeom-l1000`.
+
+Alternatively, one can clone the repository from GitHub for development
+purposes:
+
+```console
+git clone https://github.com/legend-exp/legend-pygeom-l1000.git
+```
+
+Following a git clone, the package and its other python dependencies can be
 installed with:
 
 ```console
