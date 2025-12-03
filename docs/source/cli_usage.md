@@ -57,7 +57,7 @@ legend-pygeom-l1000 -v l1000.gdml
 #### Interactive Visualization
 
 ```console
-legend-pygeom-l1000 --visualize l1000.gdml
+legend-pygeom-l1000 l1000.gdml --visualize
 ```
 
 Creates the GDML file and immediately opens the VTK visualization viewer.
@@ -67,7 +67,7 @@ Creates the GDML file and immediately opens the VTK visualization viewer.
 You can provide a custom visualization scene configuration:
 
 ```console
-legend-pygeom-l1000 --visualize scene.json l1000.gdml
+legend-pygeom-l1000 --visualize scene.json
 ```
 
 The scene file is a JSON file that can specify visualization settings such as
@@ -80,6 +80,9 @@ camera position, rendering options, and mesh quality. Example scene file:
   "background_color": [1, 1, 1]
 }
 ```
+
+More details can be found in
+[legend-pygeom-tools](https://legend-pygeom-tools.readthedocs.io/en/stable/vis.html).
 
 #### Generating Visualization Macros
 
@@ -106,17 +109,17 @@ option:
 legend-pygeom-l1000 --detail radiogenic l1000.gdml
 ```
 
-Available detail levels (from simplest to most detailed):
+Available detail levels:
 
-- `simple`: Basic geometry with minimal detail, suitable for quick testing
-- `radiogenic`: Includes relevant components for radiogenic background studies
-  (default)
-- `full`: Complete geometry with all details included
+- `radiogenic`: Includes relevant components for radiogenic background studies,
+  i.e., a lot of details around the HPGe detector strings (default)
+- `cosmogenic`: Includes larger structures such as the water tank and hall, less
+  detail around the HPGe detectors used for cosmogenic simulations
 
 Example:
 
 ```console
-legend-pygeom-l1000 --detail full l1000_detailed.gdml
+legend-pygeom-l1000 --detail cosmogenic l1000_cosmogenic.gdml
 ```
 
 #### Assembly Selection
@@ -124,17 +127,20 @@ legend-pygeom-l1000 --detail full l1000_detailed.gdml
 Select specific assemblies to include in the geometry:
 
 ```console
-legend-pygeom-l1000 --assemblies watertank,cryo,hpge_strings l1000.gdml
+legend-pygeom-l1000 --assemblies "watertank,cryo,hpge_strings" l1000.gdml
 ```
 
 When `--assemblies` is specified, all unspecified assemblies are omitted from
 the geometry. Available assemblies include:
 
 - `watertank`: Water tank and surrounding infrastructure
-- `cryo`: Cryostat components
-- `hpge_strings`: HPGe detector strings
-- `calibration`: Calibration system
-- `wlsr`: Wavelength shifter reflectors
+- `cryostat`: Cryostat components
+- `nm_plastic`: Neutron moderator
+- `fiber_curtain`: WLS fibers around HPGe strings
+- `front-end_and_insulators`: Front-end electronics and insulator holding
+  structure
+- `PEN_plates`: PEN baseplates
+- `HPGe_dets`: HPGe detectors
 - Additional assemblies (see geometry components documentation)
 
 #### Custom Configuration
@@ -146,7 +152,8 @@ legend-pygeom-l1000 --config custom_config.json l1000.gdml
 ```
 
 The configuration file is a JSON file that can specify various geometry
-parameters, material choices, and component dimensions.
+parameters, material choices, and component dimensions. It is treated as a
+substitute for `src/pygeoml1000/configs/config.json`.
 
 ### Quality Control
 
@@ -159,7 +166,7 @@ legend-pygeom-l1000 --check-overlaps l1000.gdml
 ```
 
 ```{note}
-Overlap checking can be slow for complex geometries and may not catch all overlap issues. It's recommended to verify geometries with Geant4 as well.
+Overlap checking can be slow for complex geometries and may not catch all overlap issues. It's recommended to verify geometries with Geant4 as well. Refer to [l200:geom-dev](https://legend-pygeom-l200.readthedocs.io/en/stable/geom-dev.html) for details.
 ```
 
 ### Optical Properties
@@ -179,10 +186,10 @@ geometry.
 
 ### Example 1: Full Geometry with Visualization
 
-Generate a complete geometry with maximum detail and visualize it:
+Generate a complete geometry with radiogenic detail and visualize it:
 
 ```console
-legend-pygeom-l1000 --detail full --visualize l1000_full.gdml
+legend-pygeom-l1000 l1000_radiogenic.gdml --detail radiogenic --visualize
 ```
 
 ### Example 2: Specific Assemblies with Macros
@@ -191,10 +198,10 @@ Generate geometry with only specific components and export macro files:
 
 ```console
 legend-pygeom-l1000 \
-  --assemblies watertank,cryo,hpge_strings \
+  l1000_custom.gdml \
+  --assemblies watertank,cryostat,HPGe_dets \
   --vis-macro-file vis.mac \
-  --det-macro-file detectors.mac \
-  l1000_custom.gdml
+  --det-macro-file detectors.mac
 ```
 
 ### Example 3: Custom Configuration with Overlap Check
@@ -205,8 +212,7 @@ Use a custom configuration and check for overlaps:
 legend-pygeom-l1000 \
   --config my_config.json \
   --check-overlaps \
-  --verbose \
-  l1000_checked.gdml
+  --verbose
 ```
 
 ### Example 4: Debugging with Maximum Verbosity
@@ -214,7 +220,7 @@ legend-pygeom-l1000 \
 Generate geometry with full debug output:
 
 ```console
-legend-pygeom-l1000 --debug --visualize l1000_debug.gdml
+legend-pygeom-l1000 l1000_debug.gdml --debug
 ```
 
 ## Workflow Tips
@@ -225,17 +231,15 @@ For quick testing and iteration:
 
 1. Use `--visualize` without specifying an output file to preview changes
    quickly
-2. Use `--detail simple` to speed up geometry generation
-3. Use `--assemblies` to focus on specific components
+2. Use `--assemblies` to focus on specific components
 
 ### Production Geometries
 
 For final, production-ready geometries:
 
-1. Use `--detail full` for complete detail
+1. Use `--detail radiogenic` for radiogenic detail
 2. Run with `--check-overlaps` to verify geometry integrity
-3. Generate both `--vis-macro-file` and `--det-macro-file` for simulation
-4. Use custom `--config` files to document specific geometry variations
+3. Use custom `--config` files to document specific geometry variations
 
 ### Performance Considerations
 

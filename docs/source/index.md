@@ -40,29 +40,27 @@ In the simplest case, you can create a usable geometry file with:
 legend-pygeom-l1000 l1000.gdml
 ```
 
-The generated geometry can be customized with a large number of options. Some
-geometry options can both be set on the CLI utility and in the config file.
-Those are described in {doc}`runtime-cfg`, and the descriptions similarly apply
-to the CLI options.
+The generated geometry can be customized with many options. Some geometry
+options can both be set on the CLI utility and in the config file.
 
 ### Quick start examples
 
-Generate a basic geometry:
+Generate a default geometry:
 
 ```console
 legend-pygeom-l1000 l1000.gdml
 ```
 
-Generate and visualize:
+Visualize only:
 
 ```console
-legend-pygeom-l1000 --visualize l1000.gdml
+legend-pygeom-l1000 --visualize
 ```
 
 Generate with specific detail level:
 
 ```console
-legend-pygeom-l1000 --detail full l1000.gdml
+legend-pygeom-l1000 --detail comsogenic l1000.gdml
 ```
 
 For detailed usage information, see the {doc}`cli_usage`.
@@ -77,22 +75,10 @@ cli_usage
 runtime-cfg
 visualization
 description
-coordinate_systems
 ```
 
 ```{toctree}
-:maxdepth: 1
-:caption: Reference
-
-geometry_components
-metadata
-naming
-```
-
-```{toctree}
-:maxdepth: 1
-:caption: Development
-
-geom-dev
-Package API reference <api/modules>
+:maxdepth: 2
+:caption: Developer Guide
+metadata.md
 ```

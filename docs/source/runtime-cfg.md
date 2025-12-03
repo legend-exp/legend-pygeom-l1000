@@ -9,7 +9,7 @@ Runtime configuration files use **JSON** or **YAML** format and are specified
 using the `--config` parameter:
 
 ```console
-legend-pygeom-l1000 --config my_config.json l1000.gdml
+legend-pygeom-l1000 l1000.gdml --config my_config.json
 ```
 
 ## Configurable subsystems
@@ -142,14 +142,14 @@ options override config file values**.
 Via CLI:
 
 ```console
-legend-pygeom-l1000 --detail full l1000.gdml
+legend-pygeom-l1000  l1000.gdml --detail radiogenic
 ```
 
 Via config file:
 
 ```json
 {
-  "detail_level": "full"
+  "detail_level": "radiogenic"
 }
 ```
 
@@ -169,7 +169,7 @@ Via config file:
 
 ```json
 {
-  "assemblies": ["watertank", "cryo", "hpge_strings"]
+  "assemblies": ["watertank", "cryostat", "HPGe_dets"]
 }
 ```
 
@@ -259,52 +259,6 @@ Increases PMT density for better muon veto efficiency.
 ```
 
 Minimal geometry for fast generation and testing.
-
-## Loading configurations programmatically
-
-For advanced users developing with the package:
-
-```python
-from pygeomtools.utils import load_dict
-from pygeoml1000 import core
-
-# Load configuration
-config = load_dict("my_config.json")
-
-# Build geometry with configuration
-registry = core.construct(
-    assemblies=config.get("assemblies", None),
-    detail_level=config.get("detail_level", "radiogenic"),
-    config=config,
-)
-```
-
-## Configuration validation
-
-The package performs basic validation of configuration values:
-
-- Checks for required fields
-- Validates numerical ranges
-- Ensures consistency between related parameters
-- Warns about deprecated options
-
-**Always check the console output** for validation warnings or errors.
-
-## Troubleshooting
-
-### Configuration not being applied
-
-1. **Check file path**: Ensure the config file path is correct
-2. **Check syntax**: Validate JSON/YAML syntax (use a validator)
-3. **CLI override**: Remember CLI options override config file
-4. **Check logs**: Use `--verbose` or `--debug` to see what's being loaded
-
-### Unexpected geometry
-
-1. **Review detail levels**: Ensure detail settings match expectations
-2. **Check metadata**: Verify special_metadata.yaml if using generated metadata
-3. **Assembly selection**: Confirm all needed assemblies are included
-4. **Run overlap check**: Use Geant4/remage to validate geometry
 
 ## References
 
