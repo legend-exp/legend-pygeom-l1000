@@ -34,7 +34,7 @@ z_pos_dict = {
     "copper_rod_upper_end": copper_rod_upper_end_z_pos,
     "first_individual_copper_segment_upper_end": copper_rod_upper_end_z_pos - 27,
     "first_detector_bottom": copper_rod_upper_end_z_pos - 154.9,
-    "sipm_upper_holding_structure": copper_rod_upper_end_z_pos + 93,
+    "sipm_upper_holding_structure_upper_end": copper_rod_upper_end_z_pos + 93 + 8,
 }
 
 

@@ -61,11 +61,11 @@ def place_fiber_modules(b: core.InstrumentationData) -> None:
     # that makes the bottom of the OB cover the whole area between the straight OB and IB fibers.
 
     radius_in_mm = 70
-    fiber_length_mm = 1333  # 1622.3  # 1200.2 # 1000.2 + 200
+    fiber_length_mm = 1349  # 1622.3  # 1200.2 # 1000.2 + 200
 
     z_displacement_fiber_assembly = (
         # avoid the overlap of the top SiPMs with the top plate.
-        hpge_strings.z_pos_dict["sipm_upper_holding_structure"]
+        hpge_strings.z_pos_dict["sipm_upper_holding_structure_upper_end"]
         # - fiber_length_mm   # from CAD model.
     )
 
