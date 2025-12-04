@@ -65,10 +65,8 @@ def place_fiber_modules(b: core.InstrumentationData) -> None:
 
     z_displacement_fiber_assembly = (
         # avoid the overlap of the top SiPMs with the top plate.
-        hpge_strings.top_plate_z_pos
-        - 465
-        - 12
-        + (fiber_length_mm - hpge_strings._copper_rod_state["length_from_z0"]) / 2.0  # from CAD model.
+        hpge_strings.z_pos_dict["sipm_upper_holding_structure"]
+        # - fiber_length_mm   # from CAD model.
     )
 
     single_string_factory = factory(

@@ -18,20 +18,24 @@ from . import core, materials
 log = logging.getLogger(__name__)
 
 # top of the top plate, this is still a dummy value! (Moved here from core)
-# top_plate_z_pos = 11.1
+# copper_rod_upper_end_z_pos = 11.1
 # modified to keep relative distance with new tube
-top_plate_z_pos = (
+
+
+copper_rod_upper_end_z_pos = (
     4913.0  # max of underground lar
     + 107  # distance from outer cryostat max z to underground lar max z
     + 11.8  # distance from water tank max z to outer cryostat max z
     + 769  # distance from lock flange sealing surface to water tank max z
-    - (5606.3 - 465 - 12)  # distance from lock flange sealing surface to top plate
+    - 5552.708  # distance from lock flange sealing surface to copper rod upper end
 )
 
-
-# 1121/2.+ 465 + 12 #514.1
-# Use a dict to avoid global statement (mutable container pattern)
-_copper_rod_state = {"length_from_z0": None}
+z_pos_dict = {
+    "copper_rod_upper_end": copper_rod_upper_end_z_pos,
+    "first_individual_copper_segment_upper_end": copper_rod_upper_end_z_pos - 27,
+    "first_detector_bottom": copper_rod_upper_end_z_pos - 154.9,
+    "sipm_upper_holding_structure": copper_rod_upper_end_z_pos + 93,
+}
 
 
 def place_hpge_strings(b: core.InstrumentationData) -> None:
@@ -375,7 +379,8 @@ def _place_hpge_string(
     # z0_string is the upper z coordinate of the topmost detector unit.
     # TODO: real measurements (slides of M. Bush on 2024-07-08) show an additional offset -0.6 mm.
     # TODO: this is also still a warm length.
-    z0_string = top_plate_z_pos - 465 - 12  # from CAD model.
+
+    # z0_string = copper_rod_upper_end_z_pos - distance_upper_end_of_individual_copper_rod_to_upper_end_of_whole_copper_rod - distance_z0_to_upper_end_of_individual_copper_rod  # from CAD model.
 
     # deliberately use max and range here. The code does not support sparse strings (i.e. with
     # unpopulated slots, that are _not_ at the end. In those cases it should produce a KeyError.
@@ -384,11 +389,13 @@ def _place_hpge_string(
 
     for hpge_unit_id_in_string in range(1, max_unit_id + 1):
         det_unit = string_slots[hpge_unit_id_in_string]
-        # convert the "warm" length of the rod to the (shorter) length in the cooled down state.
-        total_rod_length += det_unit.rodlength * 0.997
 
-        z_unit_bottom = z0_string - total_rod_length  # defined as the bottom of the clap at the moment.
-        unit_length = det_unit.rodlength * 0.997
+        # convert the "warm" length of the rod to the (shorter) length in the cooled down state.
+
+        z_unit_bottom = (
+            z_pos_dict["first_detector_bottom"] - total_rod_length
+        )  # defined as the bottom of the clap at the moment.
+        unit_length = det_unit.rodlength  # * 0.997
         string_info = {
             "string_id": string_id,
             "string_rot": string_rot,
@@ -408,20 +415,17 @@ def _place_hpge_string(
 
         _place_hpge_unit(z_unit_bottom, det_unit, unit_length, string_info, thicknesses, b)
 
-    # the copper rod is slightly longer after the last detector.
-    copper_rod_length_from_z0 = total_rod_length + 3.5
-    if (
-        _copper_rod_state["length_from_z0"] is None
-        or copper_rod_length_from_z0 > _copper_rod_state["length_from_z0"]
-    ):
-        _copper_rod_state["length_from_z0"] = copper_rod_length_from_z0
+        total_rod_length += det_unit.rodlength  # * 0.997
 
-    copper_rod_length = copper_rod_length_from_z0 + 12
+    # the copper rod is slightly longer after the last detector.
+    copper_rod_length = total_rod_length + (
+        z_pos_dict["copper_rod_upper_end"] - z_pos_dict["first_individual_copper_segment_upper_end"]
+    )
 
     support, tristar = _get_support_structure(string_slots[1].baseplate, b.materials, b.registry)
     geant4.PhysicalVolume(
         [0, 0, np.deg2rad(30) + string_rot],
-        [x_pos, y_pos, z0_string + 12],  # this offset of 12 is measured from the CAD file.
+        [x_pos, y_pos, z_pos_dict["copper_rod_upper_end"]],
         support,
         support.name + "_string_" + string_id,
         b.mother_lv,
@@ -429,7 +433,7 @@ def _place_hpge_string(
     )
     geant4.PhysicalVolume(
         [0, 0, string_rot],
-        [x_pos, y_pos, z0_string + 12 - 1e-6],  # this offset of 12 is measured from the CAD file.
+        [x_pos, y_pos, z_pos_dict["copper_rod_upper_end"] - 1e-6],
         tristar,
         tristar.name + "_string_" + string_id,
         b.mother_lv,
@@ -447,7 +451,7 @@ def _place_hpge_string(
         delta = copper_rod_r * string_rot_m @ np.array([np.cos(copper_rod_th), np.sin(copper_rod_th)])
         geant4.PhysicalVolume(
             [0, 0, 0],
-            [x_pos + delta[0], y_pos + delta[1], z0_string + 12 - copper_rod_length / 2],
+            [x_pos + delta[0], y_pos + delta[1], z_pos_dict["copper_rod_upper_end"] - copper_rod_length / 2],
             copper_rod,
             f"{copper_rod_name}_{i}",
             b.mother_lv,
