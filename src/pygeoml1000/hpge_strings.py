@@ -38,6 +38,25 @@ z_pos_dict = {
 }
 
 
+def calculate_string_rotation(string_id: str, b: core.InstrumentationData) -> float:
+    string_meta = b.special_metadata.hpge_string[string_id]
+    angle_in_rad = math.pi * string_meta.angle_in_deg / 180
+    x_pos = string_meta.radius_in_mm * math.cos(angle_in_rad) + string_meta.center.x_in_mm
+    y_pos = -string_meta.radius_in_mm * math.sin(angle_in_rad) + string_meta.center.y_in_mm
+    # rotation angle for anything in the string.
+    string_rot = -np.pi + angle_in_rad
+    string_rot_m = np.array(
+        [[np.sin(string_rot), np.cos(string_rot)], [np.cos(string_rot), -np.sin(string_rot)]]
+    )
+    return {
+        "string_rot": string_rot,
+        "string_rot_m": string_rot_m,
+        "x_pos": x_pos,
+        "y_pos": y_pos,
+        "string_meta": string_meta,
+    }
+
+
 def place_hpge_strings(b: core.InstrumentationData) -> None:
     """Construct LEGEND-1000 HPGe strings."""
     # derive the strings from the channelmap.
@@ -364,16 +383,13 @@ def _place_hpge_string(
     Place a single HPGe detector string.
 
     This includes all PEN plates and the nylon shroud around the string."""
-    string_meta = b.special_metadata.hpge_string[string_id]
 
-    angle_in_rad = math.pi * string_meta.angle_in_deg / 180
-    x_pos = string_meta.radius_in_mm * math.cos(angle_in_rad) + string_meta.center.x_in_mm
-    y_pos = -string_meta.radius_in_mm * math.sin(angle_in_rad) + string_meta.center.y_in_mm
-    # rotation angle for anything in the string.
-    string_rot = -np.pi + angle_in_rad
-    string_rot_m = np.array(
-        [[np.sin(string_rot), np.cos(string_rot)], [np.cos(string_rot), -np.sin(string_rot)]]
-    )
+    string_rot_output = calculate_string_rotation(string_id, b)
+    string_rot = string_rot_output["string_rot"]
+    string_rot_m = string_rot_output["string_rot_m"]
+    x_pos = string_rot_output["x_pos"]
+    y_pos = string_rot_output["y_pos"]
+    string_meta = string_rot_output["string_meta"]
 
     # offset the height of the string by the length of the string support rod.
     # z0_string is the upper z coordinate of the topmost detector unit.
