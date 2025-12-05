@@ -62,7 +62,7 @@ def place_fiber_modules(b: core.InstrumentationData) -> None:
     # we do not add the full straight part here (this would make the radius to large), but just a tiny delta
     # that makes the bottom of the OB cover the whole area between the straight OB and IB fibers.
 
-    radius_in_mm = 51.94  # 70
+    radius_in_mm = 52.75  # 70
     fiber_length_mm = 1349  # 1622.3  # 1200.2 # 1000.2 + 200
 
     z_displacement_fiber_assembly = (
@@ -156,7 +156,8 @@ class ModuleFactoryBase(ABC):
         z_displacement_mm
             displacement of the top of the fiber barrel, relative to the global zero point.
         """
-        self.radius = radius_mm
+
+        self.radius = radius_mm + 1e-9  # place fibers fully inside the specified radius
         self.fiber_length = fiber_length_mm
         self.fiber_count_per_module = fiber_count_per_module
         self.bend_radius_mm = bend_radius_mm
