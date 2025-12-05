@@ -133,9 +133,14 @@ legend-pygeom-l1000 --assemblies "watertank,cryo,hpge_strings" l1000.gdml
 When `--assemblies` is specified, all unspecified assemblies are omitted from
 the geometry. Available assemblies include:
 
+- `caver`: Cavern and surrounding rock
+- `labs`: Experimental laboratory halls (not implemented yet)
 - `watertank`: Water tank and surrounding infrastructure
+- `watertank_instrumentation`: PMTs in the water tank
 - `cryostat`: Cryostat components
 - `nm_plastic`: Neutron moderator
+- `nm_holding_structure`: Support structure for the neutron moderator (not
+  implemented yet)
 - `fiber_curtain`: WLS fibers around HPGe strings
 - `front-end_and_insulators`: Front-end electronics and insulator holding
   structure

@@ -38,7 +38,7 @@ ARRAY_CONFIG = {
     "angle_in_deg": [0, 60, 120, 180, 240, 300],
 }
 
-N_FIBERS_PER_STRING = 3
+N_FIBER_MODULES_PER_STRING = 9
 
 
 def load_config(input_path):
@@ -197,7 +197,7 @@ def generate_special_metadata(config: dict, string_idx: list, hpge_names: list, 
             },
         }
         for string in string_idx.flatten()
-        for n in range(N_FIBERS_PER_STRING)
+        for n in range(N_FIBER_MODULES_PER_STRING)
     }
 
     special_output["calibration"] = {}
@@ -235,7 +235,7 @@ def generate_channelmap(
 
     rawid = 5000
     for string in string_idx.flatten():
-        for n in range(N_FIBERS_PER_STRING):
+        for n in range(N_FIBER_MODULES_PER_STRING):
             name = f"S{string + 1:02d}{n + 1:02d}T"
             channelmap[name] = copy.deepcopy(spms_data)
             channelmap[name]["name"] = name
@@ -245,7 +245,7 @@ def generate_channelmap(
             channelmap[name]["daq"]["rawid"] = rawid
             rawid += 1
 
-        for n in range(N_FIBERS_PER_STRING):
+        for n in range(N_FIBER_MODULES_PER_STRING):
             name = f"S{string + 1:02d}{n + 1:02d}B"
             channelmap[name] = copy.deepcopy(spms_data)
             channelmap[name]["name"] = name
