@@ -319,7 +319,7 @@ def make_moderator_z_r_r(
     # print(r_inner)
     # print(r_outer)
 
-    return z, r_inner, r_outer
+    return z[::-1], r_inner[::-1], r_outer[::-1]
 
 
 def construct_outer_cryostat(
