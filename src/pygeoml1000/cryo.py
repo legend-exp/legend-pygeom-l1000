@@ -9,6 +9,7 @@ from math import pi
 
 import numpy as np
 import pyg4ometry.geant4 as g4
+from pygeomtools import RemageDetectorInfo
 
 from . import core
 
@@ -664,6 +665,8 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     # Place atmospheric argon first (needed as mother volume for reentrance tube)
     atmlar_pv = g4.PhysicalVolume([0, 0, 0], [0, 0, 0], atmlar_lv, "atmosphericlar", icryo_lv, instr.registry)
 
+    atmlar_pv.set_pygeom_active_detector(RemageDetectorInfo("scintillator", 10000, {}))
+
     neck_radius = neck_radius - neck_ar_thickness
 
     # Construct the new reentrance tube with all layers (WLSR, OFHC Cu, 316L SS, UAr)
@@ -681,6 +684,8 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
         ofhc_end_height,
         ss_start_height,
     )
+
+    uglar_pv.set_pygeom_active_detector(RemageDetectorInfo("scintillator", 10001, {}))
 
     # Construct neutron moderator if specified
     if "nm_plastic" not in instr.detail:
