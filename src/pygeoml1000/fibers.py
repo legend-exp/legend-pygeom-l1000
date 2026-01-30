@@ -1048,7 +1048,7 @@ class ModuleFactorySegment(ModuleFactoryBase):
             self.registry,
         )
 
-        coating_lv.pygeom_color_rgba = [0, 1, 0.165, 0.01]  # 520 nm
+        coating_lv.pygeom_color_rgba = [0, 1, 0.165, 0.1]  # 520 nm
 
         return coating_lv
 
