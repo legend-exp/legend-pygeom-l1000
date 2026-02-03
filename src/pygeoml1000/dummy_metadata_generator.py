@@ -8,6 +8,8 @@ import legendmeta
 import numpy as np
 import yaml
 
+from . import watertank
+
 # This script is used to generate the special_metadata.yaml and channelmap.yaml files for the LEGEND-1000 geometry.
 
 
@@ -60,6 +62,10 @@ def calculate_and_place_pmts(channelmap: dict, pmts_meta: dict, pmts_pos: dict) 
             x = radius * np.cos(np.radians(360 / pmts_in_row * i))
             y = radius * np.sin(np.radians(360 / pmts_in_row * i))
             z = 0.0
+
+            # If the PMT is outside of the pit move it up.
+            if radius > watertank.tank_pit_radius:
+                z = watertank.tank_pit_height
 
             channelmap[name] = copy.deepcopy(pmts_meta)
             channelmap[name]["daq"]["rawid"] = rawid
