@@ -211,71 +211,75 @@ class ModuleFactoryBase(ABC):
             self.radius - sipm_dim / 2 - self.SIPM_OUTER_EXTRA,
             self.radius + sipm_dim / 2 + self.SIPM_OUTER_EXTRA,
             self.SIPM_HEIGHT + self.SIPM_OUTER_EXTRA + self.SIPM_OVERLAP,
-            self.ANGLE_SAFETY,
-            sipm_angle - self.ANGLE_SAFETY,
+            -self.ANGLE_SAFETY,
+            sipm_angle + self.ANGLE_SAFETY,
             self.registry,
             "mm",
         )
-        sipm_outer_w_buffer = g4.solid.Tubs(
-            f"sipm_outer2{v_suffix}",
+        sipm_outer_without_buffer = g4.solid.Tubs(
+            f"sipm_outer_without_buffer{v_suffix}",
             self.radius - sipm_dim / 2 - 1e-9,
             self.radius + sipm_dim / 2 + 1e-9,
             self.SIPM_HEIGHT + 2 * self.SIPM_GAP + self.SIPM_OVERLAP,
-            self.ANGLE_SAFETY,
-            fiber_segment - self.ANGLE_SAFETY,
+            -self.ANGLE_SAFETY,
+            sipm_angle + self.ANGLE_SAFETY,
             self.registry,
             "mm",
         )
 
-        sipm_outer_top_1 = g4.solid.Subtraction(
-            f"sipm_outer_top_1{v_suffix}",
+        sipm_outer_buffer = g4.solid.Tubs(
+            f"sipm_outer_buffer_1{v_suffix}",
+            self.radius - sipm_dim / 2 - 1e-9,
+            self.radius + sipm_dim / 2 + 1e-9,
+            self.SIPM_GAP + self.SIPM_OVERLAP - 1e-9,
+            self.ANGLE_SAFETY,
+            self.ANGLE_BETWEEN_MODULE_OTHERWISE - self.ANGLE_SAFETY,
+            self.registry,
+            "mm",
+        )          
+
+        sipm_outer_top_wo_buffer = g4.solid.Subtraction(
+            f"sipm_outer_top{v_suffix}",
             sipm_outer1,
-            sipm_outer_w_buffer,
+            sipm_outer_without_buffer,
             [[0, 0, 0], [0, 0, -self.SIPM_OUTER_EXTRA / 2]],
             self.registry,
         )
-
-        sipm_outer_top_2 = g4.solid.Subtraction(
-            f"sipm_outer_top_2{v_suffix}",
-            sipm_outer_top_1,
-            sipm_outer_w_buffer,
-            [[0, 0, fiber_segment + self.ANGLE_BETWEEN_MODULE_OTHERWISE], [0, 0, -self.SIPM_OUTER_EXTRA / 2]],
+        sipm_outer_top_w_buffer_1= g4.solid.Union(
+            f"sipm_outer_top_w_buffer_1_{v_suffix}",
+            sipm_outer_top_wo_buffer,
+            sipm_outer_buffer,
+            [[0, 0, fiber_segment], [0, 0, -(self.SIPM_GAP + self.SIPM_OVERLAP) / 2 - self.SIPM_HEIGHT/2.]], # + self.ANGLE_BETWEEN_MODULE_OTHERWISE
             self.registry,
         )
-
-        sipm_outer_top = g4.solid.Subtraction(
+        sipm_outer_top = g4.solid.Union(
             f"sipm_outer_top_{v_suffix}",
-            sipm_outer_top_2,
-            sipm_outer_w_buffer,
-            [
-                [0, 0, 2 * (fiber_segment + self.ANGLE_BETWEEN_MODULE_OTHERWISE)],
-                [0, 0, -self.SIPM_OUTER_EXTRA / 2],
-            ],
+            sipm_outer_top_w_buffer_1,
+            sipm_outer_buffer,
+            [[0, 0, 2 * (fiber_segment) + self.ANGLE_BETWEEN_MODULE_OTHERWISE], [0, 0, -(self.SIPM_GAP + self.SIPM_OVERLAP) / 2 - self.SIPM_HEIGHT/2.]], # + self.ANGLE_BETWEEN_MODULE_OTHERWISE
             self.registry,
         )
 
-        sipm_outer_bottom_1 = g4.solid.Subtraction(
-            f"sipm_outer_bottom_1{v_suffix}",
+
+        sipm_outer_bottom_wo_buffer = g4.solid.Subtraction(
+            f"sipm_outer_bottom{v_suffix}",
             sipm_outer1,
-            sipm_outer_w_buffer,
+            sipm_outer_without_buffer,
             [[0, 0, 0], [0, 0, +self.SIPM_OUTER_EXTRA / 2]],
             self.registry,
         )
-        sipm_outer_bottom_2 = g4.solid.Subtraction(
-            f"sipm_outer_bottom_2{v_suffix}",
-            sipm_outer_bottom_1,
-            sipm_outer_w_buffer,
-            [[0, 0, fiber_segment + self.ANGLE_BETWEEN_MODULE_OTHERWISE], [0, 0, +self.SIPM_OUTER_EXTRA / 2]],
+        sipm_outer_bottom_w_buffer_1= g4.solid.Union(
+            f"sipm_outer_bottom_w_buffer_1_{v_suffix}",
+            sipm_outer_bottom_wo_buffer,
+            sipm_outer_buffer,
+            [[0, 0, fiber_segment], [0, 0, +(self.SIPM_GAP + self.SIPM_OVERLAP) / 2 + self.SIPM_HEIGHT/2.]],#  + self.ANGLE_BETWEEN_MODULE_OTHERWISE
             self.registry,
         )
-        sipm_outer_bottom = g4.solid.Subtraction(
+        sipm_outer_bottom = g4.solid.Union(
             f"sipm_outer_bottom_{v_suffix}",
-            sipm_outer_bottom_2,
-            sipm_outer_w_buffer,
-            [
-                [0, 0, 2 * (fiber_segment + self.ANGLE_BETWEEN_MODULE_OTHERWISE)],
-                [0, 0, +self.SIPM_OUTER_EXTRA / 2],
-            ],
+            sipm_outer_bottom_w_buffer_1,
+            sipm_outer_buffer,
+            [[0, 0, 2 * (fiber_segment) + self.ANGLE_BETWEEN_MODULE_OTHERWISE], [0, 0, +(self.SIPM_GAP + self.SIPM_OVERLAP) / 2 + self.SIPM_HEIGHT/2.]], # + self.ANGLE_BETWEEN_MODULE_OTHERWISE
             self.registry,
         )
 
@@ -310,6 +314,7 @@ class ModuleFactoryBase(ABC):
             f"sipm_outer_top{v_suffix}",
             self.registry,
         )
+
         self.sipm_outer_bottom_lv = g4.LogicalVolume(
             sipm_outer_bottom,
             self.materials.metal_copper,
