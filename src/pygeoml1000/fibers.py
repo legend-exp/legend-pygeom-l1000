@@ -211,6 +211,7 @@ class ModuleFactoryBase(ABC):
             self.radius - sipm_dim / 2 - self.SIPM_OUTER_EXTRA,
             self.radius + sipm_dim / 2 + self.SIPM_OUTER_EXTRA,
             self.SIPM_HEIGHT + self.SIPM_OUTER_EXTRA + self.SIPM_OVERLAP,
+
             -self.ANGLE_SAFETY,
             sipm_angle + self.ANGLE_SAFETY,
             self.registry,
