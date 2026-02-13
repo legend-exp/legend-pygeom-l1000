@@ -1,0 +1,78 @@
+name: V0000
+system: geds
+type: icpc
+location: 
+  string: 1
+  position: 1
+daq:
+  rawid: 0
+production:
+  manufacturer: DavidHervas
+  order: 1
+  crystal: "1"
+  slice: X
+  enrichment:
+    val: 0.9
+    unc: 0.01
+  passivation: true
+  reprocessing: false
+  mass_in_g: 3045
+  delivered: "2026-02-12"
+geometry:
+  height_in_mm: 90
+  radius_in_mm: 44.4
+  borehole:
+    radius_in_mm: 4
+    depth_in_mm: 53
+  groove:
+    depth_in_mm: 2
+    radius_in_mm:
+      outer: 15
+      inner: 12
+  pp_contact:
+    radius_in_mm: 12
+    depth_in_mm: 0
+  taper:
+    top:
+      angle_in_deg: 45
+      height_in_mm: 3
+    bottom:
+      angle_in_deg: 45
+      height_in_mm: 3
+    borehole:
+      angle_in_deg: 5
+      height_in_mm: 45
+characterization:
+  manufacturer:
+    depletion_voltage_in_V: 3026
+    recommended_voltage_in_V: 3500
+    fwhm_co57fep_in_keV: 0.878
+    fwhm_co60fep_in_keV: 1.95
+    dl_thickness_in_mm: 0.98
+  l200_site:
+    location: hades
+    daq: flashcam
+    depletion_voltage_in_V: 3026
+    recommended_voltage_in_V: 3500
+    fwhm_in_keV:
+      co60fep: null
+      qbb: 2.12
+      tl208fep: 2.39
+    survival_fraction:
+      tl208dep: 0.9
+      qbb: 0.27
+      tl208sep: 0.04
+      tl208fep: 0.06
+    fccd_in_mm:
+      am241:
+        central: null
+        err_uncorr_pos: null
+        err_uncorr_neg: null
+        err_corr_pos: null
+        err_corr_neg: null
+      ba133:
+        central: null
+        err_uncorr_pos: null
+        err_uncorr_neg: null
+        err_corr_pos: null
+        err_corr_neg: null

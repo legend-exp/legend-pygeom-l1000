@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import json
+import yaml
 from pathlib import Path
 
 import legendmeta
@@ -42,12 +43,12 @@ N_SIPM_MODULES_PER_STRING = 3
 
 
 def load_config(input_path):
-    """Load configuration from a JSON file."""
+    """Load configuration from a YAML file."""
     with Path(input_path).open() as f:
-        return json.load(f)
+        return yaml.safe_load(f)
 
 
-def calculate_and_place_pmts(channelmap: dict, pmts_meta: dict, pmts_pos: dict) -> None:
+def calculate_and_place_pmts(channelmap: dict, pmts_data: dict, pmts_pos: dict) -> None:
     # Floor PMTs are pretty trivial to place
     rawid = 6000
     for row in pmts_pos["floor"].values():
@@ -61,7 +62,7 @@ def calculate_and_place_pmts(channelmap: dict, pmts_meta: dict, pmts_pos: dict) 
             y = radius * np.sin(np.radians(360 / pmts_in_row * i))
             z = 0.0
 
-            channelmap[name] = copy.deepcopy(pmts_meta)
+            channelmap[name] = copy.deepcopy(pmts_data)
             channelmap[name]["daq"]["rawid"] = rawid
             rawid += 1
             channelmap[name]["name"] = name
@@ -132,7 +133,7 @@ def calculate_and_place_pmts(channelmap: dict, pmts_meta: dict, pmts_pos: dict) 
                 x = x1 * (1 - t) + x2 * t
                 y = y1 * (1 - t) + y2 * t
 
-                channelmap[name] = copy.deepcopy(pmts_meta)
+                channelmap[name] = copy.deepcopy(pmts_data)
                 channelmap[name]["daq"]["rawid"] = rawid
                 rawid += 1
                 channelmap[name]["name"] = name
@@ -150,7 +151,7 @@ def calculate_and_place_pmts(channelmap: dict, pmts_meta: dict, pmts_pos: dict) 
             raise ValueError(msg)
 
 
-def generate_special_metadata(config: dict, string_idx: list, hpge_names: list, pmts_pos: dict) -> dict:
+def generate_special_metadata(string_data: dict, detail_data: dict, string_idx: list, hpge_names: list, pmts_pos: dict) -> dict:
     """Generate special_metadata.yaml file."""
 
     special_output = {}
@@ -163,13 +164,13 @@ def generate_special_metadata(config: dict, string_idx: list, hpge_names: list, 
             },
             "angle_in_deg": ARRAY_CONFIG["angle_in_deg"][j],
             "radius_in_mm": ARRAY_CONFIG["radius_in_mm"],
-            "rod_radius_in_mm": config["string"]["copper_rods"]["r_offset_from_center"],
+            "rod_radius_in_mm": string_data["copper_rods"]["r_offset_from_center"],
         }
         for i, j in np.ndindex(string_idx.shape)
     }
 
     special_output["hpges"] = {
-        f"{name}": {"rodlength_in_mm": config["string"]["units"]["l"], "baseplate": "xlarge"}
+        f"{name}": {"rodlength_in_mm": string_data["units"]["l"], "baseplate": "xlarge"}
         for name in hpge_names
     }
 
@@ -209,7 +210,7 @@ def generate_special_metadata(config: dict, string_idx: list, hpge_names: list, 
         },
     }
 
-    special_output["detail"] = config["detail"]
+    special_output["detail"] = detail_data
 
     return special_output
 
@@ -220,7 +221,7 @@ def generate_channelmap(
     hpge_rawid: list,
     string_idx: list,
     spms_data: dict,
-    pmts_meta: dict,
+    pmts_data: dict,
     pmts_pos: dict,
 ) -> dict:
     """Generate channelmap.json file."""
@@ -254,8 +255,7 @@ def generate_channelmap(
             channelmap[name]["location"]["barrel"] = string + 1
             channelmap[name]["daq"]["rawid"] = rawid
             rawid += 1
-
-    calculate_and_place_pmts(channelmap, pmts_meta, pmts_pos)
+    calculate_and_place_pmts(channelmap, pmts_data, pmts_pos)
 
     return channelmap
 
@@ -276,7 +276,7 @@ def _convert_numpy_types(obj):
 
 
 def generate_dummy_metadata(
-    input_config: str = "",
+    input_config_folder: str = "",
     dets_from_metadata: str = "",
 ) -> tuple[dict, dict]:
     """Generate dummy metadata objects without writing files.
@@ -287,21 +287,8 @@ def generate_dummy_metadata(
     # Default to configs directory if paths are not provided
     script_dir = Path(__file__).parent
     configs_dir = script_dir / "configs"
-
-    if not input_config:
-        input_config = str(configs_dir / "config.json")
-
-    try:
-        config = load_config(input_config)
-    except FileNotFoundError as e:
-        msg = f"Config file not found: {input_config}"
-        raise FileNotFoundError(msg) from e
-    except json.JSONDecodeError as e:
-        msg = f"Invalid JSON in config file {input_config}: {e}"
-        raise ValueError(msg) from e
-    except Exception as e:
-        msg = f"Error loading config file {input_config}: {e}"
-        raise RuntimeError(msg) from e
+    if input_config_folder:
+        configs_dir = Path(input_config_folder)
 
     if dets_from_metadata != "":
         json_acceptable_string = dets_from_metadata.replace("'", '"')
@@ -311,25 +298,19 @@ def generate_dummy_metadata(
         len(ARRAY_CONFIG["center"]["x_in_mm"]) * len(ARRAY_CONFIG["angle_in_deg"])
     ).reshape(len(ARRAY_CONFIG["center"]["x_in_mm"]), len(ARRAY_CONFIG["angle_in_deg"]))
 
-    hpge_data, spms_data, pmts_meta = None, None, None
+    hpge_data, spms_data, pmts_data = None, None, None
 
-    if dets_from_metadata and legendmeta.LegendMetadata():
-        timestamp = "20230125T212014Z"
-        chm = legendmeta.LegendMetadata().channelmap(on=timestamp)
-        if "hpge" in det_names_from_metadata:
-            hpge_detector_name = det_names_from_metadata["hpge"]
-            hpge_data = chm[hpge_detector_name]
-
-    if not hpge_data:
-        hpge_data = config["dummy_dets"]["hpge"]
-
-    spms_data = config["dummy_dets"]["spms"]
-    pmts_meta = config["dummy_dets"]["pmts"]
+    hpge_data = load_config(configs_dir / "hpge.yaml")
+    spms_data = load_config(configs_dir / "sipm.yaml")
+    pmts_data = load_config(configs_dir / "pmts.yaml")
+    string_data = load_config(configs_dir / "string.yaml")
+    detail_data = load_config(configs_dir / "detail.yaml")
+    pmts_pos = load_config(configs_dir / "pmts_pos.yaml")
 
     hpge_names = np.sort(
         np.concatenate(
             [
-                [f"V{i + 1:02d}{j + 1:02d}" for j in range(config["string"]["units"]["n"])]
+                [f"V{i + 1:02d}{j + 1:02d}" for j in range(string_data["units"]["n"])]
                 for i in range(string_idx.size)
             ]
         )
@@ -337,17 +318,16 @@ def generate_dummy_metadata(
     hpge_rawid = np.sort(
         np.concatenate(
             [
-                [(i + 1) * 100 + j + 1 for j in range(config["string"]["units"]["n"])]
+                [(i + 1) * 100 + j + 1 for j in range(string_data["units"]["n"])]
                 for i in range(string_idx.size)
             ]
         )
     )
 
-    pmts_pos = config["pmts_pos"]
 
-    special_metadata = generate_special_metadata(config, string_idx, hpge_names, pmts_pos)
+    special_metadata = generate_special_metadata(string_data, detail_data, string_idx, hpge_names, pmts_pos)
     channelmap = generate_channelmap(
-        hpge_data, hpge_names, hpge_rawid, string_idx, spms_data, pmts_meta, pmts_pos
+        hpge_data, hpge_names, hpge_rawid, string_idx, spms_data, pmts_data, pmts_pos
     )
 
     # Convert numpy types to native Python types to match file serialization behavior
@@ -358,7 +338,7 @@ def generate_dummy_metadata(
 
 
 def setup_dummy_metadata(
-    input_config: str = "",
+    input_config_folder: str = "",
     output_special_metadata: str = "",
     output_channelmap: str = "",
     dets_from_metadata: str = "",
@@ -374,7 +354,7 @@ def setup_dummy_metadata(
         output_channelmap = str(configs_dir / "channelmap.json")
 
     # Generate the metadata objects
-    channelmap, special_metadata = generate_dummy_metadata(input_config, dets_from_metadata)
+    channelmap, special_metadata = generate_dummy_metadata(input_config_folder, dets_from_metadata)
 
     # Write to files
     with Path(output_special_metadata).open("w") as f:
