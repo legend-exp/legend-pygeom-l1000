@@ -1,0 +1,6 @@
+units:
+  n: 8
+  l: 140.1
+copper_rods:
+  r: 1.5
+  r_offset_from_center: 51

@@ -1,0 +1,49 @@
+floor:
+  row1:
+    id: 1
+    n: 50
+    r: 3800
+  row2:
+    id: 2
+    n: 30
+    r: 3000
+  row3:
+    id: 3
+    n: 15
+    r: 1800
+  row4:
+    id: 4
+    n: 8
+    r: 800
+  row5:
+    id: 5
+    n: 1
+    r: 0
+tyvek:
+  faces: 15
+  r: 4000
+wall:
+  row1:
+    id: 1
+    n: 35
+    z: 1811.1
+  row2:
+    id: 2
+    n: 35
+    z: 2771.4
+  row3:
+    id: 3
+    n: 35
+    z: 3731.7
+  row4:
+    id: 4
+    n: 35
+    z: 4692
+  row5:
+    id: 5
+    n: 35
+    z: 5652.3
+  row6:
+    id: 6
+    n: 35
+    z: 6612.6

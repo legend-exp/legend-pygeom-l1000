@@ -60,13 +60,8 @@ def construct(
     config = config if config is not None else {}
 
     # Try to load channelmap and special_metadata, with fallback to generate the data on the fly
+    # Fallback: generate dummy metadata objects directly
     try:
-        channelmap = load_dict_from_config(
-            config, "channelmap", lambda: AttrsDict(configs["channelmap.json"])
-        )
-    except FileNotFoundError:
-        # Fallback: generate dummy metadata objects directly
-        logger.info("channelmap.json not found in configs directory, generating channelmap on the fly")
         channelmap_dict, special_metadata_dict = dummy_metadata_generator.generate_dummy_metadata()
         channelmap = AttrsDict(channelmap_dict)
     except Exception as e:
