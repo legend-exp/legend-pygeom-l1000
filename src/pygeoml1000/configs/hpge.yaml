@@ -1,7 +1,7 @@
 name: V0000
 system: geds
 type: icpc
-location: 
+location:
   string: 1
   position: 1
 daq:
