@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import json
 import yaml
+import dbetto
 from pathlib import Path
 
 import legendmeta
@@ -40,12 +41,6 @@ ARRAY_CONFIG = {
 }
 
 N_SIPM_MODULES_PER_STRING = 3
-
-
-def load_config(input_path):
-    """Load configuration from a YAML file."""
-    with Path(input_path).open() as f:
-        return yaml.safe_load(f)
 
 
 def calculate_and_place_pmts(channelmap: dict, pmts_data: dict, pmts_pos: dict) -> None:
@@ -298,14 +293,14 @@ def generate_dummy_metadata(
         len(ARRAY_CONFIG["center"]["x_in_mm"]) * len(ARRAY_CONFIG["angle_in_deg"])
     ).reshape(len(ARRAY_CONFIG["center"]["x_in_mm"]), len(ARRAY_CONFIG["angle_in_deg"]))
 
-    hpge_data, spms_data, pmts_data = None, None, None
+    configs = dbetto.TextDB(configs_dir)
 
-    hpge_data = load_config(configs_dir / "hpge.yaml")
-    spms_data = load_config(configs_dir / "sipm.yaml")
-    pmts_data = load_config(configs_dir / "pmts.yaml")
-    string_data = load_config(configs_dir / "string.yaml")
-    detail_data = load_config(configs_dir / "detail.yaml")
-    pmts_pos = load_config(configs_dir / "pmts_pos.yaml")
+    hpge_data = configs["hpge"]
+    spms_data = configs["sipm"]
+    pmts_data = configs["pmts"]
+    string_data = configs["string"]
+    detail_data = configs["detail"]
+    pmts_pos = configs["pmts_pos"]
 
     hpge_names = np.sort(
         np.concatenate(
