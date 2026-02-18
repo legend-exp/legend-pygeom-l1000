@@ -2,10 +2,9 @@ from __future__ import annotations
 
 import copy
 import json
-import yaml
-import dbetto
 from pathlib import Path
 
+import dbetto
 import numpy as np
 import yaml
 
