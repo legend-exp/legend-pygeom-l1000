@@ -6,7 +6,6 @@ import yaml
 import dbetto
 from pathlib import Path
 
-import legendmeta
 import numpy as np
 import yaml
 
@@ -146,7 +145,9 @@ def calculate_and_place_pmts(channelmap: dict, pmts_data: dict, pmts_pos: dict) 
             raise ValueError(msg)
 
 
-def generate_special_metadata(string_data: dict, detail_data: dict, string_idx: list, hpge_names: list, pmts_pos: dict) -> dict:
+def generate_special_metadata(
+    string_data: dict, detail_data: dict, string_idx: list, hpge_names: list, pmts_pos: dict
+) -> dict:
     """Generate special_metadata.yaml file."""
 
     special_output = {}
@@ -318,7 +319,6 @@ def generate_dummy_metadata(
             ]
         )
     )
-
 
     special_metadata = generate_special_metadata(string_data, detail_data, string_idx, hpge_names, pmts_pos)
     channelmap = generate_channelmap(
