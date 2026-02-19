@@ -35,7 +35,7 @@ def construct_and_place_cavern_and_labs(instr: core.InstrumentationData) -> None
         rock_extent = rock_lv.extent(includeBoundingSolid=True)
 
         cavern_lv, cavern_x_offset = construct_cavern(
-            instr.materials.rock,
+            instr.materials.air,
             instr.registry,
             instr.mother_lv,
             cavern_max_height,
