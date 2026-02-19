@@ -11,6 +11,7 @@ from math import pi
 
 import numpy as np
 import pyg4ometry.geant4 as g4
+from pygeomtools import RemageDetectorInfo
 
 from . import core, cryo
 
@@ -316,6 +317,8 @@ def construct_and_place_tank(instr: core.InstrumentationData) -> core.Instrument
     water_lv = construct_water(instr.materials.water, instr.registry, instr.detail["watertank"])
     water_lv.pygeom_color_rgba = [0, 0, 1, 0.2]
     water_pv = g4.PhysicalVolume([0, 0, 0], [0, 0, 0], water_lv, "water", tank_lv, instr.registry)
+
+    water_pv.set_pygeom_active_detector(RemageDetectorInfo("scintillator", 10002, {}))
 
     # NamedTuples are immutable, so we need to create a copy
     return instr._replace(mother_lv=water_lv, mother_pv=water_pv, mother_z_displacement=tank_z_displacement)
