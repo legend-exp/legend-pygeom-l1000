@@ -1,0 +1,31 @@
+name: "1"
+order: 1
+impurity_measurements:
+  value_in_1e9e_cm3:
+    - 5
+    - 7
+    - 8
+    - 10
+    - 16
+  distance_from_seed_end_mm:
+    - 0
+    - 50
+    - 80
+    - 100
+    - 112
+impurity_curve:
+  model: "parabolic_exponential_boule"
+  parameters:
+    a: 5.0
+    b: 0.04703
+    c: -0.000142
+    n: 0.01442
+    l: 61.14
+    m: 8.13
+  corrections:
+    scale: 1.0
+slices:
+  A:
+    detector_offset_in_mm: 112
+  X:
+    detector_offset_in_mm: 112

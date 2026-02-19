@@ -1,0 +1,24 @@
+cosmogenic:
+  cavern: simple
+  labs: omit
+  watertank: simple
+  watertank_instrumentation: simple
+  cryostat: simple
+  nm_plastic: simple
+  nm_holding_structure: omit
+  fiber_curtain: simple
+  front-end_and_insulators: omit
+  PEN_plates: stl
+  HPGe_dets: metadata
+radiogenic:
+  cavern: omit
+  labs: omit
+  watertank: omit
+  watertank_instrumentation: omit
+  cryostat: simple
+  nm_plastic: simple
+  nm_holding_structure: simple
+  fiber_curtain: detailed
+  front-end_and_insulators: place
+  PEN_plates: stl
+  HPGe_dets: metadata
