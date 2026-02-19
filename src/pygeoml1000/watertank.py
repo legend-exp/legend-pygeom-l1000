@@ -320,7 +320,6 @@ def construct_and_place_tank(instr: core.InstrumentationData) -> core.Instrument
 
     water_pv.set_pygeom_active_detector(RemageDetectorInfo("scintillator", 10002, {}))
 
-
     # NamedTuples are immutable, so we need to create a copy
     return instr._replace(mother_lv=water_lv, mother_pv=water_pv, mother_z_displacement=tank_z_displacement)
 
