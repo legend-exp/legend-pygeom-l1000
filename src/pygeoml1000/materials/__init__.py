@@ -442,3 +442,20 @@ class OpticalMaterialRegistry(BaseMaterialRegistry):
         pygeomoptics.pmts.pyg4_pmt_attach_air_rindex(_vacuum, self.g4_registry)
 
         return _vacuum
+
+    @cached_property
+    def air(self) -> g4.Material:
+        """Air material with refractive index."""
+        _air = g4.Material(
+            name="air",
+            density=1.225e-3,
+            number_of_components=2,
+            registry=self.g4_registry,
+        )
+        _air.add_element_massfraction(self.get_element("N"), massfraction=0.757)
+        _air.add_element_massfraction(self.get_element("O"), massfraction=0.23)
+        _air.add_element_massfraction(self.get_element("Ar"), massfraction=0.013)
+
+        pygeomoptics.pmts.pyg4_pmt_attach_air_rindex(_air, self.g4_registry)
+
+        return _air
