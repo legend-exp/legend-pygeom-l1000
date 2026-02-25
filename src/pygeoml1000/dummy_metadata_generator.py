@@ -61,7 +61,7 @@ def calculate_and_place_pmts(channelmap: dict, pmts_data: dict, pmts_pos: dict) 
             if radius > watertank.tank_pit_radius:
                 z = watertank.tank_pit_height
 
-            channelmap[name] = copy.deepcopy(pmts_meta)
+            channelmap[name] = copy.deepcopy(pmts_data)
             channelmap[name]["daq"]["rawid"] = rawid
             rawid += 1
             channelmap[name]["name"] = name
