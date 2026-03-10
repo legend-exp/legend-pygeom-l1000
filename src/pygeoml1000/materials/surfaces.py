@@ -10,6 +10,7 @@ import pygeomoptics.germanium
 import pygeomoptics.silicon
 import pygeomoptics.tetratex
 import pygeomoptics.tyvek
+from dbetto import AttrsDict
 from pygeomtools.materials import cached_property
 
 from .ketek_sipm import ketek_sipm_efficiency
@@ -90,11 +91,17 @@ class OpticalSurfaceRegistry:
 
         return _wlsr_tpb_to_tetratex
 
-    @cached_property
-    def to_sipm_silicon(self) -> g4.solid.OpticalSurface:
+    def to_sipm_silicon(self, runtime_config: AttrsDict, channel_name: str) -> g4.solid.OpticalSurface:
         """Reflective surface for KETEK SiPM."""
+        # Create unique surface name based on channel to support per-channel efficiencies
+        surface_name = f"surface_to_sipm_silicon_{channel_name}"
+
+        # Check if this surface already exists in the registry
+        if surface_name in self.g4_registry.surfaceDict:
+            return self.g4_registry.surfaceDict[surface_name]
+
         _to_sipm_silicon = g4.solid.OpticalSurface(
-            "surface_to_sipm_silicon",
+            surface_name,
             finish="ground",
             model=self._model,
             surf_type="dielectric_metal",
@@ -106,6 +113,20 @@ class OpticalSurfaceRegistry:
 
         # add custom efficiency for the KETEK SiPMs. This is not part of pygeomoptics.
         λ, eff = ketek_sipm_efficiency()
+
+        # Check whether to use the KETEK efficiency curve. If not, use flat 1s.
+        if not runtime_config.get("sipm_use_pde_curve", True):
+            eff = np.ones_like(λ)
+
+        # Check if efficiencies exist and contain this channel
+        efficiencies = runtime_config.get("sipm_efficiencies", {})
+
+        # get the factor for this channel, default to 1.0
+        eff_factor = efficiencies.get(channel_name, 1.0)
+
+        eff = eff * eff_factor  # scale channel-specific efficiency
+        eff = np.clip(eff, 0, 1)
+
         with u.context("sp"):
             _to_sipm_silicon.addVecPropertyPint("EFFICIENCY", λ.to("eV"), eff)
 

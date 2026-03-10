@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 import numpy as np
+from dbetto import AttrsDict
 from pyg4ometry import geant4 as g4
 from pygeomtools import RemageDetectorInfo
 
@@ -82,6 +83,7 @@ def place_fiber_modules(b: core.InstrumentationData) -> None:
         z_displacement_mm=z_displacement_fiber_assembly,
         registry=b.registry,
         materials=b.materials,
+        runtime_config=b.runtime_config,
     )
 
     for mod in modules.values():
@@ -139,6 +141,7 @@ class ModuleFactoryBase(ABC):
         z_displacement_mm: float,
         materials: materials.OpticalMaterialRegistry,
         registry: g4.Registry,
+        runtime_config: AttrsDict,
     ):
         """
         Create a fiber module factory.
@@ -168,6 +171,7 @@ class ModuleFactoryBase(ABC):
         self.z_displacement = z_displacement_mm
         self.materials = materials
         self.registry = registry
+        self.runtime_config = runtime_config
 
         if self.number_of_sipm_modules % 3 != 0:
             msg = "number_of_sipm_modules must be a multiple of 3"
@@ -398,7 +402,10 @@ class ModuleFactoryBase(ABC):
             f"bsurface_lar_{sipm_name}",
             mother_pv,
             sipm_pv,
-            self.materials.surfaces.to_sipm_silicon,
+            self.materials.surfaces.to_sipm_silicon(
+                self.runtime_config,
+                sipm_name,
+            ),
             self.registry,
         )
 
@@ -826,7 +833,10 @@ class ModuleFactorySingleFibers(ModuleFactoryBase):
                 f"bsurface_lar_{mod.channel_bottom_name}",
                 b.mother_pv,
                 sipm_pv,
-                self.materials.surfaces.to_sipm_silicon,
+                self.materials.surfaces.to_sipm_silicon(
+                    self.runtime_config,
+                    mod.channel_bottom_name,
+                ),
                 self.registry,
             )
 
@@ -1168,7 +1178,10 @@ class ModuleFactorySegment(ModuleFactoryBase):
                 f"bsurface_lar_{mod.channel_bottom_name}",
                 b.mother_pv,
                 sipm_pv,
-                self.materials.surfaces.to_sipm_silicon,
+                self.materials.surfaces.to_sipm_silicon(
+                    self.runtime_config,
+                    mod.channel_bottom_name,
+                ),
                 self.registry,
             )
 

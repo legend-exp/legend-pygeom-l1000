@@ -5,9 +5,10 @@ from __future__ import annotations
 import argparse
 import logging
 
+import dbetto
 from pyg4ometry import config as meshconfig
 from pygeomoptics.store import load_user_material_code
-from pygeomtools import detectors, utils, visualization, write_pygeom
+from pygeomtools import detectors, visualization, write_pygeom
 
 from . import _version, core, dummy_metadata_generator
 
@@ -155,7 +156,7 @@ def dump_gdml_cli() -> None:
 
     config = {}
     if args.config:
-        config = utils.load_dict(args.config)
+        config = dbetto.utils.load_dict(args.config)
 
     # Skip geometry generation if only generating metadata
     if args.generate_metadata and args.filename is None and not args.visualize:
@@ -163,7 +164,7 @@ def dump_gdml_cli() -> None:
 
     vis_scene = {}
     if isinstance(args.visualize, str):
-        vis_scene = utils.load_dict(args.visualize)
+        vis_scene = dbetto.utils.load_dict(args.visualize)
 
     if vis_scene.get("fine_mesh", False) or args.check_overlaps:
         meshconfig.setGlobalMeshSliceAndStack(100)
