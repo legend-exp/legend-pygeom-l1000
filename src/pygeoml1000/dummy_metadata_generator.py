@@ -291,10 +291,6 @@ def generate_dummy_metadata(
     if input_config_folder:
         configs_dir = Path(input_config_folder)
 
-    if dets_from_metadata != "":
-        json_acceptable_string = dets_from_metadata.replace("'", '"')
-        det_names_from_metadata = json.loads(json_acceptable_string)
-
     string_idx = np.arange(
         len(ARRAY_CONFIG["center"]["x_in_mm"]) * len(ARRAY_CONFIG["angle_in_deg"])
     ).reshape(len(ARRAY_CONFIG["center"]["x_in_mm"]), len(ARRAY_CONFIG["angle_in_deg"]))
