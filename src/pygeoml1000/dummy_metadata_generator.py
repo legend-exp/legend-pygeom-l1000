@@ -264,7 +264,7 @@ def generate_channelmap(
 def _convert_numpy_types(obj):
     """Convert numpy types to native Python types recursively."""
     if isinstance(obj, dict):
-        return {key: _convert_numpy_types(value) for key, value in obj.items()}
+        return {str(key): _convert_numpy_types(value) for key, value in obj.items()}
     if isinstance(obj, list):
         return [_convert_numpy_types(item) for item in obj]
     if isinstance(obj, np.integer):
@@ -273,13 +273,12 @@ def _convert_numpy_types(obj):
         return float(obj)
     if isinstance(obj, np.ndarray):
         return obj.tolist()
+    if isinstance(obj, np.str_):
+        return str(obj)
     return obj
 
 
-def generate_dummy_metadata(
-    input_config_folder: str = "",
-    dets_from_metadata: str = "",
-) -> tuple[dict, dict]:
+def generate_dummy_metadata(input_config_folder: str = "") -> tuple[dict, dict]:
     """Generate dummy metadata objects without writing files.
 
     Returns:
@@ -333,28 +332,16 @@ def generate_dummy_metadata(
     return channelmap, special_metadata
 
 
-def setup_dummy_metadata(
-    input_config_folder: str = "",
-    output_special_metadata: str = "",
-    output_channelmap: str = "",
-    dets_from_metadata: str = "",
-) -> None:
+def setup_dummy_metadata(input_config_folder: str = "", output_config: str = "") -> None:
     """Generate and write dummy metadata files to disk."""
-    # Default to configs directory if paths are not provided
-    script_dir = Path(__file__).parent
-    configs_dir = script_dir / "configs"
-
-    if not output_special_metadata:
-        output_special_metadata = str(configs_dir / "special_metadata.yaml")
-    if not output_channelmap:
-        output_channelmap = str(configs_dir / "channelmap.json")
 
     # Generate the metadata objects
-    channelmap, special_metadata = generate_dummy_metadata(input_config_folder, dets_from_metadata)
+    channelmap, special_metadata = generate_dummy_metadata(input_config_folder)
 
-    # Write to files
-    with Path(output_special_metadata).open("w") as f:
-        yaml.dump(special_metadata, f)
+    output_dict = {"channelmap": channelmap, "special_metadata": special_metadata}
 
-    with Path(output_channelmap).open("w") as f:
-        json.dump(channelmap, f, cls=NpEncoder, indent=4)
+    if output_config == "":
+        output_config = "config.yaml"
+
+    with Path(output_config).open("w") as f:
+        yaml.dump(output_dict, f)

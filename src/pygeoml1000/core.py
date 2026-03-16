@@ -6,7 +6,6 @@ from typing import NamedTuple
 
 from dbetto import AttrsDict, TextDB
 from pyg4ometry import geant4
-from pygeomtools.utils import load_dict_from_config
 
 from . import (
     cavern_and_labs,
@@ -59,26 +58,15 @@ def construct(
 
     config = config if config is not None else {}
 
-    # Try to load channelmap and special_metadata, with fallback to generate the data on the fly
-    # Fallback: generate dummy metadata objects directly
-    try:
-        channelmap_dict, special_metadata_dict = dummy_metadata_generator.generate_dummy_metadata()
-        channelmap = AttrsDict(channelmap_dict)
-    except Exception as e:
-        msg = f"Error loading channelmap: {e}"
-        raise RuntimeError(msg) from e
+    channelmap_dict, special_metadata_dict = dummy_metadata_generator.generate_dummy_metadata()
 
-    try:
-        special_metadata = load_dict_from_config(
-            config, "special_metadata", lambda: AttrsDict(configs["special_metadata.yaml"])
-        )
-    except FileNotFoundError:
-        # Fallback: use dummy metadata objects directly
-        logger.info("special_metadata.yaml not found in configs directory, generating metadata on the fly")
-        special_metadata = AttrsDict(special_metadata_dict)
-    except Exception as e:
-        msg = f"Error loading special_metadata: {e}"
-        raise RuntimeError(msg) from e
+    if "special_metadata" in config:
+        special_metadata_dict = config["special_metadata"]
+    if "channelmap" in config:
+        channelmap_dict = config["channelmap"]
+
+    special_metadata = AttrsDict(special_metadata_dict)
+    channelmap = AttrsDict(channelmap_dict)
 
     if detail_level not in special_metadata["detail"]:
         msg = "invalid detail level specified"

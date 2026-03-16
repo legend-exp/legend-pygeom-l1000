@@ -91,35 +91,22 @@ def dump_gdml_cli() -> None:
     # options for metadata generation
     meta_opts = parser.add_argument_group("metadata generation options")
     meta_opts.add_argument(
-        "--generate-metadata",
+        "--generate-config",
         action="store_true",
-        help="""Generate necessary dummy metadata files (special_metadata.yaml and channelmap.json)""",
+        help="""Generate necessary the default config file containing the special_metadata and channelmap.""",
     )
     meta_opts.add_argument(
-        "--metadata-config",
+        "--input-config-folder",
         action="store",
         default="",
-        help="""Config file for metadata generation (defaults to configs/config.json)""",
+        help="""Folder location of input config files (defaults to Path(__file__).parent/configs/).""",
     )
     meta_opts.add_argument(
-        "--output-special-metadata",
+        "--output-config",
         action="store",
         default="",
-        help="""Output file for special metadata (defaults to configs/special_metadata.yaml)""",
+        help="""Output file for config file (default is [cwd]/config.yaml).""",
     )
-    meta_opts.add_argument(
-        "--output-channelmap",
-        action="store",
-        default="",
-        help="""Output file for channelmap (defaults to configs/channelmap.json)""",
-    )
-    meta_opts.add_argument(
-        "--dets-from-metadata",
-        action="store",
-        default="",
-        help="""Use HPGe detector from metadata as dummy. Format: '{"hpge": "DETECTOR_NAME"}', e.g., '{"hpge": "V000000A"}'""",
-    )
-
     parser.add_argument(
         "filename",
         default=None,
@@ -129,7 +116,7 @@ def dump_gdml_cli() -> None:
 
     args = parser.parse_args()
 
-    if not args.visualize and args.filename is None and not args.generate_metadata:
+    if not args.visualize and args.filename is None and not args.generate_config:
         parser.error("no output file, no visualization, and no metadata generation specified")
     if (args.vis_macro_file or args.det_macro_file) and args.filename is None:
         parser.error("writing macro file(s) without gdml file is not possible")
@@ -140,18 +127,15 @@ def dump_gdml_cli() -> None:
         logging.root.setLevel(logging.DEBUG)
 
     # Handle metadata generation
-    if args.generate_metadata:
-        log.info("generating dummy metadata files")
+    if args.generate_config:
+        log.info("generating default config file")
         try:
             dummy_metadata_generator.setup_dummy_metadata(
-                input_config=args.metadata_config,
-                output_special_metadata=args.output_special_metadata,
-                output_channelmap=args.output_channelmap,
-                dets_from_metadata=args.dets_from_metadata,
+                input_config_folder=args.input_config_folder, output_config=args.output_config
             )
-            log.info("metadata files generated successfully")
+            log.info("config file generated successfully")
         except Exception as e:
-            log.error("failed to generate metadata files: %s", e)
+            log.error("failed to generate config file: %s", e)
             return
 
     config = {}
@@ -159,7 +143,7 @@ def dump_gdml_cli() -> None:
         config = dbetto.utils.load_dict(args.config)
 
     # Skip geometry generation if only generating metadata
-    if args.generate_metadata and args.filename is None and not args.visualize:
+    if args.generate_config and args.filename is None and not args.visualize:
         return
 
     vis_scene = {}
