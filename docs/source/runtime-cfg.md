@@ -194,7 +194,7 @@ top-level keys.
    to bypass the compilation step and use your customized values directly:
 
    ```console
-   $ legend-pygeom-l1000 --compiled-config config.yaml output.gdml
+   $ legend-pygeom-l1000 -V --compiled-config config.yaml output.gdml
    ```
 
 Note that `--input-raw-config-folder` is silently ignored when
@@ -207,8 +207,15 @@ variant is self-contained.
 
 ### Minimal single-ring geometry (6 strings)
 
-<img src="_images/geom_6_strings_top.png" alt="" align="right" style="height: 350px; padding: 2em">
-<img src="_images/geom_6_strings_side.png" alt="" align="right" style="height: 350px; padding: 2em">
+<!-- prettier-ignore -->
+:::{image} images/geom_6_strings_top.png
+:height: 300px
+:::
+
+<!-- prettier-ignore -->
+:::{image} images/geom_6_strings_side.png
+:height: 300px
+:::
 
 A compact geometry with one central cluster of 6 strings is useful for fast test
 simulations or studies that do not require the full array. Edit `array.yaml` in
@@ -227,7 +234,7 @@ angle_in_deg: [0, 60, 120, 180, 240, 300]
 Then compile:
 
 ```console
-$ legend-pygeom-l1000 --input-raw-config-folder ./my_configs/
+$ legend-pygeom-l1000 -V --input-raw-config-folder ./my_configs/
 ```
 
 This produces 6 strings (`V0101`-`V0608`, 48 HPGe detectors total), 36 SiPM
@@ -236,8 +243,15 @@ modified).
 
 ### Two-ring geometry (12 strings)
 
-<img src="_images/geom_12_strings_top.png" alt="" align="right" style="height: 350px; padding: 2em">
-<img src="_images/geom_12_strings_side.png" alt="" align="right" style="height: 350px; padding: 2em">
+<!-- prettier-ignore -->
+:::{image} images/geom_12_strings_top.png
+:height: 300px
+:::
+
+<!-- prettier-ignore -->
+:::{image} images/geom_12_strings_side.png
+:height: 300px
+:::
 
 To simulate two string clusters placed around their respective centers, set two
 entries in `array.yaml`:
@@ -256,9 +270,15 @@ channels, and the full PMT complement.
 
 ### Removing a specific detector or string from the compiled config
 
-\_
-<img src="_images/geom_12_strings_wo_string_7_top.png" alt="" align="right" style="height: 350px; padding: 2em">
-<img src="_images/geom_12_strings_wo_string_7_side.png" alt="" align="right" style="height: 350px; padding: 2em">
+<!-- prettier-ignore -->
+:::{image} images/geom_12_strings_wo_string_7_top.png
+:height: 300px
+:::
+
+<!-- prettier-ignore -->
+:::{image} images/geom_12_strings_wo_string_7_side.png
+:height: 300px
+:::
 
 After compiling, individual detectors can be removed by deleting their entries
 from the `channelmap` and `special_metadata.hpges` sections of the compiled
