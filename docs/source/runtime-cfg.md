@@ -207,8 +207,8 @@ variant is self-contained.
 
 ### Minimal single-ring geometry (6 strings)
 
-<img src="_images/geom_6_strings_top.png" alt="" align="right" style="height: 350px; padding: 2em">
-<img src="_images/geom_6_strings_side.png" alt="" align="right" style="height: 350px; padding: 2em">
+:::{image} ./images/geom_6_strings_top.png :height: 350px ::: :::{image}
+./images/geom_6_strings_side.png :height: 350px :::
 
 A compact geometry with one central cluster of 6 strings is useful for fast test
 simulations or studies that do not require the full array. Edit `array.yaml` in
@@ -236,8 +236,8 @@ modified).
 
 ### Two-ring geometry (12 strings)
 
-<img src="_images/geom_12_strings_top.png" alt="" align="right" style="height: 350px; padding: 2em">
-<img src="_images/geom_12_strings_side.png" alt="" align="right" style="height: 350px; padding: 2em">
+:::{image} ./images/geom_12_strings_top.png :height: 350px ::: :::{image}
+./images/geom_12_strings_side.png :height: 350px :::
 
 To simulate two string clusters placed around their respective centers, set two
 entries in `array.yaml`:
@@ -256,9 +256,8 @@ channels, and the full PMT complement.
 
 ### Removing a specific detector or string from the compiled config
 
-\_
-<img src="_images/geom_12_strings_wo_string_7_top.png" alt="" align="right" style="height: 350px; padding: 2em">
-<img src="_images/geom_12_strings_wo_string_7_side.png" alt="" align="right" style="height: 350px; padding: 2em">
+:::{image} ./images/geom_12_strings_wo_string_7_top.png :height: 350px :::
+:::{image} ./images/geom_12_strings_wo_string_7_side.png :height: 350px :::
 
 After compiling, individual detectors can be removed by deleting their entries
 from the `channelmap` and `special_metadata.hpges` sections of the compiled
