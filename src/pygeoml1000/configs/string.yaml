@@ -4,3 +4,4 @@ units:
 copper_rods:
   r: 1.5
   r_offset_from_center: 51
+n_sipm_modules_per_string: 3

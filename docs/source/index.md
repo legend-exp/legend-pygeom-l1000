@@ -98,6 +98,5 @@ description
 ```{toctree}
 :maxdepth: 2
 :caption: Developer
-metadata
 Package API reference <api/modules>
 ```
