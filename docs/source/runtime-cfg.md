@@ -253,7 +253,6 @@ modified).
 :height: 300px
 :::
 
-
 To simulate two string clusters placed around their respective centers, set two
 entries in `array.yaml`:
 
@@ -280,7 +279,6 @@ channels, and the full PMT complement.
 :::{image} images/geom_12_strings_wo_string_7_side.png
 :height: 300px
 :::
-
 
 After compiling, individual detectors can be removed by deleting their entries
 from the `channelmap` and `special_metadata.hpges` sections of the compiled
