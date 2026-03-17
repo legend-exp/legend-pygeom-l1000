@@ -19,7 +19,7 @@ raw config files for high-level changes, then by modifying the compiled config
 for more detailed changes.
 
 This section first discusses the configuration file format and structure, then
-the compilation process, and finally best practices for using the configuration
+the compilation process, and finally, best practices for using the configuration
 system effectively.
 
 ## Raw configuration files
@@ -28,6 +28,19 @@ The raw configuration files are YAML files located in
 `src/pygeoml1000/configs/`. Each file controls a specific aspect of the
 geometry. A custom folder can be passed at runtime via
 `--input-raw-config-folder`.
+
+The `configs` folder in the source directory contains the following raw config files:
+```bash
+configs/
+├── array.yaml
+├── crystal.yaml
+├── detail.yaml
+├── hpge.yaml
+├── pmts_pos.yaml
+├── pmts.yaml
+├── sipm.yaml
+└── string.yaml
+```
 
 ### `array.yaml` — String array layout
 
@@ -315,8 +328,7 @@ entries in `hpges` in the `special_metadata`.
 To use a custom HPGe template, create a modified copy of `hpge.yaml` with the
 desired geometry and characterization fields. The geometry is defined using the
 standard format of the legend metadata (e.g. the example geometries found in the
-remage
-(tutorial)[https://remage.readthedocs.io/en/stable/tutorial.html#experimental-geometry]).
+remage [tutorial](https://remage.readthedocs.io/en/stable/tutorial.html#experimental-geometry)).
 At the moment, there is only support for using a single geometry template for
 all detectors, though in the future this will be generalized to allow for
 multiple geometries per setup.
