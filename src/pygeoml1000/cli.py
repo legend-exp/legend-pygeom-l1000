@@ -4,13 +4,14 @@ from __future__ import annotations
 
 import argparse
 import logging
+from pathlib import Path
 
 import dbetto
 from pyg4ometry import config as meshconfig
 from pygeomoptics.store import load_user_material_code
 from pygeomtools import detectors, visualization, write_pygeom
 
-from . import _version, core, dummy_metadata_generator
+from . import _version, config_compilation, core
 
 log = logging.getLogger(__name__)
 
@@ -82,30 +83,33 @@ def dump_gdml_cli() -> None:
         default="radiogenic",
         help="""Select the detail level for the setup. (default: %(default)s)""",
     )
-    geom_opts.add_argument(
-        "--config",
-        action="store",
-        help="""Select a config file to read geometry config from.""",
-    )
 
-    # options for metadata generation
-    meta_opts = parser.add_argument_group("metadata generation options")
-    meta_opts.add_argument(
-        "--generate-config",
+    config_opts = parser.add_argument_group("config options")
+    config_opts.add_argument(
+        "--copy-raw-configs-into-cwd-folder",
         action="store_true",
-        help="""Generate necessary the default config file containing the special_metadata and channelmap.""",
+        help="""Copy the raw config files to the cwd folder. This is useful for creating a custom config file based on the default raw configs. The default raw configs are located in the 'configs' folder of this package.""",
     )
-    meta_opts.add_argument(
-        "--input-config-folder",
+    config_opts.add_argument(
+        "--generate-compiled-config",
+        action="store_true",
+        help="""Generate the compiled config file containing the special_metadata and channelmap.""",
+    )
+    config_opts.add_argument(
+        "--output-compiled-config",
         action="store",
         default="",
-        help="""Folder location of input config files (defaults to Path(__file__).parent/configs/).""",
+        help="""Output file for the compiled config file (default is [cwd]/config.yaml).""",
     )
-    meta_opts.add_argument(
-        "--output-config",
+    config_opts.add_argument(
+        "--compiled-config",
+        help="""Use a compiled config file containing the special_metadata and channelmap instead of generating a new geometry. Overrides using the raw config files.""",
+    )
+    config_opts.add_argument(
+        "--input-raw-config-folder",
         action="store",
         default="",
-        help="""Output file for config file (default is [cwd]/config.yaml).""",
+        help="""Folder location of raw input config files (defaults to Path(__file__).parent/configs/).""",
     )
     parser.add_argument(
         "filename",
@@ -116,7 +120,12 @@ def dump_gdml_cli() -> None:
 
     args = parser.parse_args()
 
-    if not args.visualize and args.filename is None and not args.generate_config:
+    if (
+        not args.visualize
+        and args.filename is None
+        and not args.generate_compiled_config
+        and not args.copy_raw_configs_into_cwd_folder
+    ):
         parser.error("no output file, no visualization, and no metadata generation specified")
     if (args.vis_macro_file or args.det_macro_file) and args.filename is None:
         parser.error("writing macro file(s) without gdml file is not possible")
@@ -126,24 +135,39 @@ def dump_gdml_cli() -> None:
     if args.debug:
         logging.root.setLevel(logging.DEBUG)
 
-    # Handle metadata generation
-    if args.generate_config:
+    if args.copy_raw_configs_into_cwd_folder:
+        log.info("copying raw config files to %s", Path.cwd())
+        folder = Path.cwd()
+        try:
+            config_compilation.copy_raw_configs(destination_folder=folder)
+            log.info("raw config files copied successfully")
+        except Exception as e:
+            log.error("failed to copy raw config files: %s", e)
+            return
+
+    if args.generate_compiled_config:
         log.info("generating default config file")
         try:
-            dummy_metadata_generator.setup_dummy_metadata(
-                input_config_folder=args.input_config_folder, output_config=args.output_config
+            config_compilation.setup_config_file(
+                input_config_folder=args.input_raw_config_folder, output_config=args.output_compiled_config
             )
             log.info("config file generated successfully")
         except Exception as e:
             log.error("failed to generate config file: %s", e)
             return
 
-    config = {}
-    if args.config:
-        config = dbetto.utils.load_dict(args.config)
+    if args.compiled_config and args.input_raw_config_folder:
+        log.warning("input_raw_config_folder is ignored when using a compiled config file")
 
-    # Skip geometry generation if only generating metadata
-    if args.generate_config and args.filename is None and not args.visualize:
+    config = {}
+    if args.compiled_config:
+        config = dbetto.utils.load_dict(args.compiled_config)
+
+    if (
+        (args.generate_compiled_config or args.copy_raw_configs_into_cwd_folder)
+        and args.filename is None
+        and not args.visualize
+    ):
         return
 
     vis_scene = {}
@@ -161,6 +185,7 @@ def dump_gdml_cli() -> None:
         assemblies=args.assemblies.split(",") if args.assemblies else None,
         detail_level=args.detail,
         config=config,
+        input_config_folder=args.input_raw_config_folder,
     )
 
     if args.check_overlaps:

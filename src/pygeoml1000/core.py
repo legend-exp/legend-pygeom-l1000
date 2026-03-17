@@ -9,8 +9,8 @@ from pyg4ometry import geant4
 
 from . import (
     cavern_and_labs,
+    config_compilation,
     cryo,
-    dummy_metadata_generator,
     fibers,
     hpge_strings,
     materials,
@@ -53,12 +53,15 @@ def construct(
     assemblies: list[str] | None = None,
     detail_level: str = "radiogenic",
     config: dict | None = None,
+    input_config_folder: str = "",
 ) -> geant4.Registry:
     """Construct the LEGEND-1000 geometry and return the pyg4ometry Registry containing the world volume."""
 
     config = config if config is not None else {}
 
-    channelmap_dict, special_metadata_dict = dummy_metadata_generator.generate_dummy_metadata()
+    channelmap_dict, special_metadata_dict = config_compilation.generate_dummy_metadata(
+        input_config_folder=input_config_folder
+    )
 
     if "special_metadata" in config:
         special_metadata_dict = config["special_metadata"]

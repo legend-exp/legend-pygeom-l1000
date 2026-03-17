@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import copy
-import json
+import os
 from pathlib import Path
 
 import dbetto
@@ -10,43 +10,11 @@ import yaml
 
 from . import watertank
 
-# This script is used to generate the special_metadata.yaml and channelmap.yaml files for the LEGEND-1000 geometry.
 
-
-# Helper class taken from https://stackoverflow.com/questions/50916422/python-typeerror-object-of-type-int64-is-not-json-serializable
-class NpEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, np.integer):
-            return int(obj)
-        if isinstance(obj, np.floating):
-            return float(obj)
-        if isinstance(obj, np.ndarray):
-            return obj.tolist()
-        return super().default(obj)
-
-
-# Constants
-ARRAY_CONFIG = {
-    #    "center": {
-    #        "x_in_mm": [0, 550, 110, -440, -550, -110, 440],
-    #        "y_in_mm": [0, 190.5, 571.6, 381.1, -190.5, -571.6, -381.1],
-    #    },
-    #    "radius_in_mm": 220,
-    "center": {
-        "x_in_mm": [0.0, 533.7, 106.7, -427.0, -533.7, -106.7, 427.0],
-        "y_in_mm": [0.0, 184.9, 554.7, 369.8, -184.9, -554.7, -369.8],
-    },
-    "radius_in_mm": 213.5,
-    "angle_in_deg": [0, 60, 120, 180, 240, 300],
-}
-
-N_SIPM_MODULES_PER_STRING = 3
-
-
-def calculate_and_place_pmts(channelmap: dict, pmts_data: dict, pmts_pos: dict) -> None:
+def calculate_and_place_pmts(channelmap: dict, configs: dbetto.TextDB) -> None:
     # Floor PMTs are pretty trivial to place
     rawid = 6000
-    for row in pmts_pos["floor"].values():
+    for row in configs["pmts_pos"]["floor"].values():
         row_index = row["id"]
         pmts_in_row = row["n"]
         radius = row["r"]
@@ -61,7 +29,7 @@ def calculate_and_place_pmts(channelmap: dict, pmts_data: dict, pmts_pos: dict) 
             if radius > watertank.tank_pit_radius:
                 z = watertank.tank_pit_height
 
-            channelmap[name] = copy.deepcopy(pmts_data)
+            channelmap[name] = copy.deepcopy(configs["pmts"])
             channelmap[name]["daq"]["rawid"] = rawid
             rawid += 1
             channelmap[name]["name"] = name
@@ -69,15 +37,15 @@ def calculate_and_place_pmts(channelmap: dict, pmts_data: dict, pmts_pos: dict) 
             channelmap[name]["location"]["direction"] = {"nx": 0, "ny": 0, "nz": 1}
 
     # The wall PMTs require some polygon math
-    faces = pmts_pos["tyvek"]["faces"]
+    faces = configs["pmts_pos"]["tyvek"]["faces"]
     # Geant4 uses r as inscribe radius, but we need the circumradius
-    radius = pmts_pos["tyvek"]["r"] / np.cos(np.pi / faces)
+    radius = configs["pmts_pos"]["tyvek"]["r"] / np.cos(np.pi / faces)
 
     # Compute vertices of the polygon
     vertices = [
         (radius * np.cos(2 * np.pi * i / faces), radius * np.sin(2 * np.pi * i / faces)) for i in range(faces)
     ]
-    for row in pmts_pos["wall"].values():
+    for row in configs["pmts_pos"]["wall"].values():
         row_index = row["id"]
         pmts_in_row = row["n"]
         z = row["z"]
@@ -132,7 +100,7 @@ def calculate_and_place_pmts(channelmap: dict, pmts_data: dict, pmts_pos: dict) 
                 x = x1 * (1 - t) + x2 * t
                 y = y1 * (1 - t) + y2 * t
 
-                channelmap[name] = copy.deepcopy(pmts_data)
+                channelmap[name] = copy.deepcopy(configs["pmts"])
                 channelmap[name]["daq"]["rawid"] = rawid
                 rawid += 1
                 channelmap[name]["name"] = name
@@ -150,9 +118,7 @@ def calculate_and_place_pmts(channelmap: dict, pmts_data: dict, pmts_pos: dict) 
             raise ValueError(msg)
 
 
-def generate_special_metadata(
-    string_data: dict, detail_data: dict, string_idx: list, hpge_names: list, pmts_pos: dict
-) -> dict:
+def generate_special_metadata(string_idx: list, hpge_names: list, configs: dbetto.TextDB) -> dict:
     """Generate special_metadata.yaml file."""
 
     special_output = {}
@@ -160,18 +126,18 @@ def generate_special_metadata(
     special_output["hpge_string"] = {
         f"{string_idx[i][j] + 1}": {
             "center": {
-                "x_in_mm": ARRAY_CONFIG["center"]["x_in_mm"][i],
-                "y_in_mm": ARRAY_CONFIG["center"]["y_in_mm"][i],
+                "x_in_mm": configs["array"]["center"]["x_in_mm"][i],
+                "y_in_mm": configs["array"]["center"]["y_in_mm"][i],
             },
-            "angle_in_deg": ARRAY_CONFIG["angle_in_deg"][j],
-            "radius_in_mm": ARRAY_CONFIG["radius_in_mm"],
-            "rod_radius_in_mm": string_data["copper_rods"]["r_offset_from_center"],
+            "angle_in_deg": configs["array"]["angle_in_deg"][j],
+            "radius_in_mm": configs["array"]["radius_in_mm"],
+            "rod_radius_in_mm": configs["string"]["copper_rods"]["r_offset_from_center"],
         }
         for i, j in np.ndindex(string_idx.shape)
     }
 
     special_output["hpges"] = {
-        f"{name}": {"rodlength_in_mm": string_data["units"]["l"], "baseplate": "xlarge"}
+        f"{name}": {"rodlength_in_mm": configs["string"]["units"]["l"], "baseplate": "xlarge"}
         for name in hpge_names
     }
 
@@ -182,54 +148,50 @@ def generate_special_metadata(
             "geometry": {"tpb": {"thickness_in_nm": 1093}},
             "location": {
                 "x": float(
-                    ARRAY_CONFIG["center"]["x_in_mm"][string // len(ARRAY_CONFIG["angle_in_deg"])]
-                    + ARRAY_CONFIG["radius_in_mm"]
+                    configs["array"]["center"]["x_in_mm"][string // len(configs["array"]["angle_in_deg"])]
+                    + configs["array"]["radius_in_mm"]
                     * np.cos(
-                        np.radians(ARRAY_CONFIG["angle_in_deg"][string % len(ARRAY_CONFIG["angle_in_deg"])])
+                        np.radians(
+                            configs["array"]["angle_in_deg"][string % len(configs["array"]["angle_in_deg"])]
+                        )
                     )
                 ),
                 "y": float(
-                    ARRAY_CONFIG["center"]["y_in_mm"][string // len(ARRAY_CONFIG["angle_in_deg"])]
-                    + ARRAY_CONFIG["radius_in_mm"]
+                    configs["array"]["center"]["y_in_mm"][string // len(configs["array"]["angle_in_deg"])]
+                    + configs["array"]["radius_in_mm"]
                     * np.sin(
-                        np.radians(ARRAY_CONFIG["angle_in_deg"][string % len(ARRAY_CONFIG["angle_in_deg"])])
+                        np.radians(
+                            configs["array"]["angle_in_deg"][string % len(configs["array"]["angle_in_deg"])]
+                        )
                     )
                 ),
                 "module_num": n,
             },
         }
         for string in string_idx.flatten()
-        for n in range(N_SIPM_MODULES_PER_STRING)
+        for n in range(configs["string"]["n_sipm_modules_per_string"])
     }
 
     special_output["calibration"] = {}
 
     special_output["watertank_instrumentation"] = {
         "tyvek": {
-            "r": pmts_pos["tyvek"]["r"],
-            "faces": pmts_pos["tyvek"]["faces"],
+            "r": configs["pmts_pos"]["tyvek"]["r"],
+            "faces": configs["pmts_pos"]["tyvek"]["faces"],
         },
     }
 
-    special_output["detail"] = detail_data
+    special_output["detail"] = configs["detail"]
 
     return special_output
 
 
-def generate_channelmap(
-    hpge_data: dict,
-    hpge_names: list,
-    hpge_rawid: list,
-    string_idx: list,
-    spms_data: dict,
-    pmts_data: dict,
-    pmts_pos: dict,
-) -> dict:
+def generate_channelmap(string_idx: list, hpge_names: list, hpge_rawid: list, configs: dbetto.TextDB) -> dict:
     """Generate channelmap.json file."""
 
     channelmap = {}
     for name, rawid in zip(hpge_names, hpge_rawid, strict=False):
-        channelmap[name] = copy.deepcopy(hpge_data)
+        channelmap[name] = copy.deepcopy(configs["hpge"])
         channelmap[name]["name"] = name
         channelmap[name]["daq"]["rawid"] = rawid
         channelmap[name]["location"]["string"] = rawid // 100
@@ -237,9 +199,9 @@ def generate_channelmap(
 
     rawid = 5000
     for string in string_idx.flatten():
-        for n in range(N_SIPM_MODULES_PER_STRING):
+        for n in range(configs["string"]["n_sipm_modules_per_string"]):
             name = f"S{string + 1:02d}{n + 1:02d}T"
-            channelmap[name] = copy.deepcopy(spms_data)
+            channelmap[name] = copy.deepcopy(configs["sipm"])
             channelmap[name]["name"] = name
             channelmap[name]["location"]["fiber"] = name[:-1]
             channelmap[name]["location"]["position"] = "top"
@@ -247,16 +209,16 @@ def generate_channelmap(
             channelmap[name]["daq"]["rawid"] = rawid
             rawid += 1
 
-        for n in range(N_SIPM_MODULES_PER_STRING):
+        for n in range(configs["string"]["n_sipm_modules_per_string"]):
             name = f"S{string + 1:02d}{n + 1:02d}B"
-            channelmap[name] = copy.deepcopy(spms_data)
+            channelmap[name] = copy.deepcopy(configs["sipm"])
             channelmap[name]["name"] = name
             channelmap[name]["location"]["fiber"] = name[:-1]
             channelmap[name]["location"]["position"] = "bottom"
             channelmap[name]["location"]["barrel"] = string + 1
             channelmap[name]["daq"]["rawid"] = rawid
             rawid += 1
-    calculate_and_place_pmts(channelmap, pmts_data, pmts_pos)
+    calculate_and_place_pmts(channelmap, configs)
 
     return channelmap
 
@@ -287,43 +249,35 @@ def generate_dummy_metadata(input_config_folder: str = "") -> tuple[dict, dict]:
     # Default to configs directory if paths are not provided
     script_dir = Path(__file__).parent
     configs_dir = script_dir / "configs"
-    if input_config_folder:
+    if input_config_folder != "":
         configs_dir = Path(input_config_folder)
-
-    string_idx = np.arange(
-        len(ARRAY_CONFIG["center"]["x_in_mm"]) * len(ARRAY_CONFIG["angle_in_deg"])
-    ).reshape(len(ARRAY_CONFIG["center"]["x_in_mm"]), len(ARRAY_CONFIG["angle_in_deg"]))
 
     configs = dbetto.TextDB(configs_dir)
 
-    hpge_data = configs["hpge"]
-    spms_data = configs["sipm"]
-    pmts_data = configs["pmts"]
-    string_data = configs["string"]
-    detail_data = configs["detail"]
-    pmts_pos = configs["pmts_pos"]
+    string_idx = np.arange(
+        len(configs["array"]["center"]["x_in_mm"]) * len(configs["array"]["angle_in_deg"])
+    ).reshape(len(configs["array"]["center"]["x_in_mm"]), len(configs["array"]["angle_in_deg"]))
 
     hpge_names = np.sort(
         np.concatenate(
             [
-                [f"V{i + 1:02d}{j + 1:02d}" for j in range(string_data["units"]["n"])]
-                for i in range(string_idx.size)
-            ]
-        )
-    )
-    hpge_rawid = np.sort(
-        np.concatenate(
-            [
-                [(i + 1) * 100 + j + 1 for j in range(string_data["units"]["n"])]
+                [f"V{i + 1:02d}{j + 1:02d}" for j in range(configs["string"]["units"]["n"])]
                 for i in range(string_idx.size)
             ]
         )
     )
 
-    special_metadata = generate_special_metadata(string_data, detail_data, string_idx, hpge_names, pmts_pos)
-    channelmap = generate_channelmap(
-        hpge_data, hpge_names, hpge_rawid, string_idx, spms_data, pmts_data, pmts_pos
+    hpge_rawid = np.sort(
+        np.concatenate(
+            [
+                [(i + 1) * 100 + j + 1 for j in range(configs["string"]["units"]["n"])]
+                for i in range(string_idx.size)
+            ]
+        )
     )
+
+    special_metadata = generate_special_metadata(string_idx, hpge_names, configs)
+    channelmap = generate_channelmap(string_idx, hpge_names, hpge_rawid, configs)
 
     # Convert numpy types to native Python types to match file serialization behavior
     channelmap = _convert_numpy_types(channelmap)
@@ -332,7 +286,7 @@ def generate_dummy_metadata(input_config_folder: str = "") -> tuple[dict, dict]:
     return channelmap, special_metadata
 
 
-def setup_dummy_metadata(input_config_folder: str = "", output_config: str = "") -> None:
+def setup_config_file(input_config_folder: str = "", output_config: str = "") -> None:
     """Generate and write dummy metadata files to disk."""
 
     # Generate the metadata objects
@@ -345,3 +299,17 @@ def setup_dummy_metadata(input_config_folder: str = "", output_config: str = "")
 
     with Path(output_config).open("w") as f:
         yaml.dump(output_dict, f)
+
+
+def copy_raw_configs(destination_folder: str) -> None:
+    """Copy raw config files to a custom folder."""
+    script_dir = Path(__file__).parent
+    configs_dir = script_dir / "configs"
+
+    destination_folder = Path(destination_folder)
+    destination_folder.mkdir(parents=True, exist_ok=True)
+
+    for item in configs_dir.iterdir():
+        if item.is_file():
+            dest_file = destination_folder / item.name
+            os.system(f"cp {item} {dest_file}")
