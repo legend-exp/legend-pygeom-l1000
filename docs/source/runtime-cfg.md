@@ -187,16 +187,21 @@ top-level keys.
 
 1. **Start from the raw configs** for high-level structural changes (e.g. number
    of strings, PMT ring positions). Regenerate the compiled config afterwards.
+   Alternatively, if you want to keep the default raw configs unchanged, copy
+   the raw config folder using the `--copy-raw-configs-into-cwd-folder` flag and
+   pass `--input-raw-config-folder` to use your custom raw configs without
+   modifying the defaults.
 2. **Edit the compiled config** for fine-grained adjustments (e.g. removing
    individual detectors, overriding a single position or raw ID) without
-   touching the raw files.
+   touching the raw files. Generate the config with `--generate-compiled-config`
+   and `--output-compiled-config`.
 3. **Pass the compiled config** to the geometry builder via `--compiled-config`
    to bypass the compilation step and use your customized values directly:
 
    ```console
    $ legend-pygeom-l1000 -V --compiled-config config.yaml output.gdml
    ```
-
+   
 Note that `--input-raw-config-folder` is silently ignored when
 `--compiled-config` is provided — the compiled config always takes precedence.
 Keep your custom raw config in a dedicated folder and pass
