@@ -29,7 +29,9 @@ The raw configuration files are YAML files located in
 geometry. A custom folder can be passed at runtime via
 `--input-raw-config-folder`.
 
-The `configs` folder in the source directory contains the following raw config files:
+The `configs` folder in the source directory contains the following raw config
+files:
+
 ```bash
 configs/
 ├── array.yaml
@@ -214,7 +216,7 @@ top-level keys.
    ```console
    $ legend-pygeom-l1000 -V --compiled-config config.yaml output.gdml
    ```
-   
+
 Note that `--input-raw-config-folder` is silently ignored when
 `--compiled-config` is provided — the compiled config always takes precedence.
 Keep your custom raw config in a dedicated folder and pass
@@ -328,7 +330,8 @@ entries in `hpges` in the `special_metadata`.
 To use a custom HPGe template, create a modified copy of `hpge.yaml` with the
 desired geometry and characterization fields. The geometry is defined using the
 standard format of the legend metadata (e.g. the example geometries found in the
-remage [tutorial](https://remage.readthedocs.io/en/stable/tutorial.html#experimental-geometry)).
+remage
+[tutorial](https://remage.readthedocs.io/en/stable/tutorial.html#experimental-geometry)).
 At the moment, there is only support for using a single geometry template for
 all detectors, though in the future this will be generalized to allow for
 multiple geometries per setup.
