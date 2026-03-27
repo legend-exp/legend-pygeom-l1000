@@ -540,12 +540,12 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     bottom_fraction = 0.233
 
     # The following parameters are internal to this class.
-    ocryo_thickness = 60
+    ocryo_thickness = 16
     # However, I should mention the vacuum gap is asymmetric - it has distinct values at the neck, barrel, and bottom
     vgap_thickness_neck = 45
     vgap_thickness_barrel = 180
     vgap_thickness_bottom = 150
-    icryo_thickness = 40
+    icryo_thickness = 16
     neck_ar_thickness = 59  # Thickness of atmospheric argon around the neck assuming 6mm neck thickness
 
     barrel_radius = inner_barrel_radius + icryo_thickness + ocryo_thickness + vgap_thickness_barrel
