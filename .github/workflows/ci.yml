@@ -26,7 +26,7 @@ jobs:
         os: [ubuntu-latest, macOS-latest]
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v6
         with:
@@ -49,7 +49,7 @@ jobs:
           "${{ github.event_name != 'pull_request' ||
           github.event.pull_request.head.repo.owner.login == 'legend-exp' }}"
       - name: Clone legend-metadata
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: legend-exp/legend-metadata
           fetch-depth: 0
@@ -70,7 +70,7 @@ jobs:
     needs: build-and-test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 2
       - uses: actions/setup-python@v6
@@ -85,7 +85,7 @@ jobs:
           "${{ github.event_name != 'pull_request' ||
           github.event.pull_request.head.repo.owner.login == 'legend-exp' }}"
       - name: Clone legend-metadata
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: legend-exp/legend-metadata
           fetch-depth: 0
@@ -103,7 +103,7 @@ jobs:
           python -m pip install --upgrade .[test]
           python -m pytest --cov=pygeoml1000 --cov-report=xml
       - name: Upload Coverage to codecov.io
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
@@ -112,7 +112,7 @@ jobs:
     needs: build-and-test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - uses: actions/setup-python@v6
@@ -127,7 +127,7 @@ jobs:
           "${{ github.event_name != 'pull_request' ||
           github.event.pull_request.head.repo.owner.login == 'legend-exp' }}"
       - name: Clone legend-metadata
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: legend-exp/legend-metadata
           fetch-depth: 0
