@@ -8,7 +8,7 @@ from importlib import resources
 import numpy as np
 import pyg4ometry
 from dbetto import AttrsDict
-from pyg4ometry import geant4
+from pyg4ometry import geant4, transformation
 from pygeomhpges import make_hpge
 from pygeomtools import RemageDetectorInfo
 from scipy.spatial.transform import Rotation
@@ -45,13 +45,29 @@ CABLE_CAP_Z_OFFSET = 500  # mm
 
 
 def _cap_z_above_cable(cable_thickness: float) -> float:
-    """Distance along z between the origin of the topmost cable and the centre of its cap.
-
-    The cap placement in :func:`_place_front_end_and_insulators` and the cable subtracted out of
-    the cap in :func:`_get_hv_cap`/:func:`_get_signal_cap` both derive their offset from here, so
-    that the two cannot silently drift apart when the cable thickness changes.
-    """
+    """Distance along z between the origin of the topmost cable and the centre of its cap."""
     return CABLE_CAP_Z_OFFSET - 0.5 - cable_thickness
+
+
+def _cap_to_cable(cap_rotation: list, cap_pos: np.ndarray, cable_pos: np.ndarray) -> np.ndarray:
+    """Position of a cable in the local frame of the cap terminating it.
+
+    The cap is built by subtracting its cable from a solid block, which only carves out the right
+    channel if the subtraction uses exactly the displacement between the two placements. Deriving
+    it here instead of hand-tuning a constant matters on the HV side: ``angle_hv`` does not track
+    the radial direction the parts are offset along (unlike ``angle_signal``), so the displacement
+    seen in the cap frame differs between strings with different rotations.
+    """
+    # a placement rotation is the inverse of the daughter's local-to-world rotation, so the matrix
+    # built from it maps a world displacement straight into the daughter frame.
+    return transformation.tbxyz2matrix(cap_rotation) @ (cable_pos - cap_pos)
+
+
+def _cap_tag(cap_to_cable: np.ndarray) -> str:
+    """Short, stable name fragment identifying a cap's subtraction geometry."""
+    return "_".join(
+        f"{0.0 if abs(v) < 1e-3 else round(float(v), 2):.2f}".replace("-", "m") for v in cap_to_cable[:2]
+    )
 
 
 def calculate_string_rotation(string_id: str, b: core.InstrumentationData) -> float:
@@ -202,10 +218,13 @@ def _place_front_end_and_insulators(
     )
 
     if is_top:
+        cap_rot = [math.pi, 0, angle_signal]
+        cap_pos = np.array([x_cap, y_cap, z_pos["cable"] - thickness["cable"] - 0.5 + CABLE_CAP_Z_OFFSET])
+        cap_to_cable = _cap_to_cable(cap_rot, cap_pos, np.array([x_cable, y_cable, z_pos["cable"]]))
         geant4.PhysicalVolume(
-            [math.pi, 0, angle_signal],
-            [x_cap, y_cap, z_pos["cable"] - thickness["cable"] - 0.5 + CABLE_CAP_Z_OFFSET],
-            _get_signal_cap(thickness["cable"], unit_length, n_cables, b),
+            cap_rot,
+            list(cap_pos),
+            _get_signal_cap(thickness["cable"], unit_length, n_cables, cap_to_cable, b),
             f"signal_cap_string_{string_id}",
             b.mother_lv,
             b.registry,
@@ -243,10 +262,13 @@ def _place_front_end_and_insulators(
     )
 
     if is_top:
+        cap_rot = [0, 0, angle_hv]
+        cap_pos = np.array([x_cap, y_cap, z_pos["cable"] - thickness["cable"] - 0.5 + CABLE_CAP_Z_OFFSET])
+        cap_to_cable = _cap_to_cable(cap_rot, cap_pos, np.array([x_cable, y_cable, z_pos["cable"]]))
         geant4.PhysicalVolume(
-            [0, 0, angle_hv],
-            [x_cap, y_cap, z_pos["cable"] - thickness["cable"] - 0.5 + CABLE_CAP_Z_OFFSET],
-            _get_hv_cap(thickness["cable"], unit_length, n_cables, b),
+            cap_rot,
+            list(cap_pos),
+            _get_hv_cap(thickness["cable"], unit_length, n_cables, cap_to_cable, b),
             f"hv_cap_string_{string_id}",
             b.mother_lv,
             b.registry,
@@ -730,14 +752,16 @@ def _get_hv_cap(
     cable_thickness: float,
     cable_length: float,
     n_cables: int,
+    cap_to_cable: np.ndarray,
     b: core.InstrumentationData,
 ) -> geant4.LogicalVolume:
     """Get the cap terminating the HV cable run at the top of a string, creating it on first use.
 
-    The cable is subtracted out of the cap body so that the two do not overlap; the subtraction
-    offset mirrors the cap placement in :func:`_place_front_end_and_insulators`.
+    The cable is subtracted out of the cap body at ``cap_to_cable``, its measured position in the
+    cap's frame, so that the two cannot overlap by construction. That displacement is part of the
+    cache key: on the HV side it differs between strings, see :func:`_cap_to_cable`.
     """
-    cap_name = f"hv_cap_{cable_length:.2f}_n{n_cables}"
+    cap_name = f"hv_cap_{cable_length:.2f}_n{n_cables}_{_cap_tag(cap_to_cable)}"
     if cap_name in b.registry.logicalVolumeDict:
         return b.registry.logicalVolumeDict[cap_name]
 
@@ -749,16 +773,7 @@ def _get_hv_cap(
         cap_name,
         hv_cap_body,
         hv_cable.solid,
-        [
-            [0, 0, 0],
-            # might have to be changed when introducing strings with different diameters,
-            # but for now this avoids overlaps between cap and cable
-            [
-                19.08 + n_cables * cable_thickness + CABLE_CAP_TOP_LENGTH - 30,
-                0,
-                -_cap_z_above_cable(cable_thickness),
-            ],
-        ],
+        [[0, 0, 0], list(cap_to_cable)],
         b.registry,
     )
 
@@ -951,14 +966,15 @@ def _get_signal_cap(
     cable_thickness: float,
     cable_length: float,
     n_cables: int,
+    cap_to_cable: np.ndarray,
     b: core.InstrumentationData,
 ) -> geant4.LogicalVolume:
     """Get the cap terminating the signal cable run at the top of a string, creating it on first use.
 
-    The cable is subtracted out of the cap body so that the two do not overlap; the subtraction
-    offset mirrors the cap placement in :func:`_place_front_end_and_insulators`.
+    The cable is subtracted out of the cap body at ``cap_to_cable``, its measured position in the
+    cap's frame, so that the two cannot overlap by construction.
     """
-    cap_name = f"signal_cap_{cable_length:.2f}_n{n_cables}"
+    cap_name = f"signal_cap_{cable_length:.2f}_n{n_cables}_{_cap_tag(cap_to_cable)}"
     if cap_name in b.registry.logicalVolumeDict:
         return b.registry.logicalVolumeDict[cap_name]
 
@@ -970,12 +986,7 @@ def _get_signal_cap(
         cap_name,
         signal_cap_body,
         signal_cable.solid,
-        [
-            [0, 0, 0],
-            # might have to be changed when introducing strings with different diameters,
-            # but for now this avoids overlaps between cap and cable
-            [-5 + CABLE_CAP_TOP_LENGTH - 30, 0, _cap_z_above_cable(cable_thickness)],
-        ],
+        [[0, 0, 0], list(cap_to_cable)],
         b.registry,
     )
 

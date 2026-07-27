@@ -51,7 +51,9 @@ def test_placement_multiplicity(manifest):
     # there is one HV cable per position in the string, each placed once per string.
     assert _part(manifest, "cable_hv_140.10_n1")["placements"] == 42
     assert _part(manifest, "cable_hv_140.10_n8_top")["placements"] == 42
-    assert _part(manifest, "hv_cap_140.10_n8")["placements"] == 42
+    # the cap name carries the cable offset it was built for, so match on the stem.
+    hv_caps = [part for part in manifest["parts"] if part["name"].startswith("hv_cap_")]
+    assert sum(part["placements"] for part in hv_caps) == 42
     assert _part(manifest, "hpge_support_copper_weldment_top")["placements"] == 1008
 
 
