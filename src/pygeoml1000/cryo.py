@@ -594,9 +594,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     skirt_thickness = 60  # A guess
 
     if instr.detail["watertank"] == "omit":
-        skirt_bottom = (
-            -body_height / 2 - ocryo_thickness * 3 - (skirt_height - ocryo_thickness * 2) / 2
-        )
+        skirt_bottom = -body_height / 2 - ocryo_thickness * 3 - (skirt_height - ocryo_thickness * 2) / 2
     else:
         # 1e-9 to avoid sharing a surface with the bottom of the water volume.
         skirt_bottom = watertank.tank_horizontal_wall - instr.mother_z_displacement + 1e-9
