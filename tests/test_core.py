@@ -50,11 +50,6 @@ def test_volume_caching():
         pvs = [name for name in registry.physicalVolumeDict if name.startswith(stem)]
         assert len(pvs) == n_expected, f"{stem}: expected {n_expected} placements, got {len(pvs)}"
 
-    # the front-end cables are deliberately *not* identical across detector units: their cross
-    # section scales with the number of cables they bundle towards the top of the string. So there
-    # is one logical volume per position in the string, shared between all 42 strings, plus one cap
-    # per side terminating the cable run at the top of each string.
-    # name stem -> (expected number of logical volumes, expected number of placements)
     expected_per_position = {
         "cable_hv": (8, 336),
         "cable_signal": (8, 336),

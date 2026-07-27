@@ -163,13 +163,14 @@ def _place_front_end_and_insulators(
     # the cables of all units below this one are routed past it towards the top of the string, so
     # the cable bundle gets thicker the further up the string we are. The topmost unit carries the
     # full bundle and additionally routes it along the support rod into the cable cap.
+    #
+    # the runtime option ``hpge_cable_caps`` switches that last part off
     det_pos = det_unit.meta.location.position
     n_cables = string_info["max_unit_id"] + 1 - det_pos
-    is_top = det_pos == 1
+    is_top = det_pos == 1 and b.runtime_config.get("hpge_cable_caps", True)
 
     # add cable and clamp. The logical volumes only depend on the geometry, so they are shared
-    # between all detector units with the same cable bundle; only the placements below are per
-    # detector.
+    # between all detector units with the same cable bundle
     signal_cable = _get_signal_cable(thickness["cable"], unit_length, n_cables, is_top, b)
     signal_clamp = _get_signal_clamp(thickness["clamp"], b)
     signal_asic = _get_signal_asic(b)
