@@ -592,12 +592,18 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     skirt_height = total_height - neck_height - (body_height * (1 - bottom_fraction))
     skirt_radius = barrel_radius
     skirt_thickness = 60  # A guess
-    skirt_z = -body_height / 2 - ocryo_thickness * 3
+
+    if instr.detail["watertank"] == "omit":
+        skirt_bottom = (
+            -body_height / 2 - ocryo_thickness * 3 - (skirt_height - ocryo_thickness * 2) / 2
+        )
+    else:
+        # 1e-9 to avoid sharing a surface with the bottom of the water volume.
+        skirt_bottom = watertank.tank_horizontal_wall - instr.mother_z_displacement + 1e-9
 
     # The skirt is a plain cylinder, but the cryostat bottom it surrounds is curved: simply
     # shortening the skirt by a fixed amount does not reliably clear that curve. Instead, solve the
     # cryostat profile for the height at which it grows into the skirt wall and end the skirt there.
-    skirt_bottom = skirt_z - (skirt_height - ocryo_thickness * 2) / 2
     skirt_top = _first_z_at_radius(ocryo_z, ocryo_r, skirt_radius - skirt_thickness) - SKIRT_CRYO_GAP
     actual_skirt_height = skirt_top - skirt_bottom
     skirt_z = (skirt_top + skirt_bottom) / 2
@@ -720,45 +726,26 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     # Place the physical volumes at the end
     # Move the cryostat back in a central position
 
-    if instr.detail["watertank"] == "omit":
-        g4.PhysicalVolume(
-            [0, 0, 0],
-            [instr.mother_x_displacement, 0, skirt_z + instr.mother_z_displacement],
-            skirt_lv,
-            "skirt",
-            instr.mother_lv,
-            instr.registry,
-        )
-        g4.PhysicalVolume(
-            [0, 0, 0],
-            [
-                instr.mother_x_displacement,
-                0,
-                skirt_z - actual_skirt_height / 2 + foot_height / 2 + instr.mother_z_displacement,
-            ],
-            foot_lv,
-            "foot",
-            instr.mother_lv,
-            instr.registry,
-        )
-    else:
-        water_floor = watertank.tank_horizontal_wall
-        g4.PhysicalVolume(
-            [0, 0, 0],
-            [0, 0, water_floor + actual_skirt_height / 2.0 + 1e-9],
-            skirt_lv,
-            "skirt",
-            instr.mother_lv,
-            instr.registry,
-        )
-        g4.PhysicalVolume(
-            [0, 0, 0],
-            [0, 0, water_floor + foot_height / 2.0 + 1e-9],
-            foot_lv,
-            "foot",
-            instr.mother_lv,
-            instr.registry,
-        )
+    g4.PhysicalVolume(
+        [0, 0, 0],
+        [instr.mother_x_displacement, 0, skirt_z + instr.mother_z_displacement],
+        skirt_lv,
+        "skirt",
+        instr.mother_lv,
+        instr.registry,
+    )
+    g4.PhysicalVolume(
+        [0, 0, 0],
+        [
+            instr.mother_x_displacement,
+            0,
+            skirt_z - actual_skirt_height / 2 + foot_height / 2 + instr.mother_z_displacement,
+        ],
+        foot_lv,
+        "foot",
+        instr.mother_lv,
+        instr.registry,
+    )
 
     g4.PhysicalVolume(
         [0, 0, 0],
