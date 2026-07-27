@@ -126,9 +126,11 @@ def _place_front_end_and_insulators(
     thickness: dict,
     parts_origin: dict,
 ):
+    det_pos = det_unit.lv.metadata.location["position"]
     # add cable and clamp
-    signal_cable, signal_clamp, signal_asic = _get_signal_cable_and_asic(
+    signal_cable, signal_clamp, signal_asic, signal_cap, top_length_signal = _get_signal_cable_and_asic(
         det_unit.name,
+        det_pos,
         thickness["cable"],
         thickness["clamp"],
         unit_length,
@@ -150,6 +152,9 @@ def _place_front_end_and_insulators(
     x_asic, y_asic = np.array([string_info["x_pos"], string_info["y_pos"]]) + parts_origin["signal"][
         "asic"
     ] * np.array([np.sin(string_info["string_rot"]), np.cos(string_info["string_rot"])])
+    x_cap, y_cap = np.array([string_info["x_pos"], string_info["y_pos"]]) + (
+        parts_origin["signal"]["cap"] - top_length_signal
+    ) * np.array([np.sin(string_info["string_rot"]), np.cos(string_info["string_rot"])])
 
     geant4.PhysicalVolume(
         [math.pi, 0, angle_signal],
@@ -159,6 +164,7 @@ def _place_front_end_and_insulators(
         b.mother_lv,
         b.registry,
     )
+
     geant4.PhysicalVolume(
         [math.pi, 0, angle_signal],
         [x_clamp, y_clamp, z_pos["clamp"]],  # this offset of 12 is measured from the CAD file.
@@ -179,9 +185,24 @@ def _place_front_end_and_insulators(
         b.mother_lv,
         b.registry,
     )
+    if det_pos == 1:
+        signal_cap.pygeom_color_rgba = (0.5, 0.5, 0.5, 1)
+        geant4.PhysicalVolume(
+            [math.pi, 0, angle_signal],
+            [
+                x_cap,
+                y_cap,
+                z_pos["cable"] - thickness["cable"] - 0.5 + 500,
+            ],  # this offset of 12 is measured from the CAD file.
+            signal_cap,
+            signal_cap.name + "_string_" + string_info["string_id"],
+            b.mother_lv,
+            b.registry,
+        )
 
-    hv_cable, hv_clamp = _get_hv_cable(
+    hv_cable, hv_clamp, hv_cap, top_length_hv = _get_hv_cable(
         det_unit.name,
+        det_pos,
         thickness["cable"],
         thickness["clamp"],
         unit_length,
@@ -199,10 +220,13 @@ def _place_front_end_and_insulators(
     x_cable, y_cable = np.array([string_info["x_pos"], string_info["y_pos"]]) - parts_origin["hv"][
         "cable"
     ] * np.array([np.sin(string_info["string_rot"]), np.cos(string_info["string_rot"])])
+    x_cap, y_cap = np.array([string_info["x_pos"], string_info["y_pos"]]) - (
+        parts_origin["hv"]["cap"] - top_length_hv
+    ) * np.array([np.sin(string_info["string_rot"]), np.cos(string_info["string_rot"])])
 
     geant4.PhysicalVolume(
         [0, 0, angle_hv],
-        [x_clamp, y_clamp, z_pos["cable"]],
+        [x_cable, y_cable, z_pos["cable"]],
         hv_cable,
         hv_cable.name + "_string_" + string_info["string_id"],
         b.mother_lv,
@@ -216,6 +240,21 @@ def _place_front_end_and_insulators(
         b.mother_lv,
         b.registry,
     )
+
+    if det_pos == 1:
+        hv_cap.pygeom_color_rgba = (0.5, 0.5, 0.5, 1)
+        geant4.PhysicalVolume(
+            [math.pi, 0, angle_signal],
+            [
+                x_cap,
+                y_cap,
+                z_pos["cable"] - thickness["cable"] - 0.5 + 500,
+            ],  # this offset of 12 is measured from the CAD file.
+            hv_cap,
+            hv_cap.name + "_string_" + string_info["string_id"],
+            b.mother_lv,
+            b.registry,
+        )
 
     insulator_top_length = string_info["string_meta"].rod_radius_in_mm - det_unit.radius + 1.5
 
@@ -365,8 +404,13 @@ def _place_hpge_unit(
                 + 5 / 2,  # position from center of detector to center of volume center
                 "cable": 2.5 + 4.0 + 16 / 2,
                 "asic": 2.5 + 4.0 + 11 + 1 / 2.0,
+                "cap": 2.5 + 4.0 + 43,
             },
-            "hv": {"clamp": 2.5 + 29.5 + 3.5 + 5 / 2, "cable": 2.5 + 29.5 + 2.0 + 8 / 2},
+            "hv": {
+                "clamp": 2.5 + 29.5 + 3.5 + 5 / 2,
+                "cable": 2.5 + 29.5 + 2.0 + 8 / 2,
+                "cap": 2.5 + 29.5 + 2.0 + 19,
+            },
         }
 
         _place_front_end_and_insulators(
@@ -412,6 +456,7 @@ def _place_hpge_string(
             z_pos_dict["first_detector_bottom"] - total_rod_length
         )  # defined as the bottom of the clap at the moment.
         unit_length = det_unit.rodlength  # * 0.997
+
         string_info = {
             "string_id": string_id,
             "string_rot": string_rot,
@@ -518,6 +563,7 @@ def _get_support_structure(
             support_solid, materials.metal_copper, "hpge_support_copper_string_support_structure", registry
         )
         support_lv.pygeom_color_rgba = (0.72, 0.45, 0.2, 1)
+
     else:
         support_lv = registry.logicalVolumeDict["hpge_support_copper_string_support_structure"]
 
@@ -549,6 +595,7 @@ def _add_pen_surfaces(
 
 def _get_hv_cable(
     name: str,
+    det_pos: int,
     cable_thickness: float,
     clamp_thickness: float,
     cable_length: float,
@@ -576,17 +623,23 @@ def _get_hv_cable(
         "mm",
     )
 
-    hv_cable_curve = geant4.solid.Tubs(
-        "hv_cable_curve_" + name, 3.08, 3.08 + cable_thickness, 2.0, 0, math.pi / 2.0, reg, "mm"
-    )
+    length_along_unit = cable_length
+
+    if det_pos == 1:
+        length_along_unit = cable_length + 5 + 8 * cable_thickness
 
     hv_cable_along_unit = geant4.solid.Box(
         "hv_along_unit_" + name,
-        cable_thickness,
+        (9 - det_pos) * cable_thickness,
+        # cable_thickness,
         2.0,
-        cable_length,
+        length_along_unit,
         reg,
         "mm",
+    )
+
+    hv_cable_curve = geant4.solid.Tubs(
+        "hv_cable_curve_" + name, 3.08, 3.08 + cable_thickness, 2.0, 0, math.pi / 2.0, reg, "mm"
     )
 
     hv_cable_part1 = geant4.solid.Union(
@@ -605,13 +658,98 @@ def _get_hv_cable(
         reg,
     )
 
-    hv_cable = geant4.solid.Union(
-        "cable_hv_" + name,
-        hv_cable_part2,
-        hv_cable_along_unit,
-        [[0, 0, 0], [8 / 2.0 + 5.5 + 3.08 + cable_thickness / 2.0, 0, 3.08 + cable_length / 2.0]],
-        reg,
-    )
+    if det_pos != 1:
+        # hv_cable = hv_cable_part2
+        hv_cable = geant4.solid.Union(
+            "cable_hv_" + name,
+            hv_cable_part2,
+            hv_cable_along_unit,
+            [
+                [0, 0, 0],
+                [
+                    8 / 2.0 + 5.5 + 3.08 + ((9 - det_pos) * cable_thickness) / 2.0,
+                    0,
+                    3.08 + cable_length / 2.0,
+                ],
+            ],
+            reg,
+        )
+
+    # change to alter disctance between the cable/cap and the support rod
+    top_length = 30
+
+    hv_cap = None
+    if det_pos == 1:
+        hv_cable_part_3 = geant4.solid.Union(
+            "hv_cable_part3_" + name,
+            hv_cable_part2,
+            hv_cable_along_unit,
+            [[0, 0, 0], [8 / 2.0 + 5.5 + 3.08 + cable_thickness / 2.0, 0, 2 * 3.08 + cable_length / 2.0]],
+            reg,
+        )
+
+        hv_cable_top = geant4.solid.Box(
+            "hv_cable_top_" + name,
+            (9 - det_pos) * cable_thickness,
+            2.0,
+            top_length,
+            reg,
+            "mm",
+        )
+
+        hv_cable_to_cap = geant4.solid.Box(
+            "hv_to_cap_" + name,
+            (9 - det_pos) * cable_thickness,
+            2.0,
+            5 * cable_length,
+            reg,
+            "mm",
+        )
+
+        hv_cable_part_4 = geant4.solid.Union(
+            "hv_cable_part_4_" + name,
+            hv_cable_part_3,
+            hv_cable_top,
+            [
+                [math.pi / 2, math.pi / 2, math.pi / 2],
+                [
+                    8 / 2.0 + 5.5 + 3.08 + cable_thickness - top_length / 2,
+                    0,
+                    2 * 3.08 + length_along_unit / 2 + cable_length / 2.0 + 4 * cable_thickness,
+                ],
+            ],
+            reg,
+        )
+
+        hv_cable = geant4.solid.Union(
+            "cable_hv_" + name,
+            hv_cable_part_4,
+            hv_cable_to_cap,
+            [
+                [0, 0, 0],
+                [
+                    8 / 2.0 + 5.5 + 3.08 + cable_thickness - top_length,
+                    0,
+                    2 * 3.08 + length_along_unit / 2 + 6 * cable_length / 2.0 + 4 * cable_thickness,
+                ],
+            ],
+            reg,
+        )
+
+        hv_cap_1 = geant4.solid.Box("hv_cap1_" + name, 1, 1, 2, reg, "cm")
+
+        hv_cap = geant4.solid.Subtraction(
+            "hv_cap_" + name,
+            hv_cap_1,
+            hv_cable,
+            [
+                [0, 0, 0],
+                # might have to be changed when introducing strings with different diameters,
+                # but for now this avoids overlaps between cap and cable
+                [19.08 + 8 * cable_thickness + top_length - 30, 0, -499.424],
+            ],
+            reg,
+        )
 
     hv_clamp = geant4.solid.Box(
         "ultem_clamp_hv_" + name,
@@ -635,12 +773,22 @@ def _get_hv_cable(
         "ultem_clamp_hv_" + name,
         reg,
     )
+    if det_pos == 1:
+        hv_cap_lv = geant4.LogicalVolume(
+            hv_cap,
+            materials.metal_copper,
+            "hv_cap_" + name,
+            reg,
+        )
+    else:
+        hv_cap_lv = None
 
-    return hv_cable_lv, hv_clamp_lv
+    return hv_cable_lv, hv_clamp_lv, hv_cap_lv, top_length
 
 
 def _get_signal_cable_and_asic(
     name: str,
+    det_pos: int,
     cable_thickness: float,
     clamp_thickness: float,
     cable_length: float,
@@ -670,11 +818,15 @@ def _get_signal_cable_and_asic(
     signal_cable_curve = geant4.solid.Tubs(
         "signal_cable_curve_" + name, 3.08, 3.08 + cable_thickness, 2.0, 0, math.pi / 2.0, reg, "mm"
     )
+
+    length_along_unit = cable_length + 5 + 8 * cable_thickness if det_pos == 1 else cable_length
+
     signal_cable_along_unit = geant4.solid.Box(
         "signal_along_unit_" + name,
-        cable_thickness,
+        (9 - det_pos) * cable_thickness,
+        # cable_thickness,
         2.0,
-        cable_length,
+        length_along_unit,
         reg,
         "mm",
     )
@@ -692,13 +844,98 @@ def _get_signal_cable_and_asic(
         [[np.pi / 2, 0, 0], [16 / 2.0 + 23.25, 0, -3.08 - cable_thickness / 2.0]],
         reg,
     )
-    signal_cable = geant4.solid.Union(
-        "cable_signal_" + name,
-        signal_cable_part2,
-        signal_cable_along_unit,
-        [[0, 0, 0], [16 / 2.0 + 23.25 + 3.08 + cable_thickness / 2.0, 0, -3.08 - cable_length / 2.0]],
-        reg,
-    )
+
+    if det_pos != 1:
+        signal_cable = geant4.solid.Union(
+            "cable_signal_" + name,
+            signal_cable_part2,
+            signal_cable_along_unit,
+            [
+                [0, 0, 0],
+                [
+                    16 / 2.0 + 23.25 + 3.08 + ((9 - det_pos) * cable_thickness) / 2.0,
+                    0,
+                    -3.08 - cable_length / 2.0,
+                ],
+            ],
+            reg,
+        )
+
+    # change to alter disctance between the cable/cap and the support rod
+    top_length = 30
+
+    signal_cap = None
+    if det_pos == 1:
+        signal_cable_part_3 = geant4.solid.Union(
+            "signal_cable_part_3_" + name,
+            signal_cable_part2,
+            signal_cable_along_unit,
+            [[0, 0, 0], [16 / 2.0 + 23.25 + 3.08 + cable_thickness / 2.0, 0, -2 * 3.08 - cable_length / 2.0]],
+            reg,
+        )
+
+        signal_cable_top = geant4.solid.Box(
+            "signal_cable_top_" + name,
+            (9 - det_pos) * cable_thickness,
+            2.0,
+            top_length,
+            reg,
+            "mm",
+        )
+
+        signal_cable_to_cap = geant4.solid.Box(
+            "signal_to_cap" + name,
+            (9 - det_pos) * cable_thickness,
+            2.0,
+            5 * cable_length,
+            reg,
+            "mm",
+        )
+
+        signal_cable_part_4 = geant4.solid.Union(
+            "signal_cable_part_4_" + name,
+            signal_cable_part_3,
+            signal_cable_top,
+            [
+                [math.pi / 2, math.pi / 2, math.pi / 2],
+                [
+                    16 / 2.0 + 23.25 + 3.08 + cable_thickness / 2.0 - top_length / 2,
+                    0,
+                    -2 * 3.08 - length_along_unit / 2 - cable_length / 2.0,
+                ],
+            ],
+            reg,
+        )
+
+        signal_cable = geant4.solid.Union(
+            "cable_signal_" + name,
+            signal_cable_part_4,
+            signal_cable_to_cap,
+            [
+                [0, 0, 0],
+                [
+                    16 / 2.0 + 23.25 + 3.08 + cable_thickness - top_length,
+                    0,
+                    -2 * 3.08 - length_along_unit / 2 - 6 * cable_length / 2.0,
+                ],
+            ],
+            reg,
+        )
+
+        signal_cap_part1 = geant4.solid.Box("signal_cap_part1_" + name, 1, 1, 2, reg, "cm")
+
+        signal_cap = geant4.solid.Subtraction(
+            "signal_cap_" + name,
+            signal_cap_part1,
+            signal_cable,
+            [
+                [0, 0, 0],
+                # might have to be changed when introducing strings with different diameters,
+                # but for now this avoids overlaps between cap and cable
+                [-5 + top_length - 30, 0, 499.424],
+            ],
+            reg,
+        )
 
     signal_clamp_part1 = geant4.solid.Box(
         "signal_clamp_part1_" + name,
@@ -760,8 +997,17 @@ def _get_signal_cable_and_asic(
         "signal_asic_" + name,
         reg,
     )
+    if det_pos == 1:
+        signal_cap_lv = geant4.LogicalVolume(
+            signal_cap,
+            materials.metal_copper,
+            "signal_cap_" + name,
+            reg,
+        )
+    else:
+        signal_cap_lv = None
 
-    return signal_cable_lv, signal_clamp_lv, signal_asic_lv
+    return signal_cable_lv, signal_clamp_lv, signal_asic_lv, signal_cap_lv, top_length
 
 
 def _get_weldment_and_insulator(
