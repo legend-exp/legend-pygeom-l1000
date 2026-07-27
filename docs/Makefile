@@ -5,6 +5,9 @@ BUILDDIR = build
 all: apidoc
 	sphinx-build -M html "$(SOURCEDIR)" "$(BUILDDIR)" -W --keep-going
 
+images:
+	python generate_docs_images.py
+
 apidoc: clean-apidoc
 	sphinx-apidoc --private --module-first --force \
       --output-dir "$(SOURCEDIR)/api" \
@@ -15,3 +18,5 @@ clean-apidoc:
 
 clean: clean-apidoc
 	rm -rf "$(BUILDDIR)"
+
+.PHONY: all images apidoc clean-apidoc clean
