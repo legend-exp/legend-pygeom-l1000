@@ -75,8 +75,9 @@ def place_hpge_strings(b: core.InstrumentationData) -> None:
     strings_to_build = {}
 
     for hpge_meta in ch_map:
-        # Temporary fix for gedet with null enrichment value
-        if hpge_meta.production.enrichment is None:
+        # Temporary fix for gedet with null enrichment value or missing val enrichment attribute
+        enrichment = hpge_meta.production.enrichment
+        if (enrichment.val if hasattr(enrichment, "val") else enrichment) is None:
             log.warning("%s has no enrichment in metadata - setting to dummy value 0.86!", hpge_meta.name)
             hpge_meta.production.enrichment = 0.86
 
@@ -187,7 +188,7 @@ def _place_front_end_and_insulators(
 
     geant4.PhysicalVolume(
         [0, 0, angle_hv],
-        [x_clamp, y_clamp, z_pos["cable"]],
+        [x_cable, y_cable, z_pos["cable"]],
         hv_cable,
         f"cable_hv_{det_unit.name}_string_{string_id}",
         b.mother_lv,
@@ -292,7 +293,7 @@ def _place_hpge_unit(
         b.mother_lv,
         b.registry,
     )
-    det_pv.pygeom_active_detector = RemageDetectorInfo("germanium", det_unit.rawid, det_unit.meta)
+    det_pv.set_pygeom_active_detector(RemageDetectorInfo("germanium", det_unit.rawid, det_unit.meta))
     det_unit.lv.pygeom_color_rgba = (0.5, 0.5, 0.5, 1)
 
     # add germanium reflective surface.
@@ -496,12 +497,12 @@ def _get_support_structure(
 
     tristar_lv_name = f"hpge_support_copper_tristar_{size}"
     if tristar_lv_name not in registry.logicalVolumeDict:
-        pen_file = resources.files("pygeoml1000") / "models" / f"TriStar_{size}.stl"
+        tristar_file = resources.files("pygeoml1000") / "models" / f"TriStar_{size}.stl"
 
-        pen_solid = pyg4ometry.stl.Reader(
-            pen_file, solidname=f"tristar_{size}", centre=False, registry=registry
+        tristar_solid = pyg4ometry.stl.Reader(
+            tristar_file, solidname=f"tristar_{size}", centre=False, registry=registry
         ).getSolid()
-        tristar_lv = geant4.LogicalVolume(pen_solid, materials.pen, tristar_lv_name, registry)
+        tristar_lv = geant4.LogicalVolume(tristar_solid, materials.metal_copper, tristar_lv_name, registry)
         tristar_lv.pygeom_color_rgba = (0.72, 0.45, 0.2, 1)
     else:
         tristar_lv = registry.logicalVolumeDict[tristar_lv_name]

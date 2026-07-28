@@ -11,7 +11,7 @@ import numpy as np
 import pyg4ometry.geant4 as g4
 from pygeomtools import RemageDetectorInfo
 
-from . import core
+from . import core, watertank
 
 # Import new reentrance tube profile and WLSR functions
 from .rt_profiles import (
@@ -23,6 +23,22 @@ from .rt_profiles import (
 from .wlsr import place_inner_wlsr_in_argon, place_outer_wlsr_in_atmospheric
 
 log = logging.getLogger(__name__)
+
+# clearance left between the top rim of the skirt and the curved cryostat bottom it wraps around.
+SKIRT_CRYO_GAP = 0.1  # mm
+
+
+def _first_z_at_radius(prof_z: list[float], prof_r: list[float], r_limit: float) -> float:
+    """Find the height at which the cryostat profile first widens to ``r_limit``."""
+    for i in range(len(prof_z) - 1):
+        r0, r1 = prof_r[i], prof_r[i + 1]
+        if r0 <= r_limit < r1 and prof_z[i + 1] > prof_z[i]:
+            frac = (r_limit - r0) / (r1 - r0)
+            return prof_z[i] + frac * (prof_z[i + 1] - prof_z[i])
+
+    msg = f"cryostat profile never reaches r = {r_limit} mm"
+    raise ValueError(msg)
+
 
 """
 
@@ -569,15 +585,26 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     mod_thickness = 100
     mod_n_sides = 12
 
+    ocryo_z, ocryo_r = make_z_and_r(
+        total_height, neck_height, body_height, neck_radius, barrel_radius, shoulder_fraction, bottom_fraction
+    )
+
     skirt_height = total_height - neck_height - (body_height * (1 - bottom_fraction))
-    actual_skirt_height = skirt_height - (
-        ocryo_thickness * 2
-    )  # Take a little bit away to avoid overlaps with the cryo
     skirt_radius = barrel_radius
-    # Due to the curvature of the bottom it is hard to remove exactly enough
-    # To close flush with the cryo but not have overlaps.
-    skirt_z = -body_height / 2 - ocryo_thickness * 3
     skirt_thickness = 60  # A guess
+
+    if instr.detail["watertank"] == "omit":
+        skirt_bottom = -body_height / 2 - ocryo_thickness * 3 - (skirt_height - ocryo_thickness * 2) / 2
+    else:
+        # 1e-9 to avoid sharing a surface with the bottom of the water volume.
+        skirt_bottom = watertank.tank_horizontal_wall - instr.mother_z_displacement + 1e-9
+
+    # The skirt is a plain cylinder, but the cryostat bottom it surrounds is curved: simply
+    # shortening the skirt by a fixed amount does not reliably clear that curve. Instead, solve the
+    # cryostat profile for the height at which it grows into the skirt wall and end the skirt there.
+    skirt_top = _first_z_at_radius(ocryo_z, ocryo_r, skirt_radius - skirt_thickness) - SKIRT_CRYO_GAP
+    actual_skirt_height = skirt_top - skirt_bottom
+    skirt_z = (skirt_top + skirt_bottom) / 2
     foot_height = 250
     foot_width = 150  # Not really a guess so much as a placeholder...
 
@@ -605,10 +632,6 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     )
     foot_lv = g4.LogicalVolume(foot_solid, instr.materials.metal_steel, "foot", instr.registry)
     foot_lv.pygeom_color_rgba = (0.5, 0.5, 0.5, 0.1)
-
-    ocryo_z, ocryo_r = make_z_and_r(
-        total_height, neck_height, body_height, neck_radius, barrel_radius, shoulder_fraction, bottom_fraction
-    )
 
     outercryo_lv = construct_outer_cryostat(instr.materials.metal_steel, instr.registry, ocryo_r, ocryo_z)
     outercryo_lv.pygeom_color_rgba = (0.5, 0.5, 0.5, 0.1)
@@ -701,34 +724,30 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     # Place the physical volumes at the end
     # Move the cryostat back in a central position
 
-    if instr.detail["watertank"] == "omit":
-        g4.PhysicalVolume(
-            [0, 0, 0],
-            [0, 0, skirt_z - instr.mother_z_displacement],
-            skirt_lv,
-            "skirt",
-            instr.mother_lv,
-            instr.registry,
-        )
-        g4.PhysicalVolume(
-            [0, 0, 0],
-            [0, 0, skirt_z - actual_skirt_height / 2 + foot_height / 2 - instr.mother_z_displacement],
-            foot_lv,
-            "foot",
-            instr.mother_lv,
-            instr.registry,
-        )
-    else:
-        g4.PhysicalVolume(
-            [0, 0, 0], [0, 0, skirt_height / 2.0 + 1e-9], skirt_lv, "skirt", instr.mother_lv, instr.registry
-        )
-        g4.PhysicalVolume(
-            [0, 0, 0], [0, 0, foot_height / 2.0 + 20 + 1e-9], foot_lv, "foot", instr.mother_lv, instr.registry
-        )
+    g4.PhysicalVolume(
+        [0, 0, 0],
+        [instr.mother_x_displacement, 0, skirt_z + instr.mother_z_displacement],
+        skirt_lv,
+        "skirt",
+        instr.mother_lv,
+        instr.registry,
+    )
+    g4.PhysicalVolume(
+        [0, 0, 0],
+        [
+            instr.mother_x_displacement,
+            0,
+            skirt_z - actual_skirt_height / 2 + foot_height / 2 + instr.mother_z_displacement,
+        ],
+        foot_lv,
+        "foot",
+        instr.mother_lv,
+        instr.registry,
+    )
 
     g4.PhysicalVolume(
         [0, 0, 0],
-        [0, 0, -instr.mother_z_displacement],
+        [instr.mother_x_displacement, 0, instr.mother_z_displacement],
         outercryo_lv,
         "outercryostat",
         instr.mother_lv,

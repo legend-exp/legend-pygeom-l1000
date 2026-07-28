@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import copy
-import os
+import logging
+import shutil
 from pathlib import Path
 
 import dbetto
@@ -10,10 +11,12 @@ import yaml
 
 from . import watertank
 
+log = logging.getLogger(__name__)
 
-def calculate_and_place_pmts(channelmap: dict, configs: dbetto.TextDB) -> None:
+
+def calculate_and_place_pmts(channelmap: dict, configs: dbetto.TextDB, rawid_start: int = 6000) -> None:
     # Floor PMTs are pretty trivial to place
-    rawid = 6000
+    rawid = rawid_start
     for row in configs["pmts_pos"]["floor"].values():
         row_index = row["id"]
         pmts_in_row = row["n"]
@@ -158,7 +161,7 @@ def generate_special_metadata(string_idx: list, hpge_names: list, configs: dbett
                 ),
                 "y": float(
                     configs["array"]["center"]["y_in_mm"][string // len(configs["array"]["angle_in_deg"])]
-                    + configs["array"]["radius_in_mm"]
+                    - configs["array"]["radius_in_mm"]
                     * np.sin(
                         np.radians(
                             configs["array"]["angle_in_deg"][string % len(configs["array"]["angle_in_deg"])]
@@ -186,18 +189,25 @@ def generate_special_metadata(string_idx: list, hpge_names: list, configs: dbett
     return special_output
 
 
-def generate_channelmap(string_idx: list, hpge_names: list, hpge_rawid: list, configs: dbetto.TextDB) -> dict:
+def generate_channelmap(
+    string_idx: list,
+    hpge_names: list,
+    hpge_rawid: list,
+    configs: dbetto.TextDB,
+    unit_divisor: int = 100,
+) -> dict:
     """Generate channelmap.json file."""
 
     channelmap = {}
-    for name, rawid in zip(hpge_names, hpge_rawid, strict=False):
+    for name, rawid in zip(hpge_names, hpge_rawid, strict=True):
         channelmap[name] = copy.deepcopy(configs["hpge"])
         channelmap[name]["name"] = name
         channelmap[name]["daq"]["rawid"] = rawid
-        channelmap[name]["location"]["string"] = rawid // 100
-        channelmap[name]["location"]["position"] = rawid % 100
+        channelmap[name]["location"]["string"] = rawid // unit_divisor
+        channelmap[name]["location"]["position"] = rawid % unit_divisor
 
-    rawid = 5000
+    max_hpge_rawid = int(max(hpge_rawid)) if len(hpge_rawid) > 0 else 0
+    rawid = sipm_rawid_start = max(5000, _round_up(max_hpge_rawid + 1, 1000))
     for string in string_idx.flatten():
         for n in range(configs["string"]["n_sipm_modules_per_string"]):
             name = f"S{string + 1:02d}{n + 1:02d}T"
@@ -218,9 +228,22 @@ def generate_channelmap(string_idx: list, hpge_names: list, hpge_rawid: list, co
             channelmap[name]["location"]["barrel"] = string + 1
             channelmap[name]["daq"]["rawid"] = rawid
             rawid += 1
-    calculate_and_place_pmts(channelmap, configs)
+
+    pmt_rawid_start = max(6000, _round_up(rawid, 1000))
+    if sipm_rawid_start != 5000 or pmt_rawid_start != 6000:
+        log.info(
+            "array too large for the default raw ID blocks, using %d for SiPMs and %d for PMTs",
+            sipm_rawid_start,
+            pmt_rawid_start,
+        )
+    calculate_and_place_pmts(channelmap, configs, rawid_start=pmt_rawid_start)
 
     return channelmap
+
+
+def _round_up(value: int, multiple: int) -> int:
+    """Round ``value`` up to the next integer multiple of ``multiple``."""
+    return -(-value // multiple) * multiple
 
 
 def _convert_numpy_types(obj):
@@ -258,26 +281,21 @@ def generate_dummy_metadata(input_config_folder: str = "") -> tuple[dict, dict]:
         len(configs["array"]["center"]["x_in_mm"]) * len(configs["array"]["angle_in_deg"])
     ).reshape(len(configs["array"]["center"]["x_in_mm"]), len(configs["array"]["angle_in_deg"]))
 
-    hpge_names = np.sort(
-        np.concatenate(
-            [
-                [f"V{i + 1:02d}{j + 1:02d}" for j in range(configs["string"]["units"]["n"])]
-                for i in range(string_idx.size)
-            ]
-        )
-    )
+    n_units = configs["string"]["units"]["n"]
 
-    hpge_rawid = np.sort(
-        np.concatenate(
-            [
-                [(i + 1) * 100 + j + 1 for j in range(configs["string"]["units"]["n"])]
-                for i in range(string_idx.size)
-            ]
-        )
-    )
+    string_width = max(2, len(str(string_idx.size)))
+    unit_width = max(2, len(str(n_units)))
+
+    hpge_names, hpge_rawid = [], []
+    for i in range(string_idx.size):
+        for j in range(n_units):
+            hpge_names.append(f"V{i + 1:0{string_width}d}{j + 1:0{unit_width}d}")
+            hpge_rawid.append((i + 1) * 10**unit_width + j + 1)
+    hpge_names = np.array(hpge_names)
+    hpge_rawid = np.array(hpge_rawid)
 
     special_metadata = generate_special_metadata(string_idx, hpge_names, configs)
-    channelmap = generate_channelmap(string_idx, hpge_names, hpge_rawid, configs)
+    channelmap = generate_channelmap(string_idx, hpge_names, hpge_rawid, configs, unit_divisor=10**unit_width)
 
     # Convert numpy types to native Python types to match file serialization behavior
     channelmap = _convert_numpy_types(channelmap)
@@ -311,5 +329,4 @@ def copy_raw_configs(destination_folder: str) -> None:
 
     for item in configs_dir.iterdir():
         if item.is_file():
-            dest_file = destination_folder / item.name
-            os.system(f"cp {item} {dest_file}")
+            shutil.copyfile(item, destination_folder / item.name)
