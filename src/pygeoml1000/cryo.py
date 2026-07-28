@@ -506,7 +506,7 @@ def construct_reentrance_tube_with_layers(
         [[0, 0, 0], [0, 0, 0, "mm"]],
         reg,
     )
-    ss_lv = g4.LogicalVolume(ss_solid, materials.metal_steel, "ss_316l", reg)
+    ss_lv = g4.LogicalVolume(ss_solid, materials.metal_steel_316L, "ss_316l", reg)
     ss_lv.pygeom_color_rgba = (0.7, 0.7, 0.8, 1.0)
     g4.PhysicalVolume([0, 0, 0], [0, 0, 0, "mm"], ss_lv, "ss_316l", tube_lv, registry=reg)
 
@@ -618,7 +618,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
         instr.registry,
         "mm",
     )
-    skirt_lv = g4.LogicalVolume(skirt_solid, instr.materials.metal_steel, "skirt", instr.registry)
+    skirt_lv = g4.LogicalVolume(skirt_solid, instr.materials.metal_steel_316L, "skirt", instr.registry)
     skirt_lv.pygeom_color_rgba = (0.5, 0.5, 0.5, 0.1)
     foot_solid = g4.solid.Tubs(
         "foot_sol",
@@ -630,10 +630,12 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
         instr.registry,
         "mm",
     )
-    foot_lv = g4.LogicalVolume(foot_solid, instr.materials.metal_steel, "foot", instr.registry)
+    foot_lv = g4.LogicalVolume(foot_solid, instr.materials.metal_steel_316L, "foot", instr.registry)
     foot_lv.pygeom_color_rgba = (0.5, 0.5, 0.5, 0.1)
 
-    outercryo_lv = construct_outer_cryostat(instr.materials.metal_steel, instr.registry, ocryo_r, ocryo_z)
+    outercryo_lv = construct_outer_cryostat(
+        instr.materials.metal_steel_316L, instr.registry, ocryo_r, ocryo_z
+    )
     outercryo_lv.pygeom_color_rgba = (0.5, 0.5, 0.5, 0.1)
 
     # For the vacuum gap, it should be as simple as subtracting the outer cryostat thicknesses
@@ -669,7 +671,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
         total_height, neck_height, body_height, neck_radius, barrel_radius, shoulder_fraction, bottom_fraction
     )
 
-    icryo_lv = construct_inner_cryostat(instr.materials.metal_steel, instr.registry, icryo_r, icryo_z)
+    icryo_lv = construct_inner_cryostat(instr.materials.metal_steel_316L, instr.registry, icryo_r, icryo_z)
     icryo_lv.pygeom_color_rgba = (0.5, 0.5, 0.5, 0.1)
 
     # The next layer should be again just subtracting by the inner cryo thickness everywhere

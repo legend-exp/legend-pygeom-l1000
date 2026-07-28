@@ -297,7 +297,7 @@ def construct_and_place_tank(instr: core.InstrumentationData) -> core.Instrument
 
     if instr.detail["watertank"] == "omit":
         return instr
-    tank_lv = construct_tank(instr.materials.metal_steel, instr.registry, instr.detail["watertank"])
+    tank_lv = construct_tank(instr.materials.metal_steel_304L, instr.registry, instr.detail["watertank"])
     tank_lv.pygeom_color_rgba = False
     g4.SkinSurface("tank_steel_surface", tank_lv, instr.materials.surfaces.to_tyvek, instr.registry)
     # Polycones are placed with the bottom positioned at the given coordinates.

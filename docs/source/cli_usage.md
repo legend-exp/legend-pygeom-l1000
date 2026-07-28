@@ -262,6 +262,9 @@ Load custom material properties before geometry construction:
 legend-pygeom-l1000 l1000.gdml --pygeom-optics-plugin my_materials.py
 ```
 
+This allows you to define or modify optical properties of materials used in the
+geometry.
+
 ## Complete Examples
 
 ### Example 1: Full Geometry with Visualization
