@@ -16,6 +16,20 @@ from . import _version, config_compilation, core, manifest
 log = logging.getLogger(__name__)
 
 
+def _parse_enable_optical(value: str) -> bool | list[str]:
+    """Parse the ``--enable-optical`` argument into a bool or a list of material names."""
+    if value.lower() in ("true", "false"):
+        return value.lower() == "true"
+
+    materials = [name.strip() for name in value.strip("[]").replace('"', "").replace("'", "").split(",")]
+    materials = [name for name in materials if name != ""]
+    if materials == []:
+        msg = f"invalid value for --enable-optical: {value!r}"
+        raise argparse.ArgumentTypeError(msg)
+
+    return materials
+
+
 def dump_gdml_cli() -> None:
     parser = argparse.ArgumentParser(
         prog="legend-pygeom-l1000",
@@ -67,6 +81,13 @@ def dump_gdml_cli() -> None:
         "--pygeom-optics-plugin",
         action="store",
         help="""Execute the python module given by this path before constructing the geometry""",
+    )
+    parser.add_argument(
+        "--enable-optical",
+        type=_parse_enable_optical,
+        default=True,
+        help="""Enable optical properties of the materials. Either 'true'/'false' (for all/no materials)
+        or a comma-separated list of material names, e.g. 'liquidargon,pen'. (default: %(default)s)""",
     )
 
     # options for geometry generation.
@@ -195,6 +216,7 @@ def dump_gdml_cli() -> None:
         detail_level=args.detail,
         config=config,
         input_config_folder=args.input_raw_config_folder,
+        enable_optical=args.enable_optical,
     )
 
     if args.write_manifest:
