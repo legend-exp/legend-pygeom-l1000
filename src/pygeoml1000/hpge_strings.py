@@ -42,6 +42,8 @@ z_pos_dict = {
 CABLE_CAP_TOP_LENGTH = 30  # mm
 #: height of the cable cap above the front-end cable plane of the topmost detector unit.
 CABLE_CAP_Z_OFFSET = 500  # mm
+#: minimum clearance between the cable and the cap in the subtraction geometry.
+CABLE_CAP_CLEARANCE = 0.1  # mm
 
 
 def _cap_z_above_cable(cable_thickness: float) -> float:
@@ -107,8 +109,9 @@ def place_hpge_strings(b: core.InstrumentationData) -> None:
     strings_to_build = {}
 
     for hpge_meta in ch_map:
-        # Temporary fix for gedet with null enrichment value
-        if hpge_meta.production.enrichment is None:
+        # Temporary fix for gedet with null enrichment value or missing val enrichment attribute
+        enrichment = hpge_meta.production.enrichment
+        if (enrichment.val if hasattr(enrichment, "val") else enrichment) is None:
             log.warning("%s has no enrichment in metadata - setting to dummy value 0.86!", hpge_meta.name)
             hpge_meta.production.enrichment = 0.86
 
@@ -365,7 +368,7 @@ def _place_hpge_unit(
         b.mother_lv,
         b.registry,
     )
-    det_pv.pygeom_active_detector = RemageDetectorInfo("germanium", det_unit.rawid, det_unit.meta)
+    det_pv.set_pygeom_active_detector(RemageDetectorInfo("germanium", det_unit.rawid, det_unit.meta))
     det_unit.lv.pygeom_color_rgba = (0.5, 0.5, 0.5, 1)
 
     # add germanium reflective surface.
@@ -575,12 +578,12 @@ def _get_support_structure(
 
     tristar_lv_name = f"hpge_support_copper_tristar_{size}"
     if tristar_lv_name not in registry.logicalVolumeDict:
-        pen_file = resources.files("pygeoml1000") / "models" / f"TriStar_{size}.stl"
+        tristar_file = resources.files("pygeoml1000") / "models" / f"TriStar_{size}.stl"
 
-        pen_solid = pyg4ometry.stl.Reader(
-            pen_file, solidname=f"tristar_{size}", centre=False, registry=registry
+        tristar_solid = pyg4ometry.stl.Reader(
+            tristar_file, solidname=f"tristar_{size}", centre=False, registry=registry
         ).getSolid()
-        tristar_lv = geant4.LogicalVolume(pen_solid, materials.pen, tristar_lv_name, registry)
+        tristar_lv = geant4.LogicalVolume(tristar_solid, materials.metal_copper, tristar_lv_name, registry)
         tristar_lv.pygeom_color_rgba = (0.72, 0.45, 0.2, 1)
     else:
         tristar_lv = registry.logicalVolumeDict[tristar_lv_name]
@@ -758,9 +761,9 @@ def _get_hv_cap(
 ) -> geant4.LogicalVolume:
     """Get the cap terminating the HV cable run at the top of a string, creating it on first use.
 
-    The cable is subtracted out of the cap body at ``cap_to_cable``, its measured position in the
-    cap's frame, so that the two cannot overlap by construction. That displacement is part of the
-    cache key: on the HV side it differs between strings, see :func:`_cap_to_cable`.
+    The cable is subtracted out of the cap body around ``cap_to_cable``, its measured position in
+    the cap's frame, so that the two cannot overlap by construction. That displacement is part of
+    the cache key: on the HV side it differs between strings, see :func:`_cap_to_cable`.
     """
     cap_name = f"hv_cap_{cable_length:.2f}_n{n_cables}_{_cap_tag(cap_to_cable)}"
     if cap_name in b.registry.logicalVolumeDict:
@@ -770,13 +773,17 @@ def _get_hv_cap(
 
     hv_cap_body = geant4.solid.Box(f"{cap_name}_body", 1, 1, 2, b.registry, "cm")
 
-    hv_cap = geant4.solid.Subtraction(
-        cap_name,
-        hv_cap_body,
-        hv_cable.solid,
-        [[0, 0, 0], list(cap_to_cable)],
-        b.registry,
-    )
+    hv_cap = hv_cap_body
+    cuts = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
+    for i, (dx, dy) in enumerate(cuts):
+        hv_cap = geant4.solid.Subtraction(
+            # only the last cut carries the cap name, it is the solid the cap is built from.
+            cap_name if i == len(cuts) - 1 else f"{cap_name}_cut{i}",
+            hv_cap,
+            hv_cable.solid,
+            [[0, 0, 0], list(cap_to_cable + CABLE_CAP_CLEARANCE * np.array([dx, dy, 0]))],
+            b.registry,
+        )
 
     hv_cap_lv = geant4.LogicalVolume(
         hv_cap,
@@ -972,8 +979,8 @@ def _get_signal_cap(
 ) -> geant4.LogicalVolume:
     """Get the cap terminating the signal cable run at the top of a string, creating it on first use.
 
-    The cable is subtracted out of the cap body at ``cap_to_cable``, its measured position in the
-    cap's frame, so that the two cannot overlap by construction.
+    The cable is subtracted out of the cap body around ``cap_to_cable``, its measured position in
+    the cap's frame, so that the two cannot overlap by construction.
     """
     cap_name = f"signal_cap_{cable_length:.2f}_n{n_cables}_{_cap_tag(cap_to_cable)}"
     if cap_name in b.registry.logicalVolumeDict:
@@ -983,13 +990,17 @@ def _get_signal_cap(
 
     signal_cap_body = geant4.solid.Box(f"{cap_name}_body", 1, 1, 2, b.registry, "cm")
 
-    signal_cap = geant4.solid.Subtraction(
-        cap_name,
-        signal_cap_body,
-        signal_cable.solid,
-        [[0, 0, 0], list(cap_to_cable)],
-        b.registry,
-    )
+    signal_cap = signal_cap_body
+    cuts = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
+    for i, (dx, dy) in enumerate(cuts):
+        signal_cap = geant4.solid.Subtraction(
+            # only the last cut carries the cap name, it is the solid the cap is built from.
+            cap_name if i == len(cuts) - 1 else f"{cap_name}_cut{i}",
+            signal_cap,
+            signal_cable.solid,
+            [[0, 0, 0], list(cap_to_cable + CABLE_CAP_CLEARANCE * np.array([dx, dy, 0]))],
+            b.registry,
+        )
 
     signal_cap_lv = geant4.LogicalVolume(
         signal_cap,

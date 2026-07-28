@@ -37,6 +37,7 @@ pmt_eff_radius = (
 cutoff = 41  # Cutoff to take the top part of the ellipsoid resulting in 250mm diameter.
 cathode_cutoff = 65  # cutoff such that the effective cathode radius is 220mm.
 pmt_base_height = 145
+pmt_tyvek_gap = 1.0  # mm
 
 
 def construct_PMT_front(
@@ -156,7 +157,7 @@ def place_PMT_front(
     # We have to place the new logical volumes for every single PMT
     g4.PhysicalVolume([0, 0, 0], [0, 0, 0], pmt_vacuum_lv, name + "_vacuum", pmt_window_lv, reg)
     pmt_pv = g4.PhysicalVolume([0, 0, 0], [0, 0, 0], pmt_volumes[2], name, pmt_vacuum_lv, reg)
-    pmt_pv.pygeom_active_detector = RemageDetectorInfo("optical", rawid)
+    pmt_pv.set_pygeom_active_detector(RemageDetectorInfo("optical", rawid))
 
     return g4.PhysicalVolume(rotation, translation, pmt_window_lv, name + "_window", mother_lv, reg)
 
@@ -200,9 +201,11 @@ def place_wall_pmts(pmt_volumes: list, instr: core.InstrumentationData):
             loc = value["location"]
             # Due to the cutoff of the ellipsoid
             # we need to move it in the looking direction after rotation
-            x = loc["x"] + cutoff * loc["direction"]["nx"]
-            y = loc["y"] + cutoff * loc["direction"]["ny"]
-            z = loc["z"] + cutoff * loc["direction"]["nz"]
+            # The PMTs look inwards, so the offset is applied along the outward face normal.
+            wall_offset = cutoff - pmt_tyvek_gap
+            x = loc["x"] + wall_offset * loc["direction"]["nx"]
+            y = loc["y"] + wall_offset * loc["direction"]["ny"]
+            z = loc["z"] + wall_offset * loc["direction"]["nz"]
             target_direction = np.array(
                 [loc["direction"]["nx"], loc["direction"]["ny"], loc["direction"]["nz"]]
             )
