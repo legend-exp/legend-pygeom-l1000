@@ -54,6 +54,7 @@ def construct(
     detail_level: str = "radiogenic",
     config: dict | None = None,
     input_config_folder: str = "",
+    enable_optical: bool | list[str] = True,
 ) -> geant4.Registry:
     """Construct the LEGEND-1000 geometry and return the pyg4ometry Registry containing the world volume."""
 
@@ -95,7 +96,7 @@ def construct(
                 detail[system] = "simple"
 
     reg = geant4.Registry()
-    mats = materials.OpticalMaterialRegistry(reg)
+    mats = materials.OpticalMaterialRegistry(reg, enable_optical=enable_optical)
 
     # Create the world volume
     world_material = geant4.MaterialPredefined("G4_Galactic")

@@ -234,6 +234,26 @@ mesh (100 slices).
 
 ### Optical Properties
 
+Materials are taken from
+[legend-pygeom-tools](https://legend-pygeom-tools.readthedocs.io/en/stable/)
+(`LegendMaterialRegistry`), so their definitions are shared with the other
+LEGEND geometry packages.
+
+By default every material carries its optical properties (refractive indices,
+attenuation/absorption lengths, WLS and scintillation tables). They can be
+modified with `--enable-optical`:
+
+```console
+# all materials get optical properties (default)
+legend-pygeom-l1000 l1000.gdml --enable-optical true
+
+# no optical properties at all
+legend-pygeom-l1000 l1000.gdml --enable-optical false
+
+# only the listed materials
+legend-pygeom-l1000 l1000.gdml --enable-optical '["liquidargon", "pen"]'
+```
+
 #### Custom Optical Properties Plugin
 
 Load custom material properties before geometry construction:
@@ -241,9 +261,6 @@ Load custom material properties before geometry construction:
 ```console
 legend-pygeom-l1000 l1000.gdml --pygeom-optics-plugin my_materials.py
 ```
-
-This allows you to define or modify optical properties of materials used in the
-geometry.
 
 ## Complete Examples
 
