@@ -11,7 +11,7 @@ from pyg4ometry import config as meshconfig
 from pygeomoptics.store import load_user_material_code
 from pygeomtools import detectors, visualization, write_pygeom
 
-from . import _version, config_compilation, core
+from . import _version, config_compilation, core, manifest
 
 log = logging.getLogger(__name__)
 
@@ -78,6 +78,11 @@ def dump_gdml_cli() -> None:
         help="""Select the assemblies to generate in the output. If specified, changes all unspecified assemblies to 'omit'.""",
     )
     geom_opts.add_argument(
+        "--write-manifest",
+        action="store",
+        help="""Filename to write a YAML parts manifest to, listing the material, the number of placements and the total mass of each part in the geometry""",
+    )
+    geom_opts.add_argument(
         "--detail",
         action="store",
         default="radiogenic",
@@ -125,6 +130,7 @@ def dump_gdml_cli() -> None:
         and args.filename is None
         and not args.generate_compiled_config
         and not args.copy_raw_configs_into_cwd_folder
+        and not args.write_manifest
     ):
         parser.error("no output file, no visualization, and no metadata generation specified")
     if (args.vis_macro_file or args.det_macro_file) and args.filename is None:
@@ -167,6 +173,7 @@ def dump_gdml_cli() -> None:
         (args.generate_compiled_config or args.copy_raw_configs_into_cwd_folder)
         and args.filename is None
         and not args.visualize
+        and not args.write_manifest
     ):
         return
 
@@ -174,7 +181,9 @@ def dump_gdml_cli() -> None:
     if isinstance(args.visualize, str):
         vis_scene = dbetto.utils.load_dict(args.visualize)
 
-    if vis_scene.get("fine_mesh", False) or args.check_overlaps:
+    # the manifest masses are derived from the meshes, and the default discretisation of curved
+    # solids (16 slices) underestimates their volume by ~2.5%.
+    if vis_scene.get("fine_mesh", False) or args.check_overlaps or args.write_manifest:
         meshconfig.setGlobalMeshSliceAndStack(100)
 
     # load custom module to change material properties.
@@ -187,6 +196,15 @@ def dump_gdml_cli() -> None:
         config=config,
         input_config_folder=args.input_raw_config_folder,
     )
+
+    if args.write_manifest:
+        log.info("writing parts manifest to %s", args.write_manifest)
+        manifest.write_manifest(
+            registry,
+            args.write_manifest,
+            detail_level=args.detail,
+            assemblies=args.assemblies.split(",") if args.assemblies else None,
+        )
 
     if args.check_overlaps:
         msg = "checking for overlaps"

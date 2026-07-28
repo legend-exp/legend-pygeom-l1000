@@ -175,6 +175,63 @@ legend-pygeom-l1000 l1000.gdml --check-overlaps
 Overlap checking can be slow for complex geometries and may not catch all overlap issues. It's recommended to verify geometries with Geant4 as well. Refer to [l200:geom-dev](https://legend-pygeom-l200.readthedocs.io/en/stable/geom-dev.html) for details.
 ```
 
+#### Parts Manifest
+
+Write a YAML manifest of every part in the geometry, with its material, its
+number of placements and its total mass:
+
+```console
+legend-pygeom-l1000 --write-manifest parts.yaml
+```
+
+No GDML file has to be produced. The manifest is meant to be cross-checked
+against the experiment's bill of materials, and to provide the mass of each
+material present in the simulation for background studies.
+
+```yaml
+metadata:
+  package_version: 0.4
+  detail_level: radiogenic
+  assemblies: null
+  mesh_slices: 100
+  n_logical_volumes: 370
+  n_physical_volumes: 17196
+  units:
+    volume: cm**3
+    mass: g
+    density: g/cm**3
+totals:
+  mass: 373458272.2
+  by_material:
+    LiquidArgon: 280951383.1
+    metal_steel: 84623861.8
+    # ...
+parts:
+  - name: cable_hv_140.10
+    material: metal_copper
+    density: 8.96
+    solid: Union
+    placements: 336
+    unit_volume: 0.4193
+    total_volume: 140.9
+    total_mass: 1262.1
+  # ...
+```
+
+There is one entry per logical volume, sorted by descending total mass.
+`placements` is the number of times that volume occurs in the whole geometry,
+counted through the volume tree.
+
+The manifest only describes what is actually in the geometry, so it follows
+`--detail` and `--assemblies`. Parts that are omitted are absent from it rather
+than listed with zero mass.
+
+```{note}
+Volumes are derived from the meshes computed by pyg4ometry, so the masses are
+approximations. `--write-manifest` therefore builds the geometry with a fine
+mesh (100 slices).
+```
+
 ### Optical Properties
 
 #### Custom Optical Properties Plugin

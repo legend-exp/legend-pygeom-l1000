@@ -22,6 +22,40 @@ def test_construct(tmp_path):
     core.construct()
 
 
+def test_volume_caching():
+    """Geometrically identical parts must share a single logical volume.
+
+    Each of these parts is identical across all detector units, so it must be built once and
+    placed many times. This guards against a regression where a logical volume name embeds a
+    per-detector or per-string identifier, which rebuilds the entire solid tree per placement.
+    """
+    from pygeoml1000 import core
+
+    registry = core.construct()
+
+    # name stem -> expected number of placements
+    expected_placements = {
+        "cable_hv": 336,
+        "cable_signal": 336,
+        "ultem_clamp_hv": 336,
+        "ultem_clamp_signal": 336,
+        "signal_asic": 336,
+        "hpge_support_copper_weldment_top": 1008,
+        "ultem_insulator_du_holder": 1008,
+        "hpge_support_copper_rod": 126,
+    }
+
+    for stem, n_expected in expected_placements.items():
+        lvs = [name for name in registry.logicalVolumeDict if name.startswith(stem)]
+        assert len(lvs) == 1, f"{stem}: expected exactly one cached logical volume, got {lvs}"
+
+        pvs = [name for name in registry.physicalVolumeDict if name.startswith(stem)]
+        assert len(pvs) == n_expected, f"{stem}: expected {n_expected} placements, got {len(pvs)}"
+
+    # a coarse guard against per-instance logical volumes creeping back in elsewhere.
+    assert len(registry.logicalVolumeDict) < 600
+
+
 def test_read_back(tmp_path):
     from pygeoml1000 import core
 
