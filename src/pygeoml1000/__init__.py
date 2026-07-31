@@ -1,6 +1,12 @@
 from __future__ import annotations
 
 from pygeoml1000._version import version as __version__
+from pygeoml1000.config import load_config, resolve_config
 from pygeoml1000.core import construct
 
-__all__ = ["__version__", "construct"]
+__all__ = [
+    "__version__",
+    "construct",
+    "load_config",
+    "resolve_config",
+]

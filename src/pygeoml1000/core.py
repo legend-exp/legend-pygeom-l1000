@@ -1,15 +1,13 @@
 from __future__ import annotations
 
 import logging
-from importlib import resources
 from typing import NamedTuple
 
-from dbetto import AttrsDict, TextDB
+from dbetto import AttrsDict
 from pyg4ometry import geant4
 
 from . import (
     cavern_and_labs,
-    config_compilation,
     cryo,
     fibers,
     hpge_strings,
@@ -17,9 +15,9 @@ from . import (
     watertank,
     watertank_instrumentation,
 )
+from .config import effective_detail, resolve_config
 
 logger = logging.getLogger(__name__)
-configs = TextDB(resources.files("pygeoml1000") / "configs")
 
 
 class InstrumentationData(NamedTuple):
@@ -49,50 +47,21 @@ class InstrumentationData(NamedTuple):
     """The chosen detail level by the user. Used to navigate to the corresponding entry in the special metadata."""
 
 
-def construct(
-    assemblies: list[str] | None = None,
-    detail_level: str = "radiogenic",
-    config: dict | None = None,
-    input_config_folder: str = "",
-) -> geant4.Registry:
-    """Construct the LEGEND-1000 geometry and return the pyg4ometry Registry containing the world volume."""
+def construct(config: dict | None = None) -> geant4.Registry:
+    """Construct the LEGEND-1000 geometry and return the pyg4ometry Registry containing the world volume.
 
-    config = config if config is not None else {}
+    Parameters
+    ----------
+    config
+        the runtime configuration, as described in :doc:`/runtime-cfg`. It is resolved with
+        :func:`pygeoml1000.config.resolve_config` first, so both a config as read from file and
+        an already-resolved one are accepted. ``None`` builds the default geometry.
+    """
+    config = resolve_config(config)
 
-    channelmap_dict, special_metadata_dict = config_compilation.generate_dummy_metadata(
-        input_config_folder=input_config_folder
-    )
-
-    if "special_metadata" in config:
-        special_metadata_dict = config["special_metadata"]
-    if "channelmap" in config:
-        channelmap_dict = config["channelmap"]
-
-    special_metadata = AttrsDict(special_metadata_dict)
-    channelmap = AttrsDict(channelmap_dict)
-
-    if detail_level not in special_metadata["detail"]:
-        msg = "invalid detail level specified"
-        raise ValueError(msg)
-
-    detail = special_metadata["detail"][detail_level]
-    if assemblies is not None:
-        if set(assemblies) - set(detail) != set():
-            msg = "invalid geometrical assembly specified"
-            raise ValueError(msg)
-
-        if "cryostat" not in assemblies and {"HPGe_dets", "fiber_curtain"} & set(assemblies):
-            msg = "invalid geometrical assembly specified. Cryostat must be included if HPGe_dets or fiber_curtain are included"
-            raise ValueError(msg)
-
-        for system in detail:
-            if system not in assemblies:
-                detail[system] = "omit"
-
-        # Enable systems that have been specified but are not in the detail level
-        for system in assemblies:
-            if detail[system] == "omit":
-                detail[system] = "simple"
+    special_metadata = AttrsDict(config["special_metadata"])
+    channelmap = AttrsDict(config["channelmap"])
+    detail = AttrsDict(effective_detail(config))
 
     reg = geant4.Registry()
     mats = materials.OpticalMaterialRegistry(reg)
