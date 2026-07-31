@@ -237,6 +237,7 @@ pulse-shape discrimination, but is not read by the geometry generation itself.
 ## Compilation
 
 The compilation step converts the raw config files into the two runtime objects
+
 - `special_metadata` and `channelmap` - via `config.py`.
 
 **`special_metadata`** contains the detailed spatial layout used for geometry

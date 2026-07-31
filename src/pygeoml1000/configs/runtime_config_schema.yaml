@@ -8,9 +8,10 @@ properties:
   # --- shared vocabulary with legend-pygeom-l200 ---
   assemblies:
     description: >-
-      Assemblies to build. Either an absolute list of assembly names, or a list in which every
-      entry is prefixed by the set operators '+'/'-' to modify the set implied by the detail
-      preset. A comma-separated string is also accepted.
+      Assemblies to build. Either an absolute list of assembly names, or a list
+      in which every entry is prefixed by the set operators '+'/'-' to modify
+      the set implied by the detail preset. A comma-separated string is also
+      accepted.
     anyOf:
       - type: array
         items:
@@ -18,10 +19,12 @@ properties:
         uniqueItems: true
       - type: string
   special_metadata:
-    description: Inline special metadata, or a path to a YAML/JSON file containing it.
+    description:
+      Inline special metadata, or a path to a YAML/JSON file containing it.
     type: [object, string]
   channelmap:
-    description: Inline channel map, or a path to a YAML/JSON file containing it.
+    description:
+      Inline channel map, or a path to a YAML/JSON file containing it.
     type: [object, string]
   sipm_use_pde_curve:
     type: boolean
@@ -32,31 +35,34 @@ properties:
         type: number
   public_geom:
     description: >-
-      Accepted for compatibility with legend-pygeom-l200. LEGEND-1000 has no hardware metadata,
-      so its geometry is always built from public data and this option has no effect.
+      Accepted for compatibility with legend-pygeom-l200. LEGEND-1000 has no
+      hardware metadata, so its geometry is always built from public data and
+      this option has no effect.
     type: boolean
   metadata_timestamp:
     description: >-
-      Accepted for compatibility with legend-pygeom-l200, but ignored: LEGEND-1000 has no
-      hardware metadata to select a snapshot from.
+      Accepted for compatibility with legend-pygeom-l200, but ignored:
+      LEGEND-1000 has no hardware metadata to select a snapshot from.
     type: string
     pattern: "^\\d{8}T\\d{6}Z$"
 
   # --- consumed by the calling workflow, not by the geometry generation ---
   executable:
     description: >-
-      The geometry generator legend-simflow invokes for this config. Declared here so that a
-      simflow geometry config validates. It is ignored by the generation itself.
+      The geometry generator legend-simflow invokes for this config. Declared
+      here so that a simflow geometry config validates. It is ignored by the
+      generation itself.
     type: string
 
   # --- legend-pygeom-l1000 specific ---
   detail:
-    description: Name of the detail level preset to use (a key of the raw ``detail.yaml``).
+    description:
+      Name of the detail level preset to use (a key of the raw ``detail.yaml``).
     type: string
   raw_config:
     description: >-
-      Raw configuration overrides, deep-merged on top of the raw configs shipped with the
-      package. Either an inline mapping (keyed by raw config file name without extension), or a
-      path to a folder of raw config files. Ignored if both ``channelmap`` and
-      ``special_metadata`` are given.
+      Raw configuration overrides, deep-merged on top of the raw configs shipped
+      with the package. Either an inline mapping (keyed by raw config file name
+      without extension), or a path to a folder of raw config files. Ignored if
+      both ``channelmap`` and ``special_metadata`` are given.
     type: [object, string]
