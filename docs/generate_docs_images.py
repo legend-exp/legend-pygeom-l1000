@@ -250,7 +250,7 @@ def _local_bounds(lv: g4.LogicalVolume, cache: dict) -> tuple[np.ndarray, np.nda
         try:
             vertices = np.array(lv.solid.mesh().toVerticesAndPolygons()[0])
             cache[lv.name] = None if len(vertices) == 0 else (vertices.min(0), vertices.max(0))
-        except Exception:
+        except Exception:  # noqa: BLE001
             log.debug("could not mesh %s for framing", lv.name)
             cache[lv.name] = None
     return cache[lv.name]
