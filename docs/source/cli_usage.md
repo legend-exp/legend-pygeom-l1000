@@ -127,13 +127,21 @@ legend-pygeom-l1000 l1000_cosmogenic.gdml --detail cosmogenic
 Select specific assemblies to include in the geometry:
 
 ```console
-legend-pygeom-l1000 --assemblies "watertank,cryo,hpge_strings" l1000.gdml
+legend-pygeom-l1000 --assemblies "watertank,cryostat,HPGe_dets" l1000.gdml
 ```
 
-When `--assemblies` is specified, all unspecified assemblies are omitted from
-the geometry. Available assemblies include:
+When `--assemblies` is specified as a list of plain names, all unspecified
+assemblies are omitted from the geometry. Entries can instead be prefixed by `+`
+or `-` to modify the set of assemblies enabled by the detail level (either all
+entries carry an operator, or none do):
 
-- `caver`: Cavern and surrounding rock
+```console
+legend-pygeom-l1000 --assemblies "+watertank,-fiber_curtain" l1000.gdml
+```
+
+Available assemblies include:
+
+- `cavern`: Cavern and surrounding rock
 - `labs`: Experimental laboratory halls (not implemented yet)
 - `watertank`: Water tank and surrounding infrastructure
 - `watertank_instrumentation`: PMTs in the water tank
@@ -147,19 +155,36 @@ the geometry. Available assemblies include:
 - `PEN_plates`: PEN baseplates
 - `HPGe_dets`: HPGe detectors
 
-For more details see `src/pygeoml1000/configs/config.json`.
+The cryostat must be included whenever `HPGe_dets` or `fiber_curtain` are. For
+more details see the `detail.yaml` section of {doc}`runtime-cfg`.
 
 #### Custom Configuration
 
-Use a custom configuration file to override default geometry parameters:
+Use a configuration file to describe the geometry:
 
 ```console
-legend-pygeom-l1000 l1000.gdml --config custom_config.json
+legend-pygeom-l1000 l1000.gdml --config geom-config.yaml
 ```
 
-The configuration file is a JSON file that can specify various geometry
-parameters, material choices, and component dimensions. It is treated as a
-substitute for `src/pygeoml1000/configs/config.json`.
+Everything that defines the geometry can be set there, including the detail
+level, the assembly selection, overrides of the raw configuration, and a fully
+compiled `channelmap`/`special_metadata`. `--detail` and `--assemblies` override
+their config file counterparts. See {doc}`runtime-cfg` for the full reference.
+
+To write out the resolved configuration, i.e, the raw configuration compiled
+into an explicit `channelmap` and `special_metadata`, for archival or
+hand-editing:
+
+```console
+legend-pygeom-l1000 --config geom-config.yaml --write-config resolved.yaml l1000.gdml
+```
+
+To get a copy of the raw config files shipped with the package as a starting
+point for a custom configuration:
+
+```console
+legend-pygeom-l1000 --dump-raw-configs .
+```
 
 ### Quality Control
 
@@ -293,7 +318,7 @@ Use a custom configuration and check for overlaps:
 
 ```console
 legend-pygeom-l1000 \
-  --config my_config.json \
+  --config geom-config.yaml \
   --check-overlaps \
   --verbose
 ```
@@ -322,12 +347,13 @@ For final, production-ready geometries:
 
 1. Use `--detail radiogenic` for radiogenic detail
 2. Run with `--check-overlaps` to verify geometry integrity
-3. Use custom `--config` files to document specific geometry variations
+3. Use custom `--config` files to document specific geometry variations, and
+   `--write-config` to archive the exact geometry that was built
 
 ### Performance Considerations
 
-- Overlap checking is computationally expensive; use sparingly
+- Overlap checking is computationally expensive. Use sparingly
 - Fine mesh visualization (`"fine_mesh": true` in scene files) increases memory
   usage
-- Maximum verbosity (`--debug`) generates large log outputs; use only when
+- Maximum verbosity (`--debug`) generates large log outputs. Use only when
   troubleshooting
