@@ -22,6 +22,26 @@ def test_construct(tmp_path):
     core.construct()
 
 
+def test_construct_disable_optical_material_tables():
+    from pygeoml1000 import core
+
+    registry = core.construct(enable_optical=False)
+
+    assert "liquidargon_RINDEX" not in registry.defineDict
+    assert "ps_fibers_RINDEX" not in registry.defineDict
+    assert "pmma_RINDEX" not in registry.defineDict
+
+
+def test_construct_enable_optical_selected_materials():
+    from pygeoml1000 import core
+
+    registry = core.construct(enable_optical=["ps_fibers"])
+
+    assert "ps_fibers_RINDEX" in registry.defineDict
+    assert "liquidargon_RINDEX" not in registry.defineDict
+    assert "pmma_RINDEX" not in registry.defineDict
+
+
 def test_volume_caching():
     """Geometrically identical parts must share a single logical volume.
 
