@@ -25,7 +25,9 @@ def dump_gdml_cli(argv: list[str] | None = None) -> None:
     if args.debug:
         logging.root.setLevel(logging.DEBUG)
 
-    config = load_geometry_config(args)
+    config = None
+    if args.write_config or args.filename is not None or args.visualize or args.write_manifest:
+        config = load_geometry_config(args)
 
     if args.dump_raw_configs:
         folder = copy_raw_configs(args.dump_raw_configs)
@@ -35,7 +37,7 @@ def dump_gdml_cli(argv: list[str] | None = None) -> None:
         log.info("writing resolved config to %s", args.write_config)
         write_config(config, args.write_config)
 
-    if args.filename is None and not args.visualize and not args.write_manifest:
+    if config is None or (args.filename is None and not args.visualize and not args.write_manifest):
         return
 
     vis_scene = {}
