@@ -98,7 +98,7 @@ def _assign_common_copper_surface(b: InstrumentationData) -> None:
     surf = None
     cu_mat = b.materials.metal_copper
 
-    for _, pv in b.registry.physicalVolumeDict.items():
+    for pv in b.registry.physicalVolumeDict.values():
         if (
             pv.motherVolume != b.mother_lv
             or not hasattr(pv.logicalVolume, "material")
