@@ -44,6 +44,7 @@ adjustments.
 | `raw_config`         | mapping or path | raw configuration overrides, see [Raw configuration files](#raw-configuration-files) |
 | `special_metadata`   | mapping or path | compiled spatial configuration, skips compiling it from the raw config               |
 | `channelmap`         | mapping or path | compiled channel map, skips compiling it from the raw config                         |
+| `enable_optical`     | bool or list    | materials that get optical properties, see [Optical properties](#optical-properties) |
 | `sipm_use_pde_curve` | bool            | if false, use a flat SiPM photon detection efficiency instead of the PDE curve       |
 | `sipm_efficiencies`  | mapping         | per-channel scale factors for the SiPM detection efficiency                          |
 
@@ -74,6 +75,29 @@ assemblies: [+watertank, -fiber_curtain]
 Assemblies that are not selected are switched to `omit`. Selected assemblies
 that the detail level omits are built at the `simple` detail level. The cryostat
 must be included whenever `HPGe_dets` or `fiber_curtain` are.
+
+(optical-properties)=
+
+### Optical properties
+
+`enable_optical` selects the materials that get optical properties, such as
+refractive indices, absorption lengths and scintillation tables. The default is
+`true`.
+
+```yaml
+enable_optical: true # every material gets optical properties (default)
+```
+
+```yaml
+enable_optical: false # no material gets optical properties
+```
+
+```yaml
+enable_optical: [liquidargon, pen] # only these materials
+```
+
+Turn the optical properties off for a geometry that only needs the mass model,
+for example a radiogenic background study. The GDML file is then much smaller.
 
 (raw-configuration-files)=
 
