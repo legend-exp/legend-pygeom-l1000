@@ -122,16 +122,31 @@ def construct(
 
 
 def _assign_common_copper_surface(b: InstrumentationData) -> None:
-    if hasattr(b.materials, "_metal_copper") is None:
+    """Assign a common copper surface to all copper parts in the LAr volume."""
+    if not hasattr(b.materials, "_metal_copper"):
         return
+
     surf = None
     cu_mat = b.materials.metal_copper
 
     for _, pv in b.registry.physicalVolumeDict.items():
-        if pv.motherVolume != b.mother_lv or pv.logicalVolume.material != cu_mat:
+        if (
+            pv.motherVolume != b.mother_lv
+            or not hasattr(pv.logicalVolume, "material")
+            or pv.logicalVolume.material != cu_mat
+        ):
             continue
+
+        # only lazy-load the copper surface when we encounter a copper part.
         if surf is None:
             surf = b.materials.surfaces.to_copper
+
+        # check that we do not have another surface already at this boundary.
+        if any(
+            isinstance(s, geant4.BorderSurface) and {b.mother_pv, pv} == {s.physref1, s.physref2}
+            for s in b.registry.surfaceDict.values()
+        ):
+            continue
 
         geant4.BorderSurface("bsurface_lar_cu_" + pv.name, b.mother_pv, pv, surf, b.registry)
         geant4.BorderSurface("bsurface_cu_lar_" + pv.name, pv, b.mother_pv, surf, b.registry)

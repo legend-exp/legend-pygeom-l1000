@@ -5,7 +5,11 @@ from math import pi
 import numpy as np
 import pyg4ometry.geant4 as g4
 
-from . import core
+from . import core, watertank
+
+# z of the cavern's reference solid (the floor box' centre) above the detector origin. Everything
+# else in the cavern/rock chain is positioned relative to this.
+CAVERN_ORIGIN_Z = 800.0  # mm
 
 
 def construct_and_place_cavern_and_labs(instr: core.InstrumentationData) -> None:
@@ -32,9 +36,9 @@ def construct_and_place_cavern_and_labs(instr: core.InstrumentationData) -> None
             rock_depth_below,
             rock_depth_above,
         )
-        rock_extent = rock_lv.extent(includeBoundingSolid=True)
+        rock_lv.pygeom_color_rgba = (0.5, 0.5, 0.5, 0.25)
 
-        cavern_lv, cavern_x_offset = construct_cavern(
+        cavern_lv, cavern_x_offset, cavern_z_displacement = construct_cavern(
             instr.materials.air,
             instr.registry,
             instr.mother_lv,
@@ -42,19 +46,18 @@ def construct_and_place_cavern_and_labs(instr: core.InstrumentationData) -> None
             rock_depth_below,
             rock_depth_above,
         )
-        cavern_extent = cavern_lv.extent(includeBoundingSolid=True)
 
-        rock_z_displacement = (
-            rock_extent[0][2]  # lower edge of the cavern volume
-            - cavern_extent[0][2]
-        )
+        # the rock is symmetric about its own origin, so placing it such that the cavern lands at
+        # CAVERN_ORIGIN_Z fixes the whole chain. Using the solids' extents here instead would put the
+        # cavern (and with it the detector) at a different global z than in a cavern-less geometry.
+        rock_z_displacement = CAVERN_ORIGIN_Z - cavern_z_displacement
         rock_pv = g4.PhysicalVolume(
-            [0, 0, 0], [0, 0, -rock_z_displacement], rock_lv, "rock", instr.mother_lv, instr.registry
+            [0, 0, 0], [0, 0, rock_z_displacement], rock_lv, "rock", instr.mother_lv, instr.registry
         )
-        instr = instr._replace(mother_lv=rock_lv, mother_pv=rock_pv, mother_z_displacement=0)
+        instr = instr._replace(
+            mother_lv=rock_lv, mother_pv=rock_pv, mother_z_displacement=-rock_z_displacement
+        )
 
-        # since we place the cavern inside the rock, we just need the relative offset from the center of the rock, i.e., the origin
-        cavern_z_displacement = cavern_extent[0][2]
         cavern_pv = g4.PhysicalVolume(
             [0, 0, 0],
             [cavern_x_offset, 0, cavern_z_displacement],
@@ -66,7 +69,7 @@ def construct_and_place_cavern_and_labs(instr: core.InstrumentationData) -> None
         instr = instr._replace(
             mother_lv=cavern_lv,
             mother_pv=cavern_pv,
-            mother_z_displacement=-800,
+            mother_z_displacement=-CAVERN_ORIGIN_Z,
             mother_x_displacement=-cavern_x_offset,
         )
 
@@ -156,8 +159,8 @@ def construct_cavern(
     )
 
     # 3. cylindrical tube for the icarus pit
-    tank_pit_radius = 9950.0 / 2 + 0.1  # Radius of the outer tank wall inside icarus pit
-    tank_pit_height = 800.0 + 0.1  # Height of the icarus pit
+    tank_pit_radius = watertank.tank_pit_radius + 0.1  # Radius of the outer tank wall inside icarus pit
+    tank_pit_height = watertank.tank_pit_height + 0.1  # Height of the icarus pit
 
     cavern_icarus = g4.solid.Tubs(
         "cavern_icarus", 0, tank_pit_radius, tank_pit_height, 0, 2 * pi, registry, "mm"
@@ -188,5 +191,10 @@ def construct_cavern(
         registry,
     )
 
-    # Now we place this union inside the rock volume
-    return g4.LogicalVolume(cavern_box_tube_icarus, material, "cavern", registry), box_x_offset
+    # Now we place this union inside the rock volume. offset_z_box is the z of the union's reference
+    # solid (the box) inside the rock, so it is exactly the displacement the caller has to use.
+    return (
+        g4.LogicalVolume(cavern_box_tube_icarus, material, "cavern", registry),
+        box_x_offset,
+        offset_z_box,
+    )
