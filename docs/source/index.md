@@ -78,7 +78,7 @@ legend-pygeom-l1000 --visualize
 Generate with specific detail level:
 
 ```console
-legend-pygeom-l1000 l1000.gdml --detail comsogenic
+legend-pygeom-l1000 l1000.gdml --detail cosmogenic
 ```
 
 For detailed usage information, see the {doc}`cli_usage`.

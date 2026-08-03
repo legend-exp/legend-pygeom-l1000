@@ -4,19 +4,95 @@ from __future__ import annotations
 
 import argparse
 import logging
-from pathlib import Path
 
 import dbetto
 from pyg4ometry import config as meshconfig
 from pygeomoptics.store import load_user_material_code
 from pygeomtools import detectors, visualization, write_pygeom
 
-from . import _version, config_compilation, core, manifest
+from . import _version, core, manifest
+from .config import DEFAULT_DETAIL, copy_raw_configs, load_config, resolve_config, write_config
 
 log = logging.getLogger(__name__)
 
 
-def dump_gdml_cli() -> None:
+def dump_gdml_cli(argv: list[str] | None = None) -> None:
+    args = _parse_cli_args(argv)
+
+    logging.basicConfig()
+    if args.verbose:
+        logging.getLogger("pygeoml1000").setLevel(logging.DEBUG)
+    if args.debug:
+        logging.root.setLevel(logging.DEBUG)
+
+    config = None
+    if args.write_config or args.filename is not None or args.visualize or args.write_manifest:
+        config = load_geometry_config(args)
+
+    if args.dump_raw_configs:
+        folder = copy_raw_configs(args.dump_raw_configs)
+        log.info("copied raw config files to %s", folder)
+
+    if args.write_config:
+        log.info("writing resolved config to %s", args.write_config)
+        write_config(config, args.write_config)
+
+    if config is None or (args.filename is None and not args.visualize and not args.write_manifest):
+        return
+
+    vis_scene = {}
+    if isinstance(args.visualize, str):
+        vis_scene = dbetto.utils.load_dict(args.visualize)
+
+    if vis_scene.get("fine_mesh", False) or args.check_overlaps or args.write_manifest:
+        meshconfig.setGlobalMeshSliceAndStack(100)
+
+    if args.pygeom_optics_plugin:
+        load_user_material_code(args.pygeom_optics_plugin)
+
+    registry = core.construct(config)
+
+    if args.write_manifest:
+        log.info("writing parts manifest to %s", args.write_manifest)
+        manifest.write_manifest(
+            registry,
+            args.write_manifest,
+            detail_level=config["detail"],
+            assemblies=config.get("assemblies"),
+        )
+
+    if args.check_overlaps:
+        msg = "checking for overlaps"
+        log.info(msg)
+        registry.worldVolume.checkOverlaps(recursive=True)
+
+    if args.filename is not None:
+        log.info("exporting GDML geometry to %s", args.filename)
+    write_pygeom(registry, args.filename)
+
+    if args.det_macro_file:
+        detectors.generate_detector_macro(registry, args.det_macro_file)
+
+    if args.vis_macro_file:
+        visualization.generate_color_macro(registry, args.vis_macro_file)
+
+    if args.visualize:
+        log.info("visualizing...")
+        from pygeomtools import viewer
+
+        viewer.visualize(registry, vis_scene)
+
+
+def load_geometry_config(args: argparse.Namespace) -> dict:
+    """Resolve the geometry config selected on the command line.
+
+    Command line arguments take precedence over the config file, which takes precedence over the
+    defaults.
+    """
+    return resolve_config(load_config(args.config), assemblies=args.assemblies, detail=args.detail)
+
+
+def _parse_cli_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         prog="legend-pygeom-l1000",
         description="%(prog)s command line interface",
@@ -72,49 +148,42 @@ def dump_gdml_cli() -> None:
     # options for geometry generation.
     geom_opts = parser.add_argument_group("geometry options")
     geom_opts.add_argument(
-        "--assemblies",
+        "--config",
         action="store",
-        default=None,
-        help="""Select the assemblies to generate in the output. If specified, changes all unspecified assemblies to 'omit'.""",
+        help="""Select a config file (YAML or JSON) to read the geometry configuration from""",
     )
     geom_opts.add_argument(
-        "--write-manifest",
+        "--assemblies",
         action="store",
-        help="""Filename to write a YAML parts manifest to, listing the material, the number of placements and the total mass of each part in the geometry""",
+        help="""Comma-separated list of assemblies to generate in the output. Each entry can be
+        prefixed by '+' or '-' to add to/remove from the assemblies enabled by the detail level,
+        but either all entries carry an operator or none do.""",
     )
     geom_opts.add_argument(
         "--detail",
         action="store",
-        default="radiogenic",
-        help="""Select the detail level for the setup. (default: %(default)s)""",
+        help=f"""Select the detail level for the setup. (default: {DEFAULT_DETAIL})""",
     )
 
-    config_opts = parser.add_argument_group("config options")
-    config_opts.add_argument(
-        "--copy-raw-configs-into-cwd-folder",
-        action="store_true",
-        help="""Copy the raw config files to the cwd folder. This is useful for creating a custom config file based on the default raw configs. The default raw configs are located in the 'configs' folder of this package.""",
-    )
-    config_opts.add_argument(
-        "--generate-compiled-config",
-        action="store_true",
-        help="""Generate the compiled config file containing the special_metadata and channelmap.""",
-    )
-    config_opts.add_argument(
-        "--output-compiled-config",
+    # output options.
+    out_opts = parser.add_argument_group("output options")
+    out_opts.add_argument(
+        "--write-manifest",
         action="store",
-        default="",
-        help="""Output file for the compiled config file (default is [cwd]/config.yaml).""",
+        help="""Filename to write a YAML parts manifest to, listing the material, the number of placements and the total mass of each part in the geometry""",
     )
-    config_opts.add_argument(
-        "--compiled-config",
-        help="""Use a compiled config file containing the special_metadata and channelmap instead of generating a new geometry. Overrides using the raw config files.""",
-    )
-    config_opts.add_argument(
-        "--input-raw-config-folder",
+    out_opts.add_argument(
+        "--write-config",
         action="store",
-        default="",
-        help="""Folder location of raw input config files (defaults to Path(__file__).parent/configs/).""",
+        help="""Filename to write the resolved config to, i.e. the config with the raw configuration
+        compiled into an explicit channelmap and special_metadata. The result can be edited by hand
+        and fed back in via --config.""",
+    )
+    out_opts.add_argument(
+        "--dump-raw-configs",
+        action="store",
+        help="""Write a copy of the raw config files shipped with this package into a 'configs'
+        folder below the given directory, as a starting point for a custom configuration.""",
     )
     parser.add_argument(
         "filename",
@@ -123,106 +192,17 @@ def dump_gdml_cli() -> None:
         help="""File name for the output GDML geometry.""",
     )
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     if (
         not args.visualize
         and args.filename is None
-        and not args.generate_compiled_config
-        and not args.copy_raw_configs_into_cwd_folder
         and not args.write_manifest
+        and not args.write_config
+        and not args.dump_raw_configs
     ):
-        parser.error("no output file, no visualization, and no metadata generation specified")
+        parser.error("no output file, no visualization, and no config output specified")
     if (args.vis_macro_file or args.det_macro_file) and args.filename is None:
         parser.error("writing macro file(s) without gdml file is not possible")
 
-    if args.verbose:
-        logging.getLogger("pygeoml1000").setLevel(logging.DEBUG)
-    if args.debug:
-        logging.root.setLevel(logging.DEBUG)
-
-    if args.copy_raw_configs_into_cwd_folder:
-        log.info("copying raw config files to %s", Path.cwd())
-        folder = Path.cwd()
-        try:
-            config_compilation.copy_raw_configs(destination_folder=folder)
-            log.info("raw config files copied successfully")
-        except Exception as e:
-            log.error("failed to copy raw config files: %s", e)
-            return
-
-    if args.generate_compiled_config:
-        log.info("generating default config file")
-        try:
-            config_compilation.setup_config_file(
-                input_config_folder=args.input_raw_config_folder, output_config=args.output_compiled_config
-            )
-            log.info("config file generated successfully")
-        except Exception as e:
-            log.error("failed to generate config file: %s", e)
-            return
-
-    if args.compiled_config and args.input_raw_config_folder:
-        log.warning("input_raw_config_folder is ignored when using a compiled config file")
-
-    config = {}
-    if args.compiled_config:
-        config = dbetto.utils.load_dict(args.compiled_config)
-
-    if (
-        (args.generate_compiled_config or args.copy_raw_configs_into_cwd_folder)
-        and args.filename is None
-        and not args.visualize
-        and not args.write_manifest
-    ):
-        return
-
-    vis_scene = {}
-    if isinstance(args.visualize, str):
-        vis_scene = dbetto.utils.load_dict(args.visualize)
-
-    # the manifest masses are derived from the meshes, and the default discretisation of curved
-    # solids (16 slices) underestimates their volume by ~2.5%.
-    if vis_scene.get("fine_mesh", False) or args.check_overlaps or args.write_manifest:
-        meshconfig.setGlobalMeshSliceAndStack(100)
-
-    # load custom module to change material properties.
-    if args.pygeom_optics_plugin:
-        load_user_material_code(args.pygeom_optics_plugin)
-
-    registry = core.construct(
-        assemblies=args.assemblies.split(",") if args.assemblies else None,
-        detail_level=args.detail,
-        config=config,
-        input_config_folder=args.input_raw_config_folder,
-    )
-
-    if args.write_manifest:
-        log.info("writing parts manifest to %s", args.write_manifest)
-        manifest.write_manifest(
-            registry,
-            args.write_manifest,
-            detail_level=args.detail,
-            assemblies=args.assemblies.split(",") if args.assemblies else None,
-        )
-
-    if args.check_overlaps:
-        msg = "checking for overlaps"
-        log.info(msg)
-        registry.worldVolume.checkOverlaps(recursive=True)
-
-    if args.filename is not None:
-        log.info("exporting GDML geometry to %s", args.filename)
-    write_pygeom(registry, args.filename)
-
-    if args.det_macro_file:
-        detectors.generate_detector_macro(registry, args.det_macro_file)
-
-    if args.vis_macro_file:
-        visualization.generate_color_macro(registry, args.vis_macro_file)
-
-    if args.visualize:
-        log.info("visualizing...")
-        from pygeomtools import viewer
-
-        viewer.visualize(registry, vis_scene)
+    return args

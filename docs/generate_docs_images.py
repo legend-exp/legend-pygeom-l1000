@@ -13,7 +13,6 @@ Usage::
 from __future__ import annotations
 
 import argparse
-import copy
 import logging
 import math
 import re
@@ -25,7 +24,7 @@ from pyg4ometry import geant4 as g4
 from pyg4ometry.transformation import tbxyz2matrix
 from pygeomtools import viewer, write_pygeom
 
-from pygeoml1000 import config_compilation, core
+from pygeoml1000 import config, core
 
 log = logging.getLogger("generate_docs_images")
 
@@ -182,7 +181,7 @@ IMAGES = {
 
 
 def _subset_metadata(
-    strings: set[int] | None, positions: set[int] | None, input_config_folder: str = ""
+    strings: set[int] | None, positions: set[int] | None, raw_config: dict | str = ""
 ) -> dict:
     """Build a config restricted to the given strings (and detector positions).
 
@@ -193,11 +192,9 @@ def _subset_metadata(
     if strings is None:
         return {}
 
-    channelmap, special_metadata = config_compilation.generate_dummy_metadata(
-        input_config_folder=input_config_folder
-    )
-    channelmap = copy.deepcopy(channelmap)
-    special_metadata = copy.deepcopy(special_metadata)
+    resolved = config.resolve_config({"raw_config": raw_config} if raw_config else {})
+    channelmap = resolved["channelmap"]
+    special_metadata = resolved["special_metadata"]
 
     def _keep_ged(ch: dict) -> bool:
         loc = ch["location"]
@@ -330,12 +327,10 @@ def export_image(name: str, spec: dict) -> None:
     """Build the geometry for one view and render it to ``docs/source/images``."""
     log.info("building geometry for %s", name)
 
-    config = _subset_metadata(spec.get("strings"), spec.get("positions"))
-    registry = core.construct(
-        assemblies=list(spec["assemblies"]),
-        detail_level=spec.get("detail", "radiogenic"),
-        config=config,
-    )
+    geom_config = _subset_metadata(spec.get("strings"), spec.get("positions"))
+    geom_config["assemblies"] = list(spec["assemblies"])
+    geom_config["detail"] = spec.get("detail", config.DEFAULT_DETAIL)
+    registry = core.construct(geom_config)
     log.info("%s: %d physical volumes", name, len(registry.physicalVolumeDict))
 
     write_pygeom(registry, None)
