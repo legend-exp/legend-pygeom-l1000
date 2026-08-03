@@ -225,12 +225,20 @@ def _place_front_end_and_insulators(
         cap_rot = [math.pi, 0, angle_signal]
         cap_pos = np.array([x_cap, y_cap, z_pos["cable"] - thickness["cable"] - 0.5 + CABLE_CAP_Z_OFFSET])
         cap_to_cable = _cap_to_cable(cap_rot, cap_pos, np.array([x_cable, y_cable, z_pos["cable"]]))
-        geant4.PhysicalVolume(
+        signal_cap_pv = geant4.PhysicalVolume(
             cap_rot,
             list(cap_pos),
             _get_signal_cap(thickness["cable"], unit_length, n_cables, cap_to_cable, b),
             f"signal_cap_string_{string_id}",
             b.mother_lv,
+            b.registry,
+        )
+
+        geant4.BorderSurface(
+            "bsurface_lar_cap_" + signal_cap_pv.name,
+            b.mother_pv,
+            signal_cap_pv,
+            b.materials.surfaces.to_steel,
             b.registry,
         )
 
@@ -269,12 +277,20 @@ def _place_front_end_and_insulators(
         cap_rot = [0, 0, angle_hv]
         cap_pos = np.array([x_cap, y_cap, z_pos["cable"] - thickness["cable"] - 0.5 + CABLE_CAP_Z_OFFSET])
         cap_to_cable = _cap_to_cable(cap_rot, cap_pos, np.array([x_cable, y_cable, z_pos["cable"]]))
-        geant4.PhysicalVolume(
+        hv_cap_pv = geant4.PhysicalVolume(
             cap_rot,
             list(cap_pos),
             _get_hv_cap(thickness["cable"], unit_length, n_cables, cap_to_cable, b),
             f"hv_cap_string_{string_id}",
             b.mother_lv,
+            b.registry,
+        )
+
+        geant4.BorderSurface(
+            "bsurface_lar_cap_" + hv_cap_pv.name,
+            b.mother_pv,
+            hv_cap_pv,
+            b.materials.surfaces.to_steel,
             b.registry,
         )
 
@@ -620,9 +636,7 @@ def _get_hv_cable(
     """
     cable_name = f"cable_hv_{cable_length:.2f}_n{n_cables}" + ("_top" if is_top else "")
     if cable_name in b.registry.logicalVolumeDict:
-        hv_cable = b.registry.logicalVolumeDict[cable_name]
-        hv_cap = b.registry.logicalVolumeDict[f"{cable_name}_cap"] if det_pos == 1 else None
-        return hv_cable, hv_cap, 30
+        return b.registry.logicalVolumeDict[cable_name]
 
     safety_margin = 1  # mm
     cable_length -= safety_margin
@@ -842,9 +856,7 @@ def _get_signal_cable(
     """
     cable_name = f"cable_signal_{cable_length:.2f}_n{n_cables}" + ("_top" if is_top else "")
     if cable_name in b.registry.logicalVolumeDict:
-        signal_cable = b.registry.logicalVolumeDict[cable_name]
-        signal_cap = b.registry.logicalVolumeDict[f"{cable_name}_cap"] if det_pos == 1 else None
-        return signal_cable, signal_cap, 30
+        return b.registry.logicalVolumeDict[cable_name]
 
     safety_margin = 1  # mm
     cable_length -= safety_margin
@@ -913,7 +925,6 @@ def _get_signal_cable(
             ],
             b.registry,
         )
-        signal_cap = None
 
         # the horizontal piece bridging from the support rod towards the cap ...
         signal_cable_top = geant4.solid.Box(
