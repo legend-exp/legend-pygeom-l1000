@@ -64,7 +64,7 @@ def construct(config: dict | None = None) -> geant4.Registry:
     detail = AttrsDict(effective_detail(config))
 
     reg = geant4.Registry()
-    mats = materials.OpticalMaterialRegistry(reg)
+    mats = materials.OpticalMaterialRegistry(reg, enable_optical=config["enable_optical"])
 
     # Create the world volume
     world_material = geant4.MaterialPredefined("G4_Galactic")
@@ -98,7 +98,7 @@ def _assign_common_copper_surface(b: InstrumentationData) -> None:
     surf = None
     cu_mat = b.materials.metal_copper
 
-    for _, pv in b.registry.physicalVolumeDict.items():
+    for pv in b.registry.physicalVolumeDict.values():
         if (
             pv.motherVolume != b.mother_lv
             or not hasattr(pv.logicalVolume, "material")

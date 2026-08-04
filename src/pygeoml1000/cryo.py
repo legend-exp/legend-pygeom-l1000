@@ -640,7 +640,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
         "mm",
     )
     skirt_lv = g4.LogicalVolume(
-        skirt_solid, instr.materials.metal_steel, "cryostat_skirt_steel_316L", instr.registry
+        skirt_solid, instr.materials.metal_steel_316L, "cryostat_skirt_steel_316L", instr.registry
     )
     skirt_lv.pygeom_color_rgba = (0.5, 0.5, 0.5, 0.1)
     foot_solid = g4.solid.Tubs(
@@ -654,11 +654,13 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
         "mm",
     )
     foot_lv = g4.LogicalVolume(
-        foot_solid, instr.materials.metal_steel, "cryostat_foot_steel_316L", instr.registry
+        foot_solid, instr.materials.metal_steel_316L, "cryostat_foot_steel_316L", instr.registry
     )
     foot_lv.pygeom_color_rgba = (0.5, 0.5, 0.5, 0.1)
 
-    outercryo_lv = construct_outer_cryostat(instr.materials.metal_steel, instr.registry, ocryo_r, ocryo_z)
+    outercryo_lv = construct_outer_cryostat(
+        instr.materials.metal_steel_316L, instr.registry, ocryo_r, ocryo_z
+    )
     outercryo_lv.pygeom_color_rgba = (0.5, 0.5, 0.5, 0.1)
 
     # For the vacuum gap, it should be as simple as subtracting the outer cryostat thicknesses
@@ -694,7 +696,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
         total_height, neck_height, body_height, neck_radius, barrel_radius, shoulder_fraction, bottom_fraction
     )
 
-    icryo_lv = construct_inner_cryostat(instr.materials.metal_steel, instr.registry, icryo_r, icryo_z)
+    icryo_lv = construct_inner_cryostat(instr.materials.metal_steel_316L, instr.registry, icryo_r, icryo_z)
     icryo_lv.pygeom_color_rgba = (0.5, 0.5, 0.5, 0.1)
 
     # The next layer should be again just subtracting by the inner cryo thickness everywhere

@@ -15,9 +15,10 @@ def default_config():
 
 
 def test_default_is_fully_resolved(default_config):
-    """Resolving an empty config compiles the packaged raw configs."""
-    assert set(default_config) == {"channelmap", "special_metadata", "detail"}
+    """Resolving an empty config compiles the packaged raw configs and fills in the defaults."""
+    assert set(default_config) == {"channelmap", "special_metadata", "detail", "enable_optical"}
     assert default_config["detail"] == "radiogenic"
+    assert default_config["enable_optical"] is True
     assert len(default_config["channelmap"]) > 0
     assert set(default_config["special_metadata"]) >= {"hpge_string", "hpges", "fibers", "detail"}
 
@@ -141,6 +142,34 @@ def test_workflow_keys_are_accepted(default_config):
     )
 
     assert resolved == default_config
+
+
+@pytest.mark.parametrize("enable_optical", [False, ["liquidargon"]])
+def test_enable_optical_is_kept(enable_optical):
+    """A non-default optical selection must survive resolution, so it round-trips."""
+    from pygeoml1000 import config
+
+    resolved = config.resolve_config({"enable_optical": enable_optical})
+
+    assert resolved["enable_optical"] == enable_optical
+    assert config.resolve_config(resolved) == resolved
+
+
+@pytest.mark.parametrize(
+    ("enable_optical", "expect_lar_optics"),
+    [(None, True), (True, True), (False, False), (["liquidargon"], True), (["pen"], False)],
+)
+def test_construct_honours_enable_optical(enable_optical, expect_lar_optics):
+    """Only the selected materials get their optical properties registered."""
+    from pygeoml1000 import core
+
+    config = {"assemblies": ["cryostat"]}
+    if enable_optical is not None:
+        config["enable_optical"] = enable_optical
+
+    registry = core.construct(config)
+
+    assert ("liquidargon_RINDEX" in registry.defineDict) == expect_lar_optics
 
 
 def test_schema_is_not_loaded_as_raw_config():
