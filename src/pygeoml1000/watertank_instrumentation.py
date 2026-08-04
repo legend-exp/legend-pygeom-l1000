@@ -51,21 +51,28 @@ def construct_PMT_front(
     """
     # Borosilcate glass window of the PMT
     pmt_window = g4.solid.Ellipsoid(
-        "PMT_window", pmt_eff_radius, pmt_eff_radius, pmt_eff_radius, cutoff, 200, reg, "mm"
+        "waterinstr_pmt_window_borosilicate",
+        pmt_eff_radius,
+        pmt_eff_radius,
+        pmt_eff_radius,
+        cutoff,
+        200,
+        reg,
+        "mm",
     )
 
     vacuum_radius = 128  # Results in a glass window thickness of ~2-3mm
     vacuum_height = pmt_eff_radius - 2
     # The vacuum inside of the PMT window
     pmt_vacuum = g4.solid.Ellipsoid(
-        "PMT_vacuum", vacuum_radius, vacuum_radius, vacuum_height, cutoff, 200, reg, "mm"
+        "waterinstr_pmt_interior_vacuum", vacuum_radius, vacuum_radius, vacuum_height, cutoff, 200, reg, "mm"
     )
     # The actual sensitive part of the PMT. Optical hits will be registered once they hit this volume
     pmt_cathode = g4.solid.Ellipsoid(
-        "PMT_cathode", vacuum_radius, vacuum_radius, vacuum_height, cathode_cutoff, 200, reg, "mm"
+        "waterinstr_pmt_cathode", vacuum_radius, vacuum_radius, vacuum_height, cathode_cutoff, 200, reg, "mm"
     )
 
-    pmt_cathode_lv = g4.LogicalVolume(pmt_cathode, vac_mat, "PMT_cathode", reg)
+    pmt_cathode_lv = g4.LogicalVolume(pmt_cathode, vac_mat, "waterinstr_pmt_cathode", reg)
     pmt_cathode_lv.pygeom_color_rgba = [0.545, 0.271, 0.074, 1]
     g4.SkinSurface("pmt_cathode_surface", pmt_cathode_lv, surfaces.to_photocathode, reg)
 
@@ -80,16 +87,16 @@ def construct_PMT_back(base_mat: g4.Material, reg: g4.Registry) -> g4.LogicalVol
     base_r = 42.25  # values roughly measured from the CAD.
     r = [0, base_r, base_r, 52.25, 102.75, 125, 0]
     z = [0, 0, 72, 82, 110, pmt_base_height, pmt_base_height]
-    pmt_base = g4.solid.GenericPolycone("PMT_base", 0, 2 * pi, r, z, reg, "mm")
+    pmt_base = g4.solid.GenericPolycone("waterinstr_pmt_base_epoxy", 0, 2 * pi, r, z, reg, "mm")
 
-    return g4.LogicalVolume(pmt_base, base_mat, "PMT_base", reg)
+    return g4.LogicalVolume(pmt_base, base_mat, "waterinstr_pmt_base_epoxy", reg)
 
 
 def construct_tyvek_foil(mat: g4.Material, instr: core.InstrumentationData) -> g4.LogicalVolume:
     tyvek_metadata = instr.special_metadata["watertank_instrumentation"]["tyvek"]
 
     tyvek_solid = g4.solid.Polyhedra(
-        "tyvek_foil",
+        "waterinstr_reflector_tyvek",
         0,
         2 * pi,
         tyvek_metadata["faces"],
@@ -100,7 +107,7 @@ def construct_tyvek_foil(mat: g4.Material, instr: core.InstrumentationData) -> g
         instr.registry,
         "mm",
     )
-    return g4.LogicalVolume(tyvek_solid, mat, "tyvek_foil", instr.registry)
+    return g4.LogicalVolume(tyvek_solid, mat, "waterinstr_reflector_tyvek", instr.registry)
 
 
 def get_euler_angles(target_direction: np.array):
@@ -150,16 +157,18 @@ def place_PMT_front(
     Due to the Geant4 handles copies of Logical Volumes, we need to create new Logical Volumes for each sensitive PMT.
     """
     # In order to have unique PMT physical volumes, we need to re-create the mother logical volumes.
-    pmt_window_lv = g4.LogicalVolume(pmt_volumes[0], instr.materials.borosilicate, name + "_window", reg)
+    window_name = f"waterinstr_pmt_window_borosilicate_{name}"
+    vacuum_name = f"waterinstr_pmt_interior_vacuum_{name}"
+    pmt_window_lv = g4.LogicalVolume(pmt_volumes[0], instr.materials.borosilicate, window_name, reg)
     pmt_window_lv.pygeom_color_rgba = [0.9, 0.8, 0.5, 0.5]
-    pmt_vacuum_lv = g4.LogicalVolume(pmt_volumes[1], instr.materials.vacuum, name + "_vacuum", reg)
+    pmt_vacuum_lv = g4.LogicalVolume(pmt_volumes[1], instr.materials.vacuum, vacuum_name, reg)
 
     # We have to place the new logical volumes for every single PMT
-    g4.PhysicalVolume([0, 0, 0], [0, 0, 0], pmt_vacuum_lv, name + "_vacuum", pmt_window_lv, reg)
+    g4.PhysicalVolume([0, 0, 0], [0, 0, 0], pmt_vacuum_lv, vacuum_name, pmt_window_lv, reg)
     pmt_pv = g4.PhysicalVolume([0, 0, 0], [0, 0, 0], pmt_volumes[2], name, pmt_vacuum_lv, reg)
     pmt_pv.set_pygeom_active_detector(RemageDetectorInfo("optical", rawid))
 
-    return g4.PhysicalVolume(rotation, translation, pmt_window_lv, name + "_window", mother_lv, reg)
+    return g4.PhysicalVolume(rotation, translation, pmt_window_lv, window_name, mother_lv, reg)
 
 
 def place_floor_pmts(pmt_volumes: list, pmt_base_lv: g4.LogicalVolume, instr: core.InstrumentationData):
@@ -189,7 +198,7 @@ def place_floor_pmts(pmt_volumes: list, pmt_base_lv: g4.LogicalVolume, instr: co
                 get_euler_angles(target_direction),
                 [loc["x"], loc["y"], loc["z"] + offset],
                 pmt_base_lv,
-                value["name"] + "_base",
+                f"waterinstr_pmt_base_epoxy_{value['name']}",
                 instr.mother_lv,
                 instr.registry,
             )
@@ -243,7 +252,9 @@ def construct_and_place_instrumentation(instr: core.InstrumentationData) -> g4.P
     tyvek_lv = construct_tyvek_foil(instr.materials.tyvek, instr)
     tyvek_lv.pygeom_color_rgba = [1, 1, 1, 0.20]
     g4.SkinSurface("tyvek_surface", tyvek_lv, instr.materials.surfaces.to_tyvek, instr.registry)
-    g4.PhysicalVolume([0, 0, 0], [0, 0, 2 * offset], tyvek_lv, "tyvek_foil", instr.mother_lv, instr.registry)
+    g4.PhysicalVolume(
+        [0, 0, 0], [0, 0, 2 * offset], tyvek_lv, "waterinstr_reflector_tyvek", instr.mother_lv, instr.registry
+    )
     pmt_volumes = construct_PMT_front(instr.materials.vacuum, instr.materials.surfaces, instr.registry)
     pmt_base_lv = construct_PMT_back(instr.materials.epoxy, instr.registry)
     pmt_base_lv.pygeom_color_rgba = [0, 0, 0, 1]

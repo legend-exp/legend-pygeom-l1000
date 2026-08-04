@@ -43,13 +43,13 @@ def test_pyg4ometry_units():
 
 def test_placement_multiplicity(manifest):
     """The placement count must be propagated down the volume tree."""
-    core_fiber = _part(manifest, "fiber_core_l1349_bNone")
+    core_fiber = _part(manifest, "fiber_core_l1349.00")
     assert core_fiber["placements"] == 12096
     assert core_fiber["total_mass"] > 10_000  # g
 
     # cross-check against test_volume_caching, which asserts the same numbers on the registry.
-    assert _part(manifest, "cable_hv_140.10")["placements"] == 336
-    assert _part(manifest, "hpge_support_copper_weldment_top")["placements"] == 1008
+    assert _part(manifest, "hpge_cable_hv_140.10")["placements"] == 336
+    assert _part(manifest, "hpge_string_support_weldment_copper")["placements"] == 1008
 
 
 def test_totals_are_consistent(manifest):

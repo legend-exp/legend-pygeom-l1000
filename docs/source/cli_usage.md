@@ -232,7 +232,7 @@ totals:
     metal_steel: 84623861.8
     # ...
 parts:
-  - name: cable_hv_140.10
+  - name: hpge_cable_hv_140.10
     material: metal_copper
     density: 8.96
     solid: Union
