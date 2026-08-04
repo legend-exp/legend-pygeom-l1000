@@ -15,6 +15,8 @@ from pygeomtools.utils import load_dict_from_config
 log = logging.getLogger(__name__)
 
 DEFAULT_DETAIL = "radiogenic"
+DEFAULT_ENABLE_OPTICAL = True
+"""Optical properties are registered for every material unless the config says otherwise."""
 _RAW_CONFIG_SUFFIXES = (".yaml", ".json")
 #: substring marking a file in the configs folder that is not raw configuration.
 _NOT_RAW_CONFIG = "_schema"
@@ -106,6 +108,8 @@ def resolve_config(config: dict | None = None, **cli_overrides: Any) -> dict:
         )
         raise ValueError(msg)
     resolved["detail"] = detail_level
+
+    resolved["enable_optical"] = config.get("enable_optical", DEFAULT_ENABLE_OPTICAL)
 
     assemblies = parse_assemblies(config.get("assemblies"), special_metadata["detail"][detail_level])
     if assemblies is None:

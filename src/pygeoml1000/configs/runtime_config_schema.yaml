@@ -5,7 +5,16 @@ title: legend-pygeom-l1000 config file
 # so that a legend-simflow geometry config is portable between the two generators.
 type: object
 properties:
-  # --- shared vocabulary with legend-pygeom-l200 ---
+  enable_optical:
+    description: >-
+      Whether to enable optical physics in the geometry. Either a boolean, or a
+      list of material names for which to enable optical physics.
+    anyOf:
+      - type: boolean
+      - type: array
+        items:
+          type: string
+        uniqueItems: true
   assemblies:
     description: >-
       Assemblies to build. Either an absolute list of assembly names, or a list
@@ -45,16 +54,6 @@ properties:
       LEGEND-1000 has no hardware metadata to select a snapshot from.
     type: string
     pattern: "^\\d{8}T\\d{6}Z$"
-
-  # --- consumed by the calling workflow, not by the geometry generation ---
-  executable:
-    description: >-
-      The geometry generator legend-simflow invokes for this config. Declared
-      here so that a simflow geometry config validates. It is ignored by the
-      generation itself.
-    type: string
-
-  # --- legend-pygeom-l1000 specific ---
   detail:
     description:
       Name of the detail level preset to use (a key of the raw ``detail.yaml``).
@@ -66,3 +65,9 @@ properties:
       without extension), or a path to a folder of raw config files. Ignored if
       both ``channelmap`` and ``special_metadata`` are given.
     type: [object, string]
+  executable:
+    description: >-
+      The geometry generator legend-simflow invokes for this config. Declared
+      here so that a simflow geometry config validates. It is ignored by the
+      generation itself.
+    type: string
