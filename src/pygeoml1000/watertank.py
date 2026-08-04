@@ -55,6 +55,8 @@ tank_manhole_outer_radius = 500.0  # The outer radius of the curved part of the 
 tank_manhole_depth = 135.37  # How far the manhole extends outside the tank (from cad)
 
 # Missing: Top catwalk
+TANK_VOLUME_NAME = "watertank_steel_304L"
+WATER_VOLUME_NAME = "watertank_water"
 
 
 def construct_base(
@@ -155,10 +157,11 @@ def construct_bulge(
     )
 
 
-def construct_flange(base: g4.solid, reg: g4.Registry, n: int = 4) -> g4.solid:
+def construct_flange(name: str, base: g4.solid, reg: g4.Registry, n: int = 4) -> g4.solid:
     """Construct the flange solid to be placed on top of the tank.
     Constructed from 6 boolean operations and therefore probably not very run-time efficient in G4.
 
+    name: Prefix to add to the volume name
     base: The base of the tank to which the flanges will be added.
     n: Number of flanges to add to the tank. Default is 4."""
 
@@ -170,7 +173,7 @@ def construct_flange(base: g4.solid, reg: g4.Registry, n: int = 4) -> g4.solid:
     r_flange_base = [299.5, 304.5, 304.5, 390, 390, 161.5, 161.5, 222.5, 222.5, 158.5, 158.5, 299.5]
     z_flange_base = [0, 0, 923, 923, 995, 995, 1067, 1067, 1095, 1095, 923, 923]
     flange_base = g4.solid.GenericPolycone(
-        "tank_flange_base", 0, 2 * pi, r_flange_base, z_flange_base, reg, "mm"
+        name + "_flange_base", 0, 2 * pi, r_flange_base, z_flange_base, reg, "mm"
     )
 
     # The horizontal flange thingis
@@ -178,7 +181,7 @@ def construct_flange(base: g4.solid, reg: g4.Registry, n: int = 4) -> g4.solid:
     r_flange_extras = [205.5, 282.5, 282.5, 209.5, 209.5, 282.5, 282.5, 205.5]
     z_flange_extras = [0, 0, 32, 32, 925, 925, flange_extra_height, flange_extra_height]
     flange_extras = g4.solid.GenericPolycone(
-        "tank_flange_extras", 0, 2 * pi, r_flange_extras, z_flange_extras, reg, "mm"
+        name + "_flange_extras", 0, 2 * pi, r_flange_extras, z_flange_extras, reg, "mm"
     )
 
     # This is where the fun begins
@@ -191,7 +194,7 @@ def construct_flange(base: g4.solid, reg: g4.Registry, n: int = 4) -> g4.solid:
         flange_x = tank_flange_position_radius * np.sin(angle)
         flange_y = tank_flange_position_radius * np.cos(angle)
         flange_new = g4.solid.Union(
-            "tank_flange_step" + str(i) + "1",
+            name + "_flange_step" + str(i) + "1",
             flange_last,
             flange_base,
             [[0, 0, angle], [flange_x, flange_y, tank_base_height]],
@@ -200,7 +203,7 @@ def construct_flange(base: g4.solid, reg: g4.Registry, n: int = 4) -> g4.solid:
         y_offset = flange_extra_height / 2 * np.cos(angle)
         x_offset = flange_extra_height / 2 * np.sin(angle)
         flange_last = g4.solid.Union(
-            "tank_flange_step" + str(i) + "2",
+            name + "_flange_step" + str(i) + "2",
             flange_new,
             flange_extras,
             [[pi / 2, 0, angle], [flange_x - x_offset, flange_y + y_offset, z_offset]],
@@ -208,7 +211,7 @@ def construct_flange(base: g4.solid, reg: g4.Registry, n: int = 4) -> g4.solid:
         )
 
         flange_new = g4.solid.Union(
-            "tank_flange_step1" + str(i) + "3",
+            name + "_flange_step1" + str(i) + "3",
             flange_last,
             flange_extras,
             [[0, pi / 2, angle], [flange_x - y_offset, flange_y - x_offset, z_offset]],
@@ -219,9 +222,10 @@ def construct_flange(base: g4.solid, reg: g4.Registry, n: int = 4) -> g4.solid:
     return flange_last
 
 
-def construct_manhole(base: g4.solid, reg: g4.Registry):
+def construct_manhole(name: str, base: g4.solid, reg: g4.Registry):
     """Construct the manhole solid.
 
+    name: Prefix to add to the volume name
     base: The base of the tank to which the manhole will be added.
     """
     curvature_safety = (
@@ -230,11 +234,16 @@ def construct_manhole(base: g4.solid, reg: g4.Registry):
 
     mh_depth = tank_manhole_depth + curvature_safety
     mh_box = g4.solid.Box(
-        "tank_manhole_box", tank_manhole_square_inner_width, tank_manhole_square_height, mh_depth, reg, "mm"
+        name + "_manhole_box",
+        tank_manhole_square_inner_width,
+        tank_manhole_square_height,
+        mh_depth,
+        reg,
+        "mm",
     )
 
     mh_semicircle = g4.solid.Tubs(
-        "tank_manhole_semic", 0, tank_manhole_inner_radius, mh_depth, 0, 2 * pi, reg, "mm"
+        name + "_manhole_semic", 0, tank_manhole_inner_radius, mh_depth, 0, 2 * pi, reg, "mm"
     )
 
     mh_z_position = tank_manhole_square_height + tank_pit_height + tank_manhole_square_height / 2
@@ -243,14 +252,14 @@ def construct_manhole(base: g4.solid, reg: g4.Registry):
     mh_y_position = (tank_base_radius + mh_depth / 2 - curvature_safety) * np.cos(mh_rad)
 
     tank_high_step2 = g4.solid.Union(
-        "tank_manhole_step1",
+        name + "_manhole_step1",
         base,
         mh_box,
         [[pi / 2, 0, mh_rad], [mh_x_position, mh_y_position, mh_z_position]],
         reg,
     )
     tank_high_step3 = g4.solid.Union(
-        "tank_manhole_step2",
+        name + "_manhole_step2",
         tank_high_step2,
         mh_semicircle,
         [[pi / 2, 0, mh_rad], [mh_x_position, mh_y_position, mh_z_position + tank_manhole_square_height / 2]],
@@ -258,7 +267,7 @@ def construct_manhole(base: g4.solid, reg: g4.Registry):
     )
 
     return g4.solid.Union(
-        "tank_manhole_step3",
+        name + "_manhole_step3",
         tank_high_step3,
         mh_semicircle,
         [[pi / 2, 0, mh_rad], [mh_x_position, mh_y_position, mh_z_position - tank_manhole_square_height / 2]],
@@ -274,20 +283,20 @@ def construct_tank(tank_material: g4.Material, reg: g4.Registry, detail: str = "
     detailed: Base, Bulge, Manhole and Flanges are constructed.
     """
 
-    base = construct_base("tank", reg)
+    base = construct_base(TANK_VOLUME_NAME, reg)
     if detail == "simple":
-        return g4.LogicalVolume(base, tank_material, "tank", reg)
+        return g4.LogicalVolume(base, tank_material, TANK_VOLUME_NAME, reg)
 
-    tank_medium = construct_bulge("tank", base, reg)
+    tank_medium = construct_bulge(TANK_VOLUME_NAME, base, reg)
 
     if detail != "detailed":
         msg = "invalid tank detail level specified"
         raise ValueError(msg)
 
-    tank_high_flange = construct_flange(tank_medium, reg)
-    tank_high_final = construct_manhole(tank_high_flange, reg)
+    tank_high_flange = construct_flange(TANK_VOLUME_NAME, tank_medium, reg)
+    tank_high_final = construct_manhole(TANK_VOLUME_NAME, tank_high_flange, reg)
 
-    return g4.LogicalVolume(tank_high_final, tank_material, "tank", reg)
+    return g4.LogicalVolume(tank_high_final, tank_material, TANK_VOLUME_NAME, reg)
 
 
 def construct_and_place_tank(instr: core.InstrumentationData) -> core.InstrumentationData:
@@ -309,14 +318,14 @@ def construct_and_place_tank(instr: core.InstrumentationData) -> core.Instrument
         [0, 0, 0],
         [instr.mother_x_displacement, 0, tank_z_displacement + instr.mother_z_displacement],
         tank_lv,
-        "tank",
+        TANK_VOLUME_NAME,
         instr.mother_lv,
         instr.registry,
     )
 
     water_lv = construct_water(instr.materials.water, instr.registry, instr.detail["watertank"])
     water_lv.pygeom_color_rgba = [0, 0, 1, 0.2]
-    water_pv = g4.PhysicalVolume([0, 0, 0], [0, 0, 0], water_lv, "water", tank_lv, instr.registry)
+    water_pv = g4.PhysicalVolume([0, 0, 0], [0, 0, 0], water_lv, WATER_VOLUME_NAME, tank_lv, instr.registry)
 
     water_pv.set_pygeom_active_detector(RemageDetectorInfo("scintillator", 10002, {}))
 
@@ -339,10 +348,12 @@ def construct_water(
     detailed: The base polycone and the bulge on top of the tank are constructed.
     """
     base = construct_base(
-        "water", reg, v_wall=tank_vertical_wall, h_wall=tank_horizontal_wall, neck_safety=1e-9
+        WATER_VOLUME_NAME, reg, v_wall=tank_vertical_wall, h_wall=tank_horizontal_wall, neck_safety=1e-9
     )
     if detail == "simple":
-        return g4.LogicalVolume(base, water_material, "tank_water", reg)
+        return g4.LogicalVolume(base, water_material, WATER_VOLUME_NAME, reg)
 
-    water = construct_bulge("water", base, reg, v_wall=tank_vertical_wall, h_wall=tank_horizontal_wall)
-    return g4.LogicalVolume(water, water_material, "tank_water", reg)
+    water = construct_bulge(
+        WATER_VOLUME_NAME, base, reg, v_wall=tank_vertical_wall, h_wall=tank_horizontal_wall
+    )
+    return g4.LogicalVolume(water, water_material, WATER_VOLUME_NAME, reg)

@@ -342,33 +342,39 @@ def make_moderator_z_r_r(
 def construct_outer_cryostat(
     cryostat_material: g4.Material, reg: g4.Registry, ocryo_r: list, ocryo_z: list
 ) -> g4.LogicalVolume:
-    ocryo_solid = g4.solid.GenericPolycone("ocryo_sol", 0, 2 * pi, ocryo_r, ocryo_z, reg, "mm")
+    ocryo_solid = g4.solid.GenericPolycone(
+        "cryostat_outer_steel_316L", 0, 2 * pi, ocryo_r, ocryo_z, reg, "mm"
+    )
 
-    return g4.LogicalVolume(ocryo_solid, cryostat_material, "outercryostat", reg)
+    return g4.LogicalVolume(ocryo_solid, cryostat_material, "cryostat_outer_steel_316L", reg)
 
 
 def construct_vacuum_gap(
     vac_material: g4.Material, reg: g4.Registry, vac_r: list, vac_z: list
 ) -> g4.LogicalVolume:
-    vac_solid = g4.solid.GenericPolycone("vac_sol", 0, 2 * pi, vac_r, vac_z, reg, "mm")
+    vac_solid = g4.solid.GenericPolycone("cryostat_insulation_vacuum", 0, 2 * pi, vac_r, vac_z, reg, "mm")
 
-    return g4.LogicalVolume(vac_solid, vac_material, "vacuumgap", reg)
+    return g4.LogicalVolume(vac_solid, vac_material, "cryostat_insulation_vacuum", reg)
 
 
 def construct_inner_cryostat(
     cryostat_material: g4.Material, reg: g4.Registry, icryo_r: list, icryo_z: list
 ) -> g4.LogicalVolume:
-    icryo_solid = g4.solid.GenericPolycone("icryo_sol", 0, 2 * pi, icryo_r, icryo_z, reg, "mm")
+    icryo_solid = g4.solid.GenericPolycone(
+        "cryostat_inner_steel_316L", 0, 2 * pi, icryo_r, icryo_z, reg, "mm"
+    )
 
-    return g4.LogicalVolume(icryo_solid, cryostat_material, "innercryostat", reg)
+    return g4.LogicalVolume(icryo_solid, cryostat_material, "cryostat_inner_steel_316L", reg)
 
 
 def construct_atmospheric_lar(
     lar_material: g4.Material, reg: g4.Registry, atmlar_r: list, atmlar_z: list
 ) -> g4.LogicalVolume:
-    atmlar_solid = g4.solid.GenericPolycone("atmlar_sol", 0, 2 * pi, atmlar_r, atmlar_z, reg, "mm")
+    atmlar_solid = g4.solid.GenericPolycone(
+        "liquid_argon_atmospheric", 0, 2 * pi, atmlar_r, atmlar_z, reg, "mm"
+    )
 
-    return g4.LogicalVolume(atmlar_solid, lar_material, "atmosphericlar", reg)
+    return g4.LogicalVolume(atmlar_solid, lar_material, "liquid_argon_atmospheric", reg)
 
 
 def construct_reentrance_tube_with_layers(
@@ -404,17 +410,19 @@ def construct_reentrance_tube_with_layers(
     inner_z, inner_r = make_inner_profile(neck_radius, tube_height, total_height, curve_fraction, wls_height)
 
     # Construct steel tube
-    tube_solid = g4.solid.GenericPolycone("reentrancetube", 0, 2 * np.pi, outer_r, outer_z, reg, "mm")
-    tube_lv = g4.LogicalVolume(tube_solid, materials.metal_copper, "reentrancetube", reg)
+    tube_solid = g4.solid.GenericPolycone("reentrance_tube_copper", 0, 2 * np.pi, outer_r, outer_z, reg, "mm")
+    tube_lv = g4.LogicalVolume(tube_solid, materials.metal_copper, "reentrance_tube_copper", reg)
     tube_lv.pygeom_color_rgba = False  # all parts of the tube are covered by the WLSRs or the inner tubes.
-    g4.PhysicalVolume([0, 0, 0], [0, 0, 0, "mm"], tube_lv, "reentrancetube", atmlar_lv, registry=reg)
+    g4.PhysicalVolume([0, 0, 0], [0, 0, 0, "mm"], tube_lv, "reentrance_tube_copper", atmlar_lv, registry=reg)
 
     # Construct underground argon cavity
-    uglar_solid = g4.solid.GenericPolycone("undergroundlar", 0, 2 * np.pi, inner_r, inner_z, reg, "mm")
-    uglar_lv = g4.LogicalVolume(uglar_solid, materials.liquidargon, "undergroundlar", reg)
+    uglar_solid = g4.solid.GenericPolycone(
+        "liquid_argon_underground", 0, 2 * np.pi, inner_r, inner_z, reg, "mm"
+    )
+    uglar_lv = g4.LogicalVolume(uglar_solid, materials.liquidargon, "liquid_argon_underground", reg)
     uglar_lv.pygeom_color_rgba = False  # we show the reentrance tube.
     uglar_pv = g4.PhysicalVolume(
-        [0, 0, 0], [0, 0, 0, "mm"], uglar_lv, "undergroundlar", tube_lv, registry=reg
+        [0, 0, 0], [0, 0, 0, "mm"], uglar_lv, "liquid_argon_underground", tube_lv, registry=reg
     )
 
     # Place inner WLSR in underground argon (function from wlsr.py)
@@ -464,21 +472,23 @@ def construct_reentrance_tube_with_layers(
     )
 
     ofhc_outer_bound = g4.solid.GenericPolycone(
-        "ofhc_cu_outer_bound", 0, 2 * np.pi, ofhc_outer_r, ofhc_outer_z, reg, "mm"
+        "reentrance_tube_layer_copper_ofhc_outer_bound", 0, 2 * np.pi, ofhc_outer_r, ofhc_outer_z, reg, "mm"
     )
     ofhc_inner_bound = g4.solid.GenericPolycone(
-        "ofhc_cu_inner_bound", 0, 2 * np.pi, ofhc_inner_r, ofhc_inner_z, reg, "mm"
+        "reentrance_tube_layer_copper_ofhc_inner_bound", 0, 2 * np.pi, ofhc_inner_r, ofhc_inner_z, reg, "mm"
     )
     ofhc_solid = g4.solid.Subtraction(
-        "ofhc_cu",
+        "reentrance_tube_layer_copper_ofhc",
         ofhc_outer_bound,
         ofhc_inner_bound,
         [[0, 0, 0], [0, 0, 0, "mm"]],
         reg,
     )
-    ofhc_lv = g4.LogicalVolume(ofhc_solid, materials.metal_copper, "ofhc_cu", reg)
+    ofhc_lv = g4.LogicalVolume(ofhc_solid, materials.metal_copper, "reentrance_tube_layer_copper_ofhc", reg)
     ofhc_lv.pygeom_color_rgba = (0.72, 0.45, 0.2, 1)
-    g4.PhysicalVolume([0, 0, 0], [0, 0, 0, "mm"], ofhc_lv, "ofhc_cu", tube_lv, registry=reg)
+    g4.PhysicalVolume(
+        [0, 0, 0], [0, 0, 0, "mm"], ofhc_lv, "reentrance_tube_layer_copper_ofhc", tube_lv, registry=reg
+    )
 
     # Construct 316L stainless steel layer (always present)
     ss_outer_z, ss_outer_r, ss_inner_z, ss_inner_r = make_316l_ss_profiles(
@@ -494,21 +504,23 @@ def construct_reentrance_tube_with_layers(
     )
 
     ss_outer_bound = g4.solid.GenericPolycone(
-        "ss_316l_outer_bound", 0, 2 * np.pi, ss_outer_r, ss_outer_z, reg, "mm"
+        "reentrance_tube_layer_steel_316L_outer_bound", 0, 2 * np.pi, ss_outer_r, ss_outer_z, reg, "mm"
     )
     ss_inner_bound = g4.solid.GenericPolycone(
-        "ss_316l_inner_bound", 0, 2 * np.pi, ss_inner_r, ss_inner_z, reg, "mm"
+        "reentrance_tube_layer_steel_316L_inner_bound", 0, 2 * np.pi, ss_inner_r, ss_inner_z, reg, "mm"
     )
     ss_solid = g4.solid.Subtraction(
-        "ss_316l",
+        "reentrance_tube_layer_steel_316L",
         ss_outer_bound,
         ss_inner_bound,
         [[0, 0, 0], [0, 0, 0, "mm"]],
         reg,
     )
-    ss_lv = g4.LogicalVolume(ss_solid, materials.metal_steel, "ss_316l", reg)
+    ss_lv = g4.LogicalVolume(ss_solid, materials.metal_steel_316L, "reentrance_tube_layer_steel_316L", reg)
     ss_lv.pygeom_color_rgba = (0.7, 0.7, 0.8, 1.0)
-    g4.PhysicalVolume([0, 0, 0], [0, 0, 0, "mm"], ss_lv, "ss_316l", tube_lv, registry=reg)
+    g4.PhysicalVolume(
+        [0, 0, 0], [0, 0, 0, "mm"], ss_lv, "reentrance_tube_layer_steel_316L", tube_lv, registry=reg
+    )
 
     return uglar_lv, uglar_pv
 
@@ -523,12 +535,21 @@ def construct_moderator_simple(
     mother_lv: g4.LogicalVolume,
 ):
     mod_solid = g4.solid.Polyhedra(
-        "mod_sol", 0, 2 * pi, mod_n_sides, len(mod_z), mod_z, mod_r_inner, mod_r_outer, reg, "mm"
+        "neutron_moderator_pmma",
+        0,
+        2 * pi,
+        mod_n_sides,
+        len(mod_z),
+        mod_z,
+        mod_r_inner,
+        mod_r_outer,
+        reg,
+        "mm",
     )
-    mod_lv = g4.LogicalVolume(mod_solid, mod_material, "neutronmoderator", reg)
+    mod_lv = g4.LogicalVolume(mod_solid, mod_material, "neutron_moderator_pmma", reg)
     mod_lv.pygeom_color_rgba = (0.5, 0.5, 0.5, 0.1)
-    # g4.PhysicalVolume([0, 0, 0], [0, 0, -2900], mod_lv, "neutronmoderator", mother_lv, reg)  # -3000
-    g4.PhysicalVolume([0, 0, 0], [0, 0, -2397], mod_lv, "neutronmoderator", mother_lv, reg)  # -3000
+    # g4.PhysicalVolume([0, 0, 0], [0, 0, -2900], mod_lv, "neutron_moderator_pmma", mother_lv, reg)  # -3000
+    g4.PhysicalVolume([0, 0, 0], [0, 0, -2397], mod_lv, "neutron_moderator_pmma", mother_lv, reg)  # -3000
     # Z value used to be -body_height/2.*(1-bottom_fraction)
     # Could import this if we wanted, but maybe this method has enough arguments already...
 
@@ -609,7 +630,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     foot_width = 150  # Not really a guess so much as a placeholder...
 
     skirt_solid = g4.solid.Tubs(
-        "skirt_sol",
+        "cryostat_skirt_steel_316L",
         skirt_radius - skirt_thickness,
         skirt_radius,
         actual_skirt_height,
@@ -618,10 +639,12 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
         instr.registry,
         "mm",
     )
-    skirt_lv = g4.LogicalVolume(skirt_solid, instr.materials.metal_steel, "skirt", instr.registry)
+    skirt_lv = g4.LogicalVolume(
+        skirt_solid, instr.materials.metal_steel, "cryostat_skirt_steel_316L", instr.registry
+    )
     skirt_lv.pygeom_color_rgba = (0.5, 0.5, 0.5, 0.1)
     foot_solid = g4.solid.Tubs(
-        "foot_sol",
+        "cryostat_foot_steel_316L",
         skirt_radius + 1e-9,
         skirt_radius + foot_width,
         foot_height,
@@ -630,7 +653,9 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
         instr.registry,
         "mm",
     )
-    foot_lv = g4.LogicalVolume(foot_solid, instr.materials.metal_steel, "foot", instr.registry)
+    foot_lv = g4.LogicalVolume(
+        foot_solid, instr.materials.metal_steel, "cryostat_foot_steel_316L", instr.registry
+    )
     foot_lv.pygeom_color_rgba = (0.5, 0.5, 0.5, 0.1)
 
     outercryo_lv = construct_outer_cryostat(instr.materials.metal_steel, instr.registry, ocryo_r, ocryo_z)
@@ -686,7 +711,9 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     atmlar_lv.pygeom_color_rgba = False  # we already show the cryostat
 
     # Place atmospheric argon first (needed as mother volume for reentrance tube)
-    atmlar_pv = g4.PhysicalVolume([0, 0, 0], [0, 0, 0], atmlar_lv, "atmosphericlar", icryo_lv, instr.registry)
+    atmlar_pv = g4.PhysicalVolume(
+        [0, 0, 0], [0, 0, 0], atmlar_lv, "liquid_argon_atmospheric", icryo_lv, instr.registry
+    )
 
     atmlar_pv.set_pygeom_active_detector(RemageDetectorInfo("scintillator", 10000, {}))
 
@@ -728,7 +755,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
         [0, 0, 0],
         [instr.mother_x_displacement, 0, skirt_z + instr.mother_z_displacement],
         skirt_lv,
-        "skirt",
+        "cryostat_skirt_steel_316L",
         instr.mother_lv,
         instr.registry,
     )
@@ -740,7 +767,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
             skirt_z - actual_skirt_height / 2 + foot_height / 2 + instr.mother_z_displacement,
         ],
         foot_lv,
-        "foot",
+        "cryostat_foot_steel_316L",
         instr.mother_lv,
         instr.registry,
     )
@@ -749,7 +776,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
         [0, 0, 0],
         [instr.mother_x_displacement, 0, instr.mother_z_displacement],
         outercryo_lv,
-        "outercryostat",
+        "cryostat_outer_steel_316L",
         instr.mother_lv,
         instr.registry,
     )
@@ -758,8 +785,10 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     g4.SkinSurface("skirt_surface", skirt_lv, instr.materials.surfaces.to_tyvek, instr.registry)
     g4.SkinSurface("foot_surface", foot_lv, instr.materials.surfaces.to_tyvek, instr.registry)
 
-    g4.PhysicalVolume([0, 0, 0], [0, 0, 0], vac_lv, "vacuumgap", outercryo_lv, instr.registry)
-    g4.PhysicalVolume([0, 0, 0], [0, 0, 0], icryo_lv, "innercryostat", vac_lv, instr.registry)
+    g4.PhysicalVolume(
+        [0, 0, 0], [0, 0, 0], vac_lv, "cryostat_insulation_vacuum", outercryo_lv, instr.registry
+    )
+    g4.PhysicalVolume([0, 0, 0], [0, 0, 0], icryo_lv, "cryostat_inner_steel_316L", vac_lv, instr.registry)
     # atmlar_pv already placed above
 
     # NamedTuples are immutable, so we need to create a copy

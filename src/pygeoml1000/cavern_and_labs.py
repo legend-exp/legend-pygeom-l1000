@@ -62,7 +62,7 @@ def construct_and_place_cavern_and_labs(instr: core.InstrumentationData) -> None
             [0, 0, 0],
             [cavern_x_offset, 0, cavern_z_displacement],
             cavern_lv,
-            "cavern",
+            "cavern_air",
             instr.mother_lv,
             instr.registry,
         )
@@ -141,7 +141,7 @@ def construct_cavern(
     box_cavern_z = cavern_onset_of_curvature
 
     cavern_box = g4.solid.Box(
-        "cavern_box",
+        "cavern_air_box",
         box_cavern_x,
         box_cavern_y,
         box_cavern_z,
@@ -155,7 +155,7 @@ def construct_cavern(
     tube_cavern_r_2 = cavern_width / 2.0
 
     cavern_tube = g4.solid.EllipticalTube(
-        "cavern_tube", tube_cavern_r_1, tube_cavern_r_2, tube_cavern_h, registry, "mm"
+        "cavern_air_ceiling", tube_cavern_r_1, tube_cavern_r_2, tube_cavern_h, registry, "mm"
     )
 
     # 3. cylindrical tube for the icarus pit
@@ -163,7 +163,7 @@ def construct_cavern(
     tank_pit_height = watertank.tank_pit_height + 0.1  # Height of the icarus pit
 
     cavern_icarus = g4.solid.Tubs(
-        "cavern_icarus", 0, tank_pit_radius, tank_pit_height, 0, 2 * pi, registry, "mm"
+        "cavern_air_pit", 0, tank_pit_radius, tank_pit_height, 0, 2 * pi, registry, "mm"
     )
 
     # Now we create a union from those three solids with the box being the reference solid, i.e., its center is at the origin
@@ -176,7 +176,7 @@ def construct_cavern(
     # in creating the unions, we need the relative offsets
 
     cavern_box_tube = g4.solid.Union(
-        "cavern_box_tube",
+        "cavern_air_box_ceiling",
         cavern_box,
         cavern_tube,
         [[0, np.pi / 2.0, 0], [0, 0, offset_z_tube - offset_z_box]],
@@ -184,7 +184,7 @@ def construct_cavern(
     )
 
     cavern_box_tube_icarus = g4.solid.Union(
-        "cavern_box_tube_icarus",
+        "cavern_air",
         cavern_box_tube,
         cavern_icarus,
         [[0, 0, 0], [-box_x_offset, 0, offset_z_icarus - offset_z_box]],
@@ -194,7 +194,7 @@ def construct_cavern(
     # Now we place this union inside the rock volume. offset_z_box is the z of the union's reference
     # solid (the box) inside the rock, so it is exactly the displacement the caller has to use.
     return (
-        g4.LogicalVolume(cavern_box_tube_icarus, material, "cavern", registry),
+        g4.LogicalVolume(cavern_box_tube_icarus, material, "cavern_air", registry),
         box_x_offset,
         offset_z_box,
     )
