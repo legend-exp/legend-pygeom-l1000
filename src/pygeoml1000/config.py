@@ -437,31 +437,21 @@ def generate_special_metadata(string_idx: list, hpge_names: list, configs: dict)
     return special_output
 
 
-def _normalize_crystal_records(crystals: Any) -> list[dict]:
-    """Normalize crystal input into a non-empty list of record mappings."""
+def _normalize_records(inp: Any) -> list[dict]:
+    """Normalize crystal/hpge input into a non-empty list of record mappings."""
 
-    if isinstance(crystals, dict):
-        crystals = [crystals]
-    if not isinstance(crystals, list):
+    if isinstance(inp, dict):
+        inp = [inp]
+    if not isinstance(inp, list):
         msg = "crystal metadata must be a list of records or a mapping containing one record"
         raise TypeError(msg)
-    if crystals == []:
+    if inp == []:
         msg = "crystal metadata must contain at least one record"
         raise ValueError(msg)
-    if not all(isinstance(record, dict) for record in crystals):
+    if not all(isinstance(record, dict) for record in inp):
         msg = "each crystal record must be a mapping"
         raise TypeError(msg)
-    return crystals
-
-
-def assign_crystal_tags(channelmap: dict, crystals: Any) -> None:
-    """Assign crystal tags to generated detectors deterministically."""
-
-    crystal_records = _normalize_crystal_records(crystals)
-    hpge_names = sorted(name for name, det in channelmap.items() if det.get("system") == "geds")
-
-    for index, name in enumerate(hpge_names):
-        channelmap[name]["production"]["crystal"] = crystal_records[index % len(crystal_records)].get("name")
+    return inp
 
 
 def generate_channelmap(
@@ -474,12 +464,19 @@ def generate_channelmap(
     """Generate channelmap.json file."""
 
     channelmap = {}
-    for name, rawid in zip(hpge_names, hpge_rawid, strict=True):
-        channelmap[name] = copy.deepcopy(configs["hpge"])
+
+    crystal_records = _normalize_records(configs.get("crystal"))
+    hpge_records = _normalize_records(configs.get("hpge"))
+
+    n_diods = len(hpge_records)
+
+    for index, (name, rawid) in enumerate(zip(hpge_names, hpge_rawid, strict=True)):
+        channelmap[name] = copy.deepcopy(hpge_records[index % n_diods])
         channelmap[name]["name"] = name
         channelmap[name]["daq"]["rawid"] = rawid
         channelmap[name]["location"]["string"] = rawid // unit_divisor
         channelmap[name]["location"]["position"] = rawid % unit_divisor
+        channelmap[name]["production"]["crystal"] = crystal_records[index % len(crystal_records)].get("name")
 
     max_hpge_rawid = int(max(hpge_rawid)) if len(hpge_rawid) > 0 else 0
     rawid = sipm_rawid_start = max(5000, _round_up(max_hpge_rawid + 1, 1000))
@@ -571,8 +568,5 @@ def compile_raw_config(configs: dict) -> tuple[dict, dict]:
 
     special_metadata = generate_special_metadata(string_idx, hpge_names, configs)
     channelmap = generate_channelmap(string_idx, hpge_names, hpge_rawid, configs, unit_divisor=10**unit_width)
-
-    crystal_records = configs.get("crystal")
-    assign_crystal_tags(channelmap, crystal_records)
 
     return convert_to_plain_types(channelmap), convert_to_plain_types(special_metadata)

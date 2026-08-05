@@ -107,6 +107,39 @@ def test_crystal_records_are_assigned_deterministically():
     assert assigned == ["c1", "c2", "c1", "c2"]
 
 
+def test_hpge_records_are_assigned_deterministically():
+    from pygeoml1000 import config
+
+    resolved = config.resolve_config(
+        {
+            "raw_config": {
+                "string": {"units": {"n": 2}},
+                "hpge": [
+                    {
+                        "system": "geds",
+                        "daq": {},
+                        "location": {},
+                        "production": {},
+                        "additional_id": "c1",
+                    },
+                    {
+                        "system": "geds",
+                        "daq": {},
+                        "location": {},
+                        "production": {},
+                        "additional_id": "c2",
+                    },
+                ],
+            }
+        }
+    )
+
+    geds = sorted(name for name, det in resolved["channelmap"].items() if det["system"] == "geds")
+    assigned = [resolved["channelmap"][name]["additional_id"] for name in geds[:4]]
+
+    assert assigned == ["c1", "c2", "c1", "c2"]
+
+
 def test_missing_raw_config_folder_raises():
     from pygeoml1000 import config
 
