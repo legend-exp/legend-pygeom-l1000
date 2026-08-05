@@ -65,14 +65,20 @@ characterization:
       tl208fep: 0.06
     fccd_in_mm:
       am241:
-        central: null
-        err_uncorr_pos: null
-        err_uncorr_neg: null
-        err_corr_pos: null
-        err_corr_neg: null
+        value: 1.0
+        uncertainty:
+          uncorr:
+            pos: 0.01
+            neg: 0.01
+          corr:
+            pos: 0.03
+            neg: 0.03
       ba133:
-        central: null
-        err_uncorr_pos: null
-        err_uncorr_neg: null
-        err_corr_pos: null
-        err_corr_neg: null
+        value: 1.0
+        uncertainty:
+          uncorr:
+            pos: 0.01
+            neg: 0.01
+          corr:
+            pos: 0.03
+            neg: 0.03

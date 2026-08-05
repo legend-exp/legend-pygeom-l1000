@@ -92,7 +92,7 @@ def resolve_config(config: dict | None = None, **cli_overrides: Any) -> dict:
         log.warning("'raw_config' is ignored because both 'channelmap' and 'special_metadata' are given")
 
     # compiling is only needed for the objects that are not given already.
-    compiled = ({}, {}) if is_compiled else generate_dummy_metadata(load_raw_config(config.get("raw_config")))
+    compiled = ({}, {}) if is_compiled else compile_raw_config(load_raw_config(config.get("raw_config")))
     channelmap = load_dict_from_config(config, "channelmap", lambda: compiled[0])
     special_metadata = load_dict_from_config(config, "special_metadata", lambda: compiled[1])
 
@@ -437,6 +437,33 @@ def generate_special_metadata(string_idx: list, hpge_names: list, configs: dict)
     return special_output
 
 
+def _normalize_crystal_records(crystals: Any) -> list[dict]:
+    """Normalize crystal input into a non-empty list of record mappings."""
+
+    if isinstance(crystals, dict):
+        crystals = [crystals]
+    if not isinstance(crystals, list):
+        msg = "crystal metadata must be a list of records or a mapping containing one record"
+        raise TypeError(msg)
+    if crystals == []:
+        msg = "crystal metadata must contain at least one record"
+        raise ValueError(msg)
+    if not all(isinstance(record, dict) for record in crystals):
+        msg = "each crystal record must be a mapping"
+        raise TypeError(msg)
+    return crystals
+
+
+def assign_crystal_tags(channelmap: dict, crystals: Any) -> None:
+    """Assign crystal tags to generated detectors deterministically."""
+
+    crystal_records = _normalize_crystal_records(crystals)
+    hpge_names = sorted(name for name, det in channelmap.items() if det.get("system") == "geds")
+
+    for index, name in enumerate(hpge_names):
+        channelmap[name]["production"]["crystal"] = crystal_records[index % len(crystal_records)].get("name")
+
+
 def generate_channelmap(
     string_idx: list,
     hpge_names: list,
@@ -511,8 +538,8 @@ def convert_to_plain_types(obj):
     return obj
 
 
-def generate_dummy_metadata(configs: dict) -> tuple[dict, dict]:
-    """Compile the raw configuration into the two objects the geometry is built from.
+def compile_raw_config(configs: dict) -> tuple[dict, dict]:
+    """Compile the raw configuration into the objects the geometry is built from.
 
     Parameters
     ----------
@@ -531,18 +558,21 @@ def generate_dummy_metadata(configs: dict) -> tuple[dict, dict]:
 
     n_units = configs["string"]["units"]["n"]
 
-    string_width = max(2, len(str(string_idx.size)))
     unit_width = max(2, len(str(n_units)))
+    string_width = 5 - unit_width
 
     hpge_names, hpge_rawid = [], []
     for i in range(string_idx.size):
         for j in range(n_units):
-            hpge_names.append(f"V{i + 1:0{string_width}d}{j + 1:0{unit_width}d}")
+            hpge_names.append(f"V{i + 1:0{string_width}d}{j + 1:0{unit_width}d}A")
             hpge_rawid.append((i + 1) * 10**unit_width + j + 1)
     hpge_names = np.array(hpge_names)
     hpge_rawid = np.array(hpge_rawid)
 
     special_metadata = generate_special_metadata(string_idx, hpge_names, configs)
     channelmap = generate_channelmap(string_idx, hpge_names, hpge_rawid, configs, unit_divisor=10**unit_width)
+
+    crystal_records = configs.get("crystal")
+    assign_crystal_tags(channelmap, crystal_records)
 
     return convert_to_plain_types(channelmap), convert_to_plain_types(special_metadata)

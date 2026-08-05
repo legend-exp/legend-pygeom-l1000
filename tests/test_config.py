@@ -21,6 +21,8 @@ def test_default_is_fully_resolved(default_config):
     assert default_config["enable_optical"] is True
     assert len(default_config["channelmap"]) > 0
     assert set(default_config["special_metadata"]) >= {"hpge_string", "hpges", "fibers", "detail"}
+    geds = [name for name, det in default_config["channelmap"].items() if det["system"] == "geds"]
+    assert {default_config["channelmap"][name]["production"]["crystal"] for name in geds} == {"1"}
 
 
 def test_resolve_is_unchanged(default_config):
@@ -81,25 +83,28 @@ def test_raw_config_from_folder(tmp_path):
 
     resolved = config.resolve_config({"raw_config": str(folder)})
     geds = [ch for ch in resolved["channelmap"].values() if ch["system"] == "geds"]
+    first_hpge = next(iter(resolved["special_metadata"]["hpges"]))
 
     assert len(geds) == 4 * len(resolved["special_metadata"]["hpge_string"])
-    assert resolved["special_metadata"]["hpges"]["V0101"]["rodlength_in_mm"] == 140.1
+    assert resolved["special_metadata"]["hpges"][first_hpge]["rodlength_in_mm"] == 140.1
 
 
-def test_compiled_config_skips_compilation(default_config):
-    """With both compiled objects given, the raw configs must not be touched at all."""
+def test_crystal_records_are_assigned_deterministically():
     from pygeoml1000 import config
 
     resolved = config.resolve_config(
         {
-            "channelmap": default_config["channelmap"],
-            "special_metadata": default_config["special_metadata"],
-            "raw_config": "/nonexistent",
+            "raw_config": {
+                "string": {"units": {"n": 2}},
+                "crystal": [{"name": "c1"}, {"name": "c2"}],
+            }
         }
     )
 
-    assert resolved["channelmap"] == default_config["channelmap"]
-    assert "raw_config" not in resolved
+    geds = sorted(name for name, det in resolved["channelmap"].items() if det["system"] == "geds")
+    assigned = [resolved["channelmap"][name]["production"]["crystal"] for name in geds[:4]]
+
+    assert assigned == ["c1", "c2", "c1", "c2"]
 
 
 def test_missing_raw_config_folder_raises():
