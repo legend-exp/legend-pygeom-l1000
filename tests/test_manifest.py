@@ -48,7 +48,12 @@ def test_placement_multiplicity(manifest):
     assert core_fiber["total_mass"] > 10_000  # g
 
     # cross-check against test_volume_caching, which asserts the same numbers on the registry.
-    assert _part(manifest, "cable_hv_140.10")["placements"] == 336
+    # there is one HV cable per position in the string, each placed once per string.
+    assert _part(manifest, "cable_hv_140.10_n1")["placements"] == 42
+    assert _part(manifest, "cable_hv_140.10_n8_top")["placements"] == 42
+    # the cap name carries the cable offset it was built for, so match on the stem.
+    hv_caps = [part for part in manifest["parts"] if part["name"].startswith("hv_cap_")]
+    assert sum(part["placements"] for part in hv_caps) == 42
     assert _part(manifest, "hpge_support_copper_weldment_top")["placements"] == 1008
 
 
