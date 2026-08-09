@@ -64,7 +64,22 @@ CRYOSTAT_LVS = (
 )
 HIDE_CRYOSTAT = dict.fromkeys(CRYOSTAT_LVS, HIDE)
 HIDE_STRING_SUPPORT = {"hpge_support_copper_string_support_structure": HIDE}
+HIDE_TRISTAR = {r"hpge_support_copper_tristar_.*": HIDE}
 ARRAY_ASSEMBLIES = ["cryostat", "HPGe_dets", "PEN_plates", "front-end_and_insulators"]
+
+# the single-unit views show one detector unit as an excerpt of a longer string: the string top
+# (support structure and tristar) is hidden and ``hpge_cable_caps`` keeps the cables of that unit
+# from being routed up the support rod into a cable cap. Without this the radiogenic view would be
+# dominated by half a metre of cable that the cosmogenic view (built without the front-end
+# assembly) does not have, and the two would be framed completely differently.
+DETECTOR_UNIT = {
+    "strings": {1},
+    "positions": {1},
+    "config": {"hpge_cable_caps": False},
+    "overrides": {**HIDE_CRYOSTAT, **HIDE_STRING_SUPPORT, **HIDE_TRISTAR},
+    "window_size": [700, 800],
+    "view_direction": _VIEW_DIRECTION_BELOW,
+}
 
 # ----------------------------------------------------------------------------
 # the renderings
@@ -72,12 +87,8 @@ ARRAY_ASSEMBLIES = ["cryostat", "HPGe_dets", "PEN_plates", "front-end_and_insula
 
 IMAGES = {
     "detector_unit": {
+        **DETECTOR_UNIT,
         "assemblies": ARRAY_ASSEMBLIES,
-        "strings": {1},
-        "positions": {1},
-        "overrides": {**HIDE_CRYOSTAT, **HIDE_STRING_SUPPORT},
-        "window_size": [700, 800],
-        "view_direction": _VIEW_DIRECTION_BELOW,
     },
     "string": {
         "assemblies": ARRAY_ASSEMBLIES,
@@ -117,13 +128,9 @@ IMAGES = {
         "view_direction": _VIEW_DIRECTION_LEVEL,
     },
     "detector_unit_cosmogenic": {
+        **DETECTOR_UNIT,
         "detail": "cosmogenic",
         "assemblies": ["cryostat", "HPGe_dets", "PEN_plates"],
-        "strings": {1},
-        "positions": {1},
-        "overrides": {**HIDE_CRYOSTAT, **HIDE_STRING_SUPPORT},
-        "window_size": [700, 800],
-        "view_direction": _VIEW_DIRECTION_BELOW,
     },
     "watertank": {
         "detail": "cosmogenic",
