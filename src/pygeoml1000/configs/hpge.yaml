@@ -10,7 +10,7 @@
     manufacturer: DavidHervas
     order: 1
     crystal: "1"
-    slice: X
+    slice: A
     enrichment:
       val: 0.9
       unc: 0.01
@@ -82,3 +82,9 @@
             corr:
               pos: 0.03
               neg: 0.03
+    combined_0vbb_analysis:
+      fccd_in_mm:
+        value: 1.0
+        uncertainty:
+          pos: 0.03
+          neg: 0.03

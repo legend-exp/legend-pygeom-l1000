@@ -19,34 +19,73 @@ through one workflow rule.
 
 The geometry itself is built from two objects: `special_metadata`, a detailed
 spatial configuration, and `channelmap`, the detector mapping and electronics
-configuration (similar to the channelmap in the usual metadata). Those can be
-supplied in two ways, and the choice is made by which keys the config file
-contains, not by which command line flags are used:
+configuration (similar to the channelmap in the usual metadata).
 
-- as a **raw** configuration: high-level geometry parameters (number of
-  detectors per string, PMT positions, ...) that get _compiled_ into
-  `special_metadata` and `channelmap`. This is the default. `raw_config`
-  overrides individual raw values.
-- as a **compiled** configuration: `special_metadata` and `channelmap` given
-  directly, either inline or as paths to separate files. Then no compilation
-  happens at all.
+(input-schemes)=
 
-The typical workflow uses both: change the raw config for structural changes,
-write the result out with `--write-config`, and edit that for fine-grained
-adjustments.
+## The three input schemes
+
+Three schemes supply those two objects. The keys in the config file select the
+scheme.
+
+| scheme                                    | key                                 | what it sets                                             | edit it by hand?             |
+| ----------------------------------------- | ----------------------------------- | -------------------------------------------------------- | ---------------------------- |
+| [raw](#raw-configuration-files)           | `raw_config`                        | the shape of the setup, such as the detectors per string | yes, for a high-level change |
+| [compiled](#compilation)                  | `channelmap` and `special_metadata` | every detector, one by one                               | yes, for a low-level change  |
+| [generated metadata](#generated-metadata) | `metadata`                          | a whole metadata tree, which holds both objects          | no, this one is for simflow  |
+
+A config file that gives more than one scheme keeps the most explicit one.
+`metadata` wins over the other two. `channelmap` together with
+`special_metadata` wins over `raw_config`. The generator writes a warning for
+each key that it drops.
+
+### Raw
+
+The raw configuration holds the parameters that describe the shape of the setup:
+the number of strings, the number of detectors on a string, the position of the
+PMTs. The generator compiles them into the two objects. This is the default.
+
+Use it for a change that modifies many parts at the same time. Such a change is
+usually a few lines. See [Raw configuration files](#raw-configuration-files).
+
+### Compiled
+
+A compiled configuration gives the two objects directly, either in the config
+file or as a path to a separate file. The generator then compiles nothing.
+
+Use it for a change that the raw parameters cannot express: to remove a single
+detector, to move a single string, or to give one detector its own geometry. The
+key names match [legend-pygeom-l200](https://legend-pygeom-l200.readthedocs.io),
+so a config of this shape drives both generators.
+
+Write one with `--write-config` and then edit it. See
+[Compilation](#compilation).
+
+### Generated metadata
+
+The `metadata` key points to the tarball that `--write-metadata` wrote. That
+tarball holds the same information as the compiled configuration, but in the
+form of the legend-metadata tree.
+
+This scheme exists for [legend-simflow](https://legend-simflow.readthedocs.io),
+where the geometry defined here defines the structure of the metadata content.
+Do not edit the tarball to change the geometry. Change a raw or a compiled
+config instead, and write a new tarball. See
+[Generated metadata](#generated-metadata).
 
 ## Config file reference
 
-| key                  | type            | meaning                                                                              |
-| -------------------- | --------------- | ------------------------------------------------------------------------------------ |
-| `detail`             | string          | detail level preset, a key of `detail.yaml` (default: `radiogenic`)                  |
-| `assemblies`         | list or string  | assemblies to build, see [Selecting assemblies](#selecting-assemblies)               |
-| `raw_config`         | mapping or path | raw configuration overrides, see [Raw configuration files](#raw-configuration-files) |
-| `special_metadata`   | mapping or path | compiled spatial configuration, skips compiling it from the raw config               |
-| `channelmap`         | mapping or path | compiled channel map, skips compiling it from the raw config                         |
-| `enable_optical`     | bool or list    | materials that get optical properties, see [Optical properties](#optical-properties) |
-| `sipm_use_pde_curve` | bool            | if false, use a flat SiPM photon detection efficiency instead of the PDE curve       |
-| `sipm_efficiencies`  | mapping         | per-channel scale factors for the SiPM detection efficiency                          |
+| key                  | type            | meaning                                                                                                 |
+| -------------------- | --------------- | ------------------------------------------------------------------------------------------------------- |
+| `detail`             | string          | detail level preset, a key of `detail.yaml` (default: `radiogenic`)                                     |
+| `assemblies`         | list or string  | assemblies to build, see [Selecting assemblies](#selecting-assemblies)                                  |
+| `raw_config`         | mapping or path | raw configuration overrides, see [Raw configuration files](#raw-configuration-files)                    |
+| `special_metadata`   | mapping or path | compiled spatial configuration, skips compiling it from the raw config                                  |
+| `channelmap`         | mapping or path | compiled channel map, skips compiling it from the raw config                                            |
+| `metadata`           | path            | generated metadata tree that holds both compiled objects, see [Generated metadata](#generated-metadata) |
+| `enable_optical`     | bool or list    | materials that get optical properties, see [Optical properties](#optical-properties)                    |
+| `sipm_use_pde_curve` | bool            | if false, use a flat SiPM photon detection efficiency instead of the PDE curve                          |
+| `sipm_efficiencies`  | mapping         | per-channel scale factors for the SiPM detection efficiency                                             |
 
 Every option that defines the geometry lives in this file. The command line only
 selects which artifacts to produce (`--write-manifest`, `--det-macro-file`, the
@@ -251,12 +290,21 @@ Each key is a named preset (e.g. `cosmogenic`, `radiogenic`) selectable via the
 `pygeomtools` assembly detail convention (`omit`, `simple`, `stl`, `detailed`,
 `metadata`, `place`).
 
-### `crystal.yaml` - Crystal boule profile
+### `crystal.yaml` - Crystal boule catalog
 
-Stores the impurity profile and slice offsets for the HPGe crystal boule used as
-the default detector template, with the same format as in the metadata. It is
-required to generate the drift-time map used in the post-processing of the
-pulse-shape discrimination, but is not read by the geometry generation itself.
+A list of crystal boules. Each boule has an impurity profile and slice offsets,
+in the same format as in the metadata.
+
+The compilation assigns the detectors to the boules of the catalog in order.
+Each detector takes the `name` and the `order` of its boule. A workflow uses
+these two fields to find the boule again. A detector therefore always points to
+a crystal that exists.
+
+The boule data does not change the geometry. It generates the drift-time map for
+the post-processing of the pulse-shape discrimination, and it goes into the
+[generated metadata](#generated-metadata).
+
+(compilation)=
 
 ## Compilation
 
@@ -297,7 +345,248 @@ that builds the geometry:
 $ legend-pygeom-l1000 --config geom-config.yaml --write-config resolved.yaml l1000.gdml
 ```
 
+(generated-metadata)=
+
+## Generated metadata
+
+To use the LEGEND-1000 geometry in simflow, one has to generate a metadata
+database:
+
+```console
+$ legend-pygeom-l1000 --config geom-config.yaml --write-metadata l1000dsg01-geom-metadata.tar.gz
+```
+
+The tree uses the same layout as the real
+[legend-metadata](https://github.com/legend-exp/legend-metadata). A workflow
+therefore reads it in the usual way.
+
+The archive holds everything that describes the detectors. Four files come from
+a template. The generator derives all other files from the compiled channel map.
+
+| file                                                | content                                                       |
+| --------------------------------------------------- | ------------------------------------------------------------- |
+| `datasets/runinfo.yaml`                             | template: the runs, their start keys and live times           |
+| `datasets/runlists.yaml`                            | template: the named run lists                                 |
+| `datasets/statuses/validity.yaml`                   | template: from when the statuses apply                        |
+| `datasets/statuses/<name>.yaml`                     | one analysis status per channel                               |
+| `hardware/configuration/channelmaps/validity.yaml`  | template: from when the channel map applies                   |
+| `hardware/configuration/channelmaps/<name>.yaml`    | `name`, `system`, `location` and `daq` of every channel       |
+| `hardware/detectors/germanium/diodes/<DET>.yaml`    | one per HPGe: type, production, geometry and characterization |
+| `hardware/detectors/germanium/crystals/<XTAL>.yaml` | one per crystal boule the detectors were cut from             |
+| `special_metadata.yaml`                             | the compiled special metadata                                 |
+
+The `apply:` entries of the adjacent `validity.yaml` set `<name>`. Nothing reads
+these names. A workflow selects a file by comparing its `valid_from` with the
+start key of a run. The template thus controls how the files are called.
+
+The real legend-metadata has no `special_metadata.yaml`. This file carries the
+compiled geometry, and it makes the tree sufficient to rebuild that geometry.
+
+(why-each-part)=
+
+### Why each part is necessary
+
+Each part answers a question that
+[legend-simflow](https://legend-simflow.readthedocs.io) asks while it builds the
+DAG, or while it runs a job. This section names the reader of each part and the
+effect of its absence.
+
+#### `datasets/runinfo.yaml`
+
+Gives the start key of each run. The workflow resolves every validity file
+against a start key. It also gives `livetime_in_s` for a physics run. The
+workflow splits the simulated events over the runs in proportion to that number.
+
+Without it no run identifier resolves, and the workflow cannot select a channel
+map or a status.
+
+#### `datasets/runlists.yaml`
+
+Names a group of runs, so that a production can ask for
+`~runlists:valid.phy.p01` instead of a list of run identifiers.
+
+The workflow reads this file only for a request of that form. A production that
+lists its run identifiers one by one never touches it.
+
+#### `datasets/statuses/`
+
+Holds the analysis status of each channel. `LegendMetadata.channelmap` attaches
+the status to the channel as `analysis`. The workflow then reads
+`analysis.usability` to decide whether it simulates a detector, and
+`analysis.psd.status.low_aoe` for the pulse-shape discrimination.
+
+This part is the one that fails hardest. The workflow reads `analysis.usability`
+without a guard while it builds the DAG. A germanium channel without a status
+stops the production before the first job starts.
+
+#### `hardware/configuration/channelmaps/`
+
+Lists the channels. The workflow reads `system` to separate the germanium
+detectors from the SiPMs and the PMTs, and `daq.rawid` to match a channel to the
+raw identifier that the simulation writes.
+
+Without it the workflow sees no channels, and there is nothing to simulate.
+
+#### `hardware/detectors/germanium/diodes/`
+
+One file per germanium detector, with four separate jobs:
+
+- `geometry` builds the detector solid for the drift-time map.
+- `characterization.combined_0vbb_analysis.fccd_in_mm.value` gives the dead
+  layer. Without it the workflow falls back to 1 mm and writes a warning for
+  each detector in each job.
+- `characterization.l200_site.depletion_voltage_in_V` decides whether a detector
+  runs far enough above depletion to be modeled. A detector without it gets no
+  pulse-shape model.
+- `type`, `production.order` and `production.crystal` build the name of the
+  crystal. That name is the file the workflow looks for in the next folder.
+
+The workflow also hands the whole file to the Julia code that builds the
+drift-time map.
+
+#### `hardware/detectors/germanium/crystals/`
+
+One file per crystal boule. `impurity_curve.parameters` gives the impurity
+profile along the boule, which the drift-time map needs. A detector whose
+crystal has no impurity curve is not modelable.
+
+`slices[<slice>].status` decides whether the simulated hits of a detector count.
+The workflow copies it into the hit tier as `is_valid_sim`. A missing status
+makes every hit of that detector invalid, and it does so quietly.
+
+#### `special_metadata.yaml`
+
+The workflow never reads this file. It holds the compiled geometry, so that this
+generator can rebuild the same setup from the tarball alone.
+
+```{note}
+The tree describes the detectors. It does not describe the production. The
+settings under `simprod/config/` stay with the user, and the operational
+voltages in `pars/<experiment>/geds/opv/` are mandatory there. A workflow that
+cannot read them fails while it builds the DAG.
+```
+
+### Rebuild the geometry from the tarball
+
+A geometry config that points to a generated tree needs nothing else:
+
+```yaml
+# l1000dsg01-geom-config.yaml
+executable: legend-pygeom-l1000
+metadata: ./l1000dsg01-geom-metadata.tar.gz
+```
+
+```console
+$ legend-pygeom-l1000 --config l1000dsg01-geom-config.yaml l1000.gdml
+```
+
+The generator reads both compiled objects from the tree. The keys `channelmap`,
+`special_metadata` and `raw_config` thus have no effect next to `metadata`, and
+the generator ignores them with a warning. Commit the two files together to make
+a production reproducible from them alone.
+
+### One channel in three files
+
+The generator splits a channel map entry into three disjoint parts, because the
+database merges them again when it reads them. The reader loads the channel map
+first. It then merges the matching diode file over the channel. Last, it
+attaches the status as `analysis`.
+
+The diode file wins this merge. It therefore carries none of `system`, `daq` or
+`location`. Any of these keys would replace the raw ID and the position of the
+channel.
+
+(metadata-template)=
+
+### The template
+
+The template holds what a geometry cannot know: the runs, their duration, and
+the start of validity of the metadata. It ships as
+`src/pygeoml1000/configs/template_metadata.tar.gz` and holds four files. The
+four blocks below are those files, unpacked while this page is built.
+
+`datasets/runinfo.yaml` gives the start key of each run. Every validity file
+resolves against a start key, so this file is the clock of the whole tree.
+
+```{literalinclude} _generated/template_metadata/datasets/runinfo.yaml
+:language: yaml
+```
+
+`datasets/runlists.yaml` names a group of runs. Keep the entries as `rNNN..rMMM`
+range expressions.
+
+```{literalinclude} _generated/template_metadata/datasets/runlists.yaml
+:language: yaml
+```
+
+`datasets/statuses/validity.yaml` says from when the per-channel statuses apply,
+and under which name the generator writes them.
+
+```{literalinclude} _generated/template_metadata/datasets/statuses/validity.yaml
+:language: yaml
+```
+
+`hardware/configuration/channelmaps/validity.yaml` does the same for the channel
+map.
+
+```{literalinclude} _generated/template_metadata/hardware/configuration/channelmaps/validity.yaml
+:language: yaml
+```
+
+#### Change the template
+
+1. Unpack a copy of the template.
+2. Edit the files.
+3. Give the copy to the generator.
+
+```console
+$ tar xzf $(python -c "import pygeoml1000, pathlib; \
+    print(pathlib.Path(pygeoml1000.__file__).parent / 'configs/template_metadata.tar.gz')") -C my_template
+$ $EDITOR my_template/datasets/runinfo.yaml
+$ legend-pygeom-l1000 --write-metadata out.tar.gz --metadata-template my_template
+```
+
+The packaged template carries a comment on each setting. Read those before you
+change a value.
+
+Keep the run list entries as `rNNN..rMMM` range expressions. A workflow adds the
+experiment name only to an entry with the shape of a range. It reads a plain
+`r000` as a complete run identifier, which never resolves.
+
+The template does not hold the per-channel statuses either. A geometry cannot
+know how a channel behaved in a run, so the generator gives every channel the
+same status: `usability: "on"`, `processable: true`, and for a germanium channel
+`psd.status.low_aoe: valid`.
+
+There is no config key for this. To turn a channel off, edit its entry in the
+generated `datasets/statuses/` file:
+
+```yaml
+V00101A:
+  reason: "noisy"
+  usability: "off"
+  processable: true
+  psd:
+    status:
+      low_aoe: valid
+```
+
+Commit the tarball with that edit. A later `--write-metadata` writes the
+defaults again, so re-apply the change after a regeneration.
+
+```{note}
+A generated tree is not a Git repository. `legendmeta.LegendMetadata` reads such
+a tree, but its version check does not. Call `channelmap` with
+`skip_version_check=True`.
+
+Unpack the archive before you give the folder to `LegendMetadata`. For a path
+that is empty or absent, it clones the real legend-metadata over SSH.
+```
+
 ## Best practices
+
+[The three input schemes](#input-schemes) compares the schemes. This section
+shows how to move from one to the next.
 
 1. **Start from `raw_config`** for high-level structural changes (e.g. number of
    strings, PMT ring positions). Because it is deep-merged over the packaged raw

@@ -65,3 +65,32 @@ def test_build_from_config_file(tmp_path):
     assert gdml_file.exists()
     registry = gdml.Reader(gdml_file).getRegistry()
     assert len(registry.physicalVolumeDict) > 0
+
+
+def test_write_metadata_only(tmp_path):
+    """Writing the metadata must not build the geometry, same as --write-config."""
+    from pygeoml1000 import cli, metadata
+
+    out = tmp_path / "l1000dsg01-geom-metadata.tar.gz"
+    cli.dump_gdml_cli(["--write-metadata", str(out)])
+
+    tree = metadata.load_tree(out)
+    assert metadata.SPECIAL_METADATA_FILE in tree
+    assert any(name.startswith(metadata.DIODES_DIR) for name in tree)
+
+
+def test_write_metadata_honours_the_raw_config(tmp_path):
+    """The crystal catalog must come from the config, not from the packaged defaults."""
+    from pygeoml1000 import cli, metadata
+
+    config_file = tmp_path / "geom-config.yaml"
+    out = tmp_path / "metadata.tar.gz"
+    utils.write_dict(
+        {"raw_config": {"crystal": [{"name": "042", "order": 7, "slices": {"A": {}}}]}},
+        str(config_file),
+    )
+
+    cli.dump_gdml_cli(["--config", str(config_file), "--write-metadata", str(out)])
+
+    tree = metadata.load_tree(out)
+    assert f"{metadata.CRYSTALS_DIR}/V07042.yaml" in tree

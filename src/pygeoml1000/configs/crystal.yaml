@@ -27,5 +27,4 @@
   slices:
     A:
       detector_offset_in_mm: 112
-    X:
-      detector_offset_in_mm: 112
+      status: valid

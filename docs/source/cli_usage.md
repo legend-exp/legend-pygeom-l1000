@@ -186,6 +186,37 @@ point for a custom configuration:
 legend-pygeom-l1000 --dump-raw-configs .
 ```
 
+### Generated Metadata
+
+LEGEND-1000 has no metadata database. The generator writes one that describes
+the detectors of the geometry it built:
+
+```console
+legend-pygeom-l1000 --config geom-config.yaml --write-metadata l1000dsg01-geom-metadata.tar.gz
+```
+
+The result is a stand-in for
+[legend-metadata](https://github.com/legend-exp/legend-metadata) with the same
+layout. A workflow such as
+[legend-simflow](https://legend-simflow.readthedocs.io) unpacks the archive into
+its metadata folder and reads it in the usual way. Give a plain folder name to
+write the tree directly.
+
+The archive also carries the compiled geometry. The `metadata` key of a config
+file rebuilds that same geometry from the archive alone. Two files are therefore
+sufficient to describe a production. See {doc}`runtime-cfg` for the layout, and
+for what the tree does _not_ contain.
+
+A template supplies what a geometry cannot know, such as the runs and their
+duration. Unpack the packaged template, change it, and give the folder back with
+`--metadata-template`:
+
+```console
+legend-pygeom-l1000 --write-metadata out.tar.gz --metadata-template my_template
+```
+
+See {doc}`runtime-cfg` for where the packaged template is and what it holds.
+
 ### Quality Control
 
 #### Overlap Checking

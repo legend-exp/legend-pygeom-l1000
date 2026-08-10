@@ -12,6 +12,9 @@ import numpy as np
 from dbetto import utils
 from pygeomtools.utils import load_dict_from_config
 
+from . import metadata
+from .utils import deep_merge
+
 log = logging.getLogger(__name__)
 
 DEFAULT_DETAIL = "radiogenic"
@@ -21,7 +24,7 @@ _RAW_CONFIG_SUFFIXES = (".yaml", ".json")
 #: substring marking a file in the configs folder that is not raw configuration.
 _NOT_RAW_CONFIG = "_schema"
 #: keys consumed by :func:`resolve_config` itself, and hence absent from a resolved config.
-_RESOLVED_KEYS = ("raw_config",)
+_RESOLVED_KEYS = ("raw_config", "metadata")
 #: keys accepted for interoperability with other generators, but without effect here.
 _IGNORED_KEYS = ("public_geom", "metadata_timestamp", "executable")
 
@@ -87,18 +90,31 @@ def resolve_config(config: dict | None = None, **cli_overrides: Any) -> dict:
             log.warning("'%s' has no effect on the LEGEND-1000 geometry, ignoring it", key)
             del config[key]
 
+    if "metadata" in config:
+        # a generated metadata tree already carries both compiled objects
+        for key in ("channelmap", "special_metadata", "raw_config"):
+            if key in config:
+                log.warning("'%s' is ignored because 'metadata' is given", key)
+                del config[key]
+        config.update(metadata.metadata_to_config(config["metadata"]))
+
     is_compiled = "channelmap" in config and "special_metadata" in config
     if is_compiled and "raw_config" in config:
         log.warning("'raw_config' is ignored because both 'channelmap' and 'special_metadata' are given")
 
     # compiling is only needed for the objects that are not given already.
-    compiled = ({}, {}) if is_compiled else compile_raw_config(load_raw_config(config.get("raw_config")))
+    raw = None if is_compiled else load_raw_config(config.get("raw_config"))
+    compiled = ({}, {}) if raw is None else compile_raw_config(raw)
     channelmap = load_dict_from_config(config, "channelmap", lambda: compiled[0])
     special_metadata = load_dict_from_config(config, "special_metadata", lambda: compiled[1])
+    crystals = config.get("crystals")
+    if crystals is None:
+        crystals = (raw if raw is not None else load_raw_config()).get("crystal")
 
     resolved = {k: v for k, v in config.items() if k not in _RESOLVED_KEYS}
     resolved["channelmap"] = convert_to_plain_types(channelmap)
     resolved["special_metadata"] = convert_to_plain_types(special_metadata)
+    resolved["crystals"] = convert_to_plain_types(_normalize_records(crystals))
 
     detail_level = config.get("detail", DEFAULT_DETAIL)
     if detail_level not in special_metadata.get("detail", {}):
@@ -132,7 +148,7 @@ def load_raw_config(raw_config: dict | str | None = None) -> dict:
     if isinstance(raw_config, str):
         raw_config = _load_raw_config_dir(Path(raw_config))
     if raw_config:
-        configs = _deep_merge(configs, raw_config)
+        configs = deep_merge(configs, raw_config)
 
     return configs
 
@@ -149,17 +165,6 @@ def _load_raw_config_dir(path: Path) -> dict:
 def _is_raw_config(path: Path) -> bool:
     """Whether ``path`` is a raw config file, and not e.g. the JSON schema next to them."""
     return path.is_file() and path.suffix in _RAW_CONFIG_SUFFIXES and _NOT_RAW_CONFIG not in path.stem
-
-
-def _deep_merge(base: dict, override: dict) -> dict:
-    """Recursively merge ``override`` into a copy of ``base``."""
-    merged = copy.deepcopy(base)
-    for key, value in override.items():
-        if isinstance(value, dict) and isinstance(merged.get(key), dict):
-            merged[key] = _deep_merge(merged[key], value)
-        else:
-            merged[key] = copy.deepcopy(value)
-    return merged
 
 
 def parse_assemblies(arg: str | Collection[str] | None, detail: dict) -> set[str] | None:
@@ -238,6 +243,32 @@ def effective_detail(config: dict) -> dict:
 def write_config(config: dict, filename: str | Path) -> None:
     """Write a resolved config to a YAML/JSON file that can be fed back in via ``--config``."""
     utils.write_dict(resolve_config(config), str(filename))
+
+
+def write_metadata(
+    config: dict,
+    filename: str | Path,
+    template: str | Path | None = None,
+) -> Path:
+    """Write a stand-in ``legend-metadata`` tree for the geometry ``config`` describes.
+
+    ``filename`` is a directory, or a ``.tar.gz`` archive if it ends in one. The
+    archive is what a workflow unpacks into its metadata folder, and what
+    ``metadata:`` in a geometry config points back at.
+
+    Everything the tree is built from travels in the resolved config, including
+    the crystal catalog. A config that came from a metadata tree therefore
+    re-packs from that tree, and never falls back to the packaged catalog.
+
+    See :mod:`pygeoml1000.metadata` for the layout of the result.
+    """
+    return metadata.write_metadata(
+        metadata.build_metadata_tree(
+            resolve_config(config),
+            template=metadata.load_template(template) if template is not None else None,
+        ),
+        filename,
+    )
 
 
 def copy_raw_configs(destination: str | Path) -> Path:
@@ -476,7 +507,9 @@ def generate_channelmap(
         channelmap[name]["daq"]["rawid"] = rawid
         channelmap[name]["location"]["string"] = rawid // unit_divisor
         channelmap[name]["location"]["position"] = rawid % unit_divisor
-        channelmap[name]["production"]["crystal"] = crystal_records[index % len(crystal_records)].get("name")
+        crystal = crystal_records[index % len(crystal_records)]
+        channelmap[name]["production"]["crystal"] = crystal["name"]
+        channelmap[name]["production"]["order"] = crystal["order"]
 
     max_hpge_rawid = int(max(hpge_rawid)) if len(hpge_rawid) > 0 else 0
     rawid = sipm_rawid_start = max(5000, _round_up(max_hpge_rawid + 1, 1000))

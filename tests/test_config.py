@@ -16,7 +16,13 @@ def default_config():
 
 def test_default_is_fully_resolved(default_config):
     """Resolving an empty config compiles the packaged raw configs and fills in the defaults."""
-    assert set(default_config) == {"channelmap", "special_metadata", "detail", "enable_optical"}
+    assert set(default_config) == {
+        "channelmap",
+        "special_metadata",
+        "crystals",
+        "detail",
+        "enable_optical",
+    }
     assert default_config["detail"] == "radiogenic"
     assert default_config["enable_optical"] is True
     assert len(default_config["channelmap"]) > 0
@@ -96,7 +102,7 @@ def test_crystal_records_are_assigned_deterministically():
         {
             "raw_config": {
                 "string": {"units": {"n": 2}},
-                "crystal": [{"name": "c1"}, {"name": "c2"}],
+                "crystal": [{"name": "c1", "order": 1}, {"name": "c2", "order": 1}],
             }
         }
     )

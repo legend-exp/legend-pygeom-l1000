@@ -11,7 +11,14 @@ from pygeomoptics.store import load_user_material_code
 from pygeomtools import detectors, visualization, write_pygeom
 
 from . import _version, core, manifest
-from .config import DEFAULT_DETAIL, copy_raw_configs, load_config, resolve_config, write_config
+from .config import (
+    DEFAULT_DETAIL,
+    copy_raw_configs,
+    load_config,
+    resolve_config,
+    write_config,
+    write_metadata,
+)
 
 log = logging.getLogger(__name__)
 
@@ -26,7 +33,13 @@ def dump_gdml_cli(argv: list[str] | None = None) -> None:
         logging.root.setLevel(logging.DEBUG)
 
     config = None
-    if args.write_config or args.filename is not None or args.visualize or args.write_manifest:
+    if (
+        args.write_config
+        or args.write_metadata
+        or args.filename is not None
+        or args.visualize
+        or args.write_manifest
+    ):
         config = load_geometry_config(args)
 
     if args.dump_raw_configs:
@@ -36,6 +49,10 @@ def dump_gdml_cli(argv: list[str] | None = None) -> None:
     if args.write_config:
         log.info("writing resolved config to %s", args.write_config)
         write_config(config, args.write_config)
+
+    if args.write_metadata:
+        log.info("writing generated metadata to %s", args.write_metadata)
+        write_metadata(load_config(args.config), args.write_metadata, template=args.metadata_template)
 
     if config is None or (args.filename is None and not args.visualize and not args.write_manifest):
         return
@@ -180,6 +197,21 @@ def _parse_cli_args(argv: list[str] | None = None) -> argparse.Namespace:
         and fed back in via --config.""",
     )
     out_opts.add_argument(
+        "--write-metadata",
+        action="store",
+        help="""Filename to write a stand-in legend-metadata tree to, describing the detectors of
+        this geometry. A folder, or a '.tar.gz' archive if the name ends in one. The archive is what
+        a workflow unpacks into its metadata folder, and it can be fed back in through the
+        'metadata' key of a config file to rebuild the same geometry.""",
+    )
+    out_opts.add_argument(
+        "--metadata-template",
+        action="store",
+        help="""Folder or '.tar.gz' archive holding the parts of the metadata tree that are not
+        derived from the geometry: run info, run lists and the validity files. Defaults to the
+        template shipped with this package.""",
+    )
+    out_opts.add_argument(
         "--dump-raw-configs",
         action="store",
         help="""Write a copy of the raw config files shipped with this package into a 'configs'
@@ -199,6 +231,7 @@ def _parse_cli_args(argv: list[str] | None = None) -> argparse.Namespace:
         and args.filename is None
         and not args.write_manifest
         and not args.write_config
+        and not args.write_metadata
         and not args.dump_raw_configs
     ):
         parser.error("no output file, no visualization, and no config output specified")

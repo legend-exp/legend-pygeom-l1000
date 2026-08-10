@@ -35,6 +35,22 @@ properties:
     description:
       Inline channel map, or a path to a YAML/JSON file containing it.
     type: [object, string]
+  crystals:
+    description: >-
+      The crystal boules the detectors were cut from, compiled from the raw
+      'crystal' catalog. It travels with the compiled objects so that a resolved
+      config holds everything the generated metadata is built from. It has no
+      effect on the geometry.
+    type: array
+    items:
+      type: object
+  metadata:
+    description: >-
+      Path to a generated metadata tree, either a folder or a '.tar.gz' archive,
+      as written by '--write-metadata'. Both the channel map and the special
+      metadata are read back from it, so 'channelmap', 'special_metadata' and
+      'raw_config' have no effect alongside it.
+    type: string
   sipm_use_pde_curve:
     type: boolean
   sipm_efficiencies:
