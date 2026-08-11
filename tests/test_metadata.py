@@ -367,9 +367,7 @@ def test_metadata_wins_over_the_other_geometry_inputs(small_tarball, caplog):
     from pygeoml1000 import config
 
     with caplog.at_level("WARNING"):
-        resolved = config.resolve_config(
-            {"metadata": str(small_tarball), "channelmap": {"nonsense": {}}}
-        )
+        resolved = config.resolve_config({"metadata": str(small_tarball), "channelmap": {"nonsense": {}}})
 
     assert "nonsense" not in resolved["channelmap"]
     assert "'channelmap' is ignored because 'metadata' is given" in caplog.text

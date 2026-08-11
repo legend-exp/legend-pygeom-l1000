@@ -65,7 +65,6 @@ from typing import Any
 
 from dbetto import utils
 
-
 log = logging.getLogger(__name__)
 
 SPECIAL_METADATA_FILE = "special_metadata.yaml"
@@ -126,7 +125,7 @@ def load_template(path: str | Path | None = None) -> dict[str, Any]:
 def write_metadata(tree: dict[str, Any], dest: str | Path) -> Path:
     """Write a generated tree to a directory, or to a ``.tar.gz`` archive.
 
-    Every file goes through :func:`dbetto.utils.write_dict`. 
+    Every file goes through :func:`dbetto.utils.write_dict`.
     Two runs on the same tree give the same archive. A regeneration of an
     unchanged tarball thus leaves the committed file alone.
     """
@@ -170,7 +169,11 @@ def crystal_name(diode: dict) -> str:
     This mirrors ``legendsimflow.metadata.get_crystal_name``. A workflow looks
     for a file with this name under ``hardware/detectors/germanium/crystals``.
     """
-    return TYPE_IDS[diode["type"]] + format(diode["production"]["order"], "02d") + str(diode["production"]["crystal"])
+    return (
+        TYPE_IDS[diode["type"]]
+        + format(diode["production"]["order"], "02d")
+        + str(diode["production"]["crystal"])
+    )
 
 
 def split_channel(entry: dict) -> tuple[dict, dict | None]:
