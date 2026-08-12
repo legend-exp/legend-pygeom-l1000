@@ -35,8 +35,6 @@ def test_volume_caching():
 
     # name stem -> expected number of placements
     expected_placements = {
-        "hpge_cable_hv": 336,
-        "hpge_cable_signal": 336,
         "hpge_assembly_clamp_hv_ultem": 336,
         "hpge_assembly_clamp_signal_ultem": 336,
         "hpge_assembly_asic": 336,
@@ -51,6 +49,20 @@ def test_volume_caching():
 
         pvs = [name for name in registry.physicalVolumeDict if name.startswith(stem)]
         assert len(pvs) == n_expected, f"{stem}: expected {n_expected} placements, got {len(pvs)}"
+
+    expected_per_position = {
+        "hpge_cable_hv": (8, 336),
+        "hpge_cable_signal_": (8, 336),
+        "hpge_string_hv_cap": (1, 42),
+        "hpge_string_signal_cap": (1, 42),
+    }
+
+    for stem, (n_lvs, n_pvs) in expected_per_position.items():
+        lvs = [name for name in registry.logicalVolumeDict if name.startswith(stem)]
+        assert len(lvs) == n_lvs, f"{stem}: expected {n_lvs} cached logical volumes, got {lvs}"
+
+        pvs = [name for name in registry.physicalVolumeDict if name.startswith(stem)]
+        assert len(pvs) == n_pvs, f"{stem}: expected {n_pvs} placements, got {len(pvs)}"
 
     # a coarse guard against per-instance logical volumes creeping back in elsewhere.
     assert len(registry.logicalVolumeDict) < 600

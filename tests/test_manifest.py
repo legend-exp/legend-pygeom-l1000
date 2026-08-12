@@ -48,7 +48,9 @@ def test_placement_multiplicity(manifest):
     assert core_fiber["total_mass"] > 10_000  # g
 
     # cross-check against test_volume_caching, which asserts the same numbers on the registry.
-    assert _part(manifest, "hpge_cable_hv_140.10")["placements"] == 336
+    # there is one HV cable per position in the string, each placed once per string.
+    assert _part(manifest, "hpge_cable_hv_140.10_n1")["placements"] == 42
+    assert _part(manifest, "hpge_cable_hv_140.10_n8_top")["placements"] == 42
     assert _part(manifest, "hpge_string_support_weldment_copper")["placements"] == 1008
 
 
