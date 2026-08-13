@@ -2,9 +2,7 @@
 from __future__ import annotations
 
 import importlib.metadata
-import shutil
 import sys
-import tarfile
 from pathlib import Path
 
 sys.path.insert(0, Path(__file__).parents[2].resolve().as_posix())
@@ -37,17 +35,6 @@ exclude_patterns = [
     ".env",
     ".venv",
 ]
-
-# The metadata template ships as a tarball, so `literalinclude` cannot reach its
-# files. Unpack it next to the sources at build time. The documentation then
-# shows the packaged template itself, and cannot drift away from it.
-_TEMPLATE_ARCHIVE = Path(__file__).parents[2] / "src/pygeoml1000/configs/template_metadata.tar.gz"
-_TEMPLATE_DIR = Path(__file__).parent / "_generated/template_metadata"
-
-shutil.rmtree(_TEMPLATE_DIR, ignore_errors=True)
-_TEMPLATE_DIR.mkdir(parents=True)
-with tarfile.open(_TEMPLATE_ARCHIVE, "r:*") as _tar:
-    _tar.extractall(_TEMPLATE_DIR, filter="data")
 
 master_doc = "index"
 language = "python"

@@ -20,6 +20,7 @@ def test_default_is_fully_resolved(default_config):
         "channelmap",
         "special_metadata",
         "crystals",
+        "runs",
         "detail",
         "enable_optical",
     }

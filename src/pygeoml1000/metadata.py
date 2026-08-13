@@ -31,12 +31,13 @@ only the roots listed above.
 Layout
 ------
 
-The template supplies the two ``validity.yaml`` files, ``runinfo.yaml`` and
-``runlists.yaml``. It is the single source of truth for run and validity naming.
-This module derives all other files from the compiled channel map::
+The runs come from the raw ``runs.yaml``, which a resolved config carries as
+``runs``. This module writes the run info and the run lists as they stand there,
+derives both ``validity.yaml`` files from the run info, and derives all other
+files from the compiled channel map::
 
-    datasets/runinfo.yaml
-    datasets/runlists.yaml
+    datasets/runinfo.yaml                                the runs, from the config
+    datasets/runlists.yaml                               the run lists, from the config
     datasets/statuses/validity.yaml
     datasets/statuses/<name>.yaml                        one entry per channel
     hardware/configuration/channelmaps/validity.yaml
@@ -48,6 +49,10 @@ This module derives all other files from the compiled channel map::
 The ``apply:`` entries of the matching ``validity.yaml`` set ``<name>``. Nothing
 reads these names. A workflow selects a file by comparing its ``valid_from``
 with the start key of a run, so the names can say anything.
+
+All runs share one channel map and one status file, because a compiled config
+describes one setup. A tree that needs a second channel map needs a second
+geometry, and this module does not write one.
 
 The real ``legend-metadata`` has no ``special_metadata.yaml``. This file makes
 the tarball sufficient to rebuild the geometry. It sits at the root of the tree,
@@ -74,16 +79,17 @@ import io
 import logging
 import tarfile
 import tempfile
-from importlib import resources
 from pathlib import Path
 from typing import Any
 
-from dbetto import utils
+from dbetto import time, utils
 
 log = logging.getLogger(__name__)
 
 SPECIAL_METADATA_FILE = "special_metadata.yaml"
-TEMPLATE_NAME = "template_metadata.tar.gz"
+RUNINFO_FILE = "datasets/runinfo.yaml"
+RUNLISTS_FILE = "datasets/runlists.yaml"
+CONFIG_FILE_TEMPLATE = "{experiment}-{period}-r%-T%-all-config.yaml"
 
 STATUSES_DIR = "datasets/statuses"
 CHANNELMAPS_DIR = "hardware/configuration/channelmaps"
@@ -128,13 +134,6 @@ def load_tree(path: str | Path) -> dict[str, Any]:
         for f in sorted(path.rglob("*"))
         if f.is_file() and f.suffix in _SUFFIXES
     }
-
-
-def load_template(path: str | Path | None = None) -> dict[str, Any]:
-    """Read the metadata template, defaulting to the one shipped with the package."""
-    if path is None:
-        path = Path(str(resources.files("pygeoml1000") / "configs" / TEMPLATE_NAME))
-    return load_tree(path)
 
 
 def write_metadata(tree: dict[str, Any], dest: str | Path) -> Path:
@@ -264,6 +263,55 @@ def build_crystals(channelmap: dict, crystals: list[dict]) -> dict[str, dict]:
     return out
 
 
+def prune_runinfo(runinfo: dict) -> dict:
+    """Drop the periods and the runs that a config set to ``null``.
+
+    An override deep-merges into the packaged ``runs.yaml``, so a user cannot
+    remove a packaged period by leaving it out. Setting it to ``null`` removes
+    it, and nothing empty reaches the tree.
+    """
+    return {
+        period_name: {run_name: run for run_name, run in period.items() if run is not None}
+        for period_name, period in runinfo.items()
+        if period is not None
+    }
+
+
+def build_validity(runs: dict) -> list[dict]:
+    """From when the channel map and the statuses apply.
+
+    One entry, valid from the earliest start key of the run info, applying one
+    file. That file holds every channel, so it covers every run. The earliest
+    run also names the file, together with the experiment.
+
+    Raises
+    ------
+    ValueError
+        if the run info holds no run, or if a run has no readable start key. An
+        empty validity file only fails when a workflow reads the tree, far away
+        from the cause.
+    """
+    runinfo = runs["runinfo"]
+
+    starts = []
+    for period_name, period in runinfo.items():
+        for run_name, run in period.items():
+            for datatype, entry in run.items():
+                if "start_key" not in entry:
+                    msg = f"run {period_name}-{run_name}-{datatype} has no start key"
+                    raise ValueError(msg)
+                # unix_time raises a ValueError on anything but %Y%m%dT%H%M%SZ
+                starts.append((time.unix_time(entry["start_key"]), entry["start_key"], period_name))
+
+    if starts == []:
+        msg = "the run info holds no run, so nothing gives the channel map a start of validity"
+        raise ValueError(msg)
+
+    _, start_key, period_name = min(starts)
+    name = CONFIG_FILE_TEMPLATE.format(experiment=runs["experiment"], period=period_name)
+    return [{"valid_from": start_key, "apply": [name]}]
+
+
 def crystals_from_tree(tree: dict[str, Any]) -> list[dict]:
     """The crystal catalog of an existing tree, in the shape that :func:`build_crystals` takes.
 
@@ -274,7 +322,7 @@ def crystals_from_tree(tree: dict[str, Any]) -> list[dict]:
     return [content for name, content in sorted(tree.items()) if name.startswith(prefix)]
 
 
-def build_metadata_tree(config: dict, template: dict[str, Any] | None = None) -> dict[str, Any]:
+def build_metadata_tree(config: dict) -> dict[str, Any]:
     """Build the ``datasets`` and ``hardware`` parts of a metadata tree.
 
     Adds ``special_metadata.yaml``, which holds the compiled geometry. Writes
@@ -284,13 +332,19 @@ def build_metadata_tree(config: dict, template: dict[str, Any] | None = None) ->
     ----------
     config
         a resolved config, as :func:`pygeoml1000.config.resolve_config` returns.
-        Only ``channelmap``, ``special_metadata`` and ``crystals`` are read.
-    template
-        everything that is not derived from the geometry. Defaults to the
-        template shipped with the package.
+        Only ``channelmap``, ``special_metadata``, ``crystals`` and ``runs`` are
+        read.
     """
     channelmap = config["channelmap"]
-    tree = dict(load_template() if template is None else template)
+    runs = dict(config["runs"], runinfo=prune_runinfo(config["runs"]["runinfo"]))
+    validity = build_validity(runs)
+
+    tree: dict[str, Any] = {
+        RUNINFO_FILE: runs["runinfo"],
+        RUNLISTS_FILE: runs["runlists"],
+        f"{STATUSES_DIR}/{VALIDITY_FILE}": validity,
+        f"{CHANNELMAPS_DIR}/{VALIDITY_FILE}": copy.deepcopy(validity),
+    }
 
     for directory, content in (
         (CHANNELMAPS_DIR, build_channelmap(channelmap)),
@@ -341,16 +395,16 @@ def metadata_to_config(path: str | Path) -> dict:
     over SSH for a path that does not exist yet. It also refuses to resolve
     validity on a tree that is not a Git repository.
 
-    Returns the three keys that :func:`build_metadata_tree` reads back, so a
-    tree re-packs from its own contents and never falls back to the catalog of
-    this package. The channel map is the hardware one. It has no ``analysis``
-    block, unlike the map that :meth:`legendmeta.LegendMetadata.channelmap`
-    returns.
+    Returns the four keys that :func:`build_metadata_tree` reads back, so a tree
+    re-packs from its own contents and never falls back to the catalogs of this
+    package. The channel map is the hardware one. It has no ``analysis`` block,
+    unlike the map that :meth:`legendmeta.LegendMetadata.channelmap` returns.
     """
     tree = load_tree(path)
+    applied = _applied_names(tree, CHANNELMAPS_DIR)
 
     channelmap: dict[str, dict] = {}
-    for name in _applied_names(tree, CHANNELMAPS_DIR):
+    for name in applied:
         key = f"{CHANNELMAPS_DIR}/{name}"
         # a later file patches an earlier one, as the `append` validity mode of
         # dbetto does
@@ -366,4 +420,22 @@ def metadata_to_config(path: str | Path) -> dict:
         "channelmap": channelmap,
         "special_metadata": tree[SPECIAL_METADATA_FILE],
         "crystals": crystals_from_tree(tree),
+        "runs": runs_from_tree(tree, applied),
+    }
+
+
+def runs_from_tree(tree: dict[str, Any], applied: list[str] | None = None) -> dict:
+    """The run config of an existing tree, in the shape that :func:`build_validity` takes.
+
+    A re-pack of a tree thus uses the runs of that tree, and not the runs of
+    this package. The experiment name comes back from the channel map file name,
+    which :data:`CONFIG_FILE_TEMPLATE` puts it into.
+    """
+    if applied is None:
+        applied = _applied_names(tree, CHANNELMAPS_DIR)
+
+    return {
+        "experiment": applied[0].split("-")[0],
+        "runinfo": tree[RUNINFO_FILE],
+        "runlists": tree[RUNLISTS_FILE],
     }

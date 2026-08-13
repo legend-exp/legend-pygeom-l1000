@@ -148,11 +148,24 @@ def crystals():
 
 
 @pytest.fixture
-def tree(channelmap, crystals):
+def runs():
+    """The packaged run config, i.e. what a resolved config carries as ``runs``."""
+    from pygeoml1000 import config
+
+    return config.load_raw_config()["runs"]
+
+
+@pytest.fixture
+def tree(channelmap, crystals, runs):
     from pygeoml1000 import metadata
 
     return metadata.build_metadata_tree(
-        {"channelmap": channelmap, "special_metadata": {"detail": {}}, "crystals": crystals}
+        {
+            "channelmap": channelmap,
+            "special_metadata": {"detail": {}},
+            "crystals": crystals,
+            "runs": runs,
+        }
     )
 
 
@@ -255,26 +268,90 @@ def test_crystal_slice_status_is_filled_in_when_the_catalog_omits_it(channelmap,
     assert built["V011"]["slices"]["A"]["status"] == metadata.DEFAULT_SLICE_STATUS
 
 
-def test_generated_file_names_follow_the_template(channelmap, crystals):
-    """The template's ``apply:`` entries name the generated files, in both accepted forms."""
+def test_generated_file_names_follow_the_run_config(channelmap, crystals):
+    """The experiment and the first period name the channel map and the status file."""
     from pygeoml1000 import metadata
 
-    template = dict(metadata.load_template())
-    template["datasets/statuses/validity.yaml"] = [
-        {"valid_from": "20000101T000000Z", "apply": "scalar-form.yaml"}
-    ]
-    template["hardware/configuration/channelmaps/validity.yaml"] = [
-        {"valid_from": "20000101T000000Z", "apply": ["first.yaml", "second.yaml"]}
-    ]
-
     tree = metadata.build_metadata_tree(
-        {"channelmap": channelmap, "special_metadata": {}, "crystals": crystals},
-        template=template,
+        {
+            "channelmap": channelmap,
+            "special_metadata": {},
+            "crystals": crystals,
+            "runs": {
+                "experiment": "l1000dsg01",
+                "runinfo": {"p07": {"r000": {"cal": {"start_key": "20250101T000000Z"}}}},
+                "runlists": {},
+            },
+        }
     )
 
-    assert "datasets/statuses/scalar-form.yaml" in tree
-    assert "hardware/configuration/channelmaps/first.yaml" in tree
-    assert "hardware/configuration/channelmaps/second.yaml" in tree
+    name = "l1000dsg01-p07-r%-T%-all-config.yaml"
+    assert f"datasets/statuses/{name}" in tree
+    assert f"hardware/configuration/channelmaps/{name}" in tree
+
+
+def test_the_validity_starts_at_the_earliest_start_key(channelmap, crystals):
+    """A lookup at any start key must find a channel map, so no run may precede it."""
+    from pygeoml1000 import metadata
+
+    runinfo = {
+        # deliberately not in chronological order
+        "p02": {"r000": {"phy": {"start_key": "20260101T000000Z"}}},
+        "p01": {"r000": {"cal": {"start_key": "20250101T000000Z"}}},
+    }
+    validity = metadata.build_validity({"experiment": "l1000", "runinfo": runinfo})
+
+    assert validity == [{"valid_from": "20250101T000000Z", "apply": ["l1000-p01-r%-T%-all-config.yaml"]}]
+
+
+@pytest.mark.parametrize(
+    "runinfo",
+    [
+        pytest.param({}, id="no period"),
+        pytest.param({"p01": {}}, id="no run"),
+        pytest.param({"p01": {"r000": {"cal": {"livetime_in_s": 1.0}}}}, id="no start key"),
+        pytest.param({"p01": {"r000": {"cal": {"start_key": "yesterday"}}}}, id="bad start key"),
+    ],
+)
+def test_a_run_config_without_a_usable_start_key_is_rejected(runinfo):
+    """An empty validity file only fails once a workflow reads the tree."""
+    from pygeoml1000 import metadata
+
+    with pytest.raises(ValueError):
+        metadata.build_validity({"experiment": "l1000", "runinfo": runinfo})
+
+
+def test_the_packaged_run_config_reaches_the_tree(tree, runs):
+    """The four files that the geometry cannot describe come from ``runs.yaml``."""
+    assert tree["datasets/runinfo.yaml"] == runs["runinfo"]
+    assert tree["datasets/runlists.yaml"] == runs["runlists"]
+
+    validity = [{"valid_from": "20000101T000000Z", "apply": ["l1000-p01-r%-T%-all-config.yaml"]}]
+    assert tree["datasets/statuses/validity.yaml"] == validity
+    assert tree["hardware/configuration/channelmaps/validity.yaml"] == validity
+
+
+def test_a_user_run_config_reaches_the_tree(small_config):
+    """``raw_config`` overrides the packaged runs, as it does for every other raw config."""
+    from pygeoml1000 import config, metadata
+
+    runinfo = {
+        # the packaged period, dropped through the deep merge
+        "p01": None,
+        "p02": {"r000": {"phy": {"start_key": "20300101T000000Z", "livetime_in_s": 1.0}}},
+    }
+    raw_config = dict(small_config["raw_config"], runs={"runinfo": runinfo})
+    resolved = config.resolve_config({"raw_config": raw_config})
+
+    # the packaged run lists survive the deep merge
+    assert resolved["runs"]["runlists"]["valid"]["phy"]["p01"] == ["r000..r000"]
+
+    tree = metadata.build_metadata_tree(resolved)
+    assert tree["datasets/runinfo.yaml"] == {"p02": runinfo["p02"]}
+    assert tree["hardware/configuration/channelmaps/validity.yaml"] == [
+        {"valid_from": "20300101T000000Z", "apply": ["l1000-p02-r%-T%-all-config.yaml"]}
+    ]
+    assert "hardware/configuration/channelmaps/l1000-p02-r%-T%-all-config.yaml" in tree
 
 
 def test_directory_and_archive_hold_the_same_tree(tmp_path, tree):
@@ -351,6 +428,7 @@ def test_geometry_inputs_survive_the_round_trip(small_config, small_tarball):
 
     assert rebuilt["channelmap"] == original["channelmap"]
     assert rebuilt["special_metadata"] == original["special_metadata"]
+    assert rebuilt["runs"] == original["runs"]
 
 
 def test_a_resolved_metadata_config_no_longer_refers_to_the_tarball(small_tarball):

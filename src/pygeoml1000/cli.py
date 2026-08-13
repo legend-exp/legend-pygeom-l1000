@@ -52,7 +52,7 @@ def dump_gdml_cli(argv: list[str] | None = None) -> None:
 
     if args.write_metadata:
         log.info("writing generated metadata to %s", args.write_metadata)
-        write_metadata(load_config(args.config), args.write_metadata, template=args.metadata_template)
+        write_metadata(config, args.write_metadata)
 
     if config is None or (args.filename is None and not args.visualize and not args.write_manifest):
         return
@@ -202,13 +202,6 @@ def _parse_cli_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="""Filename to write the detectors of this geometry to, as the 'datasets' and
         'hardware' parts of a legend-metadata tree. A folder, or a '.tar.gz' archive if the name
         ends in one. Nothing under 'simprod', 'dataprod' or 'jldataprod' is written.""",
-    )
-    out_opts.add_argument(
-        "--metadata-template",
-        action="store",
-        help="""Folder or '.tar.gz' archive holding the parts of the metadata tree that are not
-        derived from the geometry: run info, run lists and the validity files. Defaults to the
-        template shipped with this package.""",
     )
     out_opts.add_argument(
         "--dump-raw-configs",

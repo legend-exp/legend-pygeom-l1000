@@ -108,13 +108,17 @@ def resolve_config(config: dict | None = None, **cli_overrides: Any) -> dict:
     channelmap = load_dict_from_config(config, "channelmap", lambda: compiled[0])
     special_metadata = load_dict_from_config(config, "special_metadata", lambda: compiled[1])
     crystals = config.get("crystals")
-    if crystals is None:
-        crystals = (raw if raw is not None else load_raw_config()).get("crystal")
+    runs = config.get("runs")
+    if crystals is None or runs is None:
+        fallback = raw if raw is not None else load_raw_config()
+        crystals = fallback.get("crystal") if crystals is None else crystals
+        runs = fallback.get("runs") if runs is None else runs
 
     resolved = {k: v for k, v in config.items() if k not in _RESOLVED_KEYS}
     resolved["channelmap"] = convert_to_plain_types(channelmap)
     resolved["special_metadata"] = convert_to_plain_types(special_metadata)
     resolved["crystals"] = convert_to_plain_types(_normalize_records(crystals))
+    resolved["runs"] = convert_to_plain_types(runs)
 
     detail_level = config.get("detail", DEFAULT_DETAIL)
     if detail_level not in special_metadata.get("detail", {}):
@@ -245,11 +249,7 @@ def write_config(config: dict, filename: str | Path) -> None:
     utils.write_dict(resolve_config(config), str(filename))
 
 
-def write_metadata(
-    config: dict,
-    filename: str | Path,
-    template: str | Path | None = None,
-) -> Path:
+def write_metadata(config: dict, filename: str | Path) -> Path:
     """Write a stand-in ``legend-metadata`` tree for the geometry ``config`` describes.
 
     ``filename`` is a directory, or a ``.tar.gz`` archive if it ends in one. The
@@ -257,18 +257,13 @@ def write_metadata(
     ``metadata:`` in a geometry config points back at.
 
     Everything the tree is built from travels in the resolved config, including
-    the crystal catalog. A config that came from a metadata tree therefore
-    re-packs from that tree, and never falls back to the packaged catalog.
+    the crystal catalog and the runs. A config that came from a metadata tree
+    therefore re-packs from that tree, and never falls back to the packaged
+    catalogs.
 
     See :mod:`pygeoml1000.metadata` for the layout of the result.
     """
-    return metadata.write_metadata(
-        metadata.build_metadata_tree(
-            resolve_config(config),
-            template=metadata.load_template(template) if template is not None else None,
-        ),
-        filename,
-    )
+    return metadata.write_metadata(metadata.build_metadata_tree(resolve_config(config)), filename)
 
 
 def copy_raw_configs(destination: str | Path) -> Path:

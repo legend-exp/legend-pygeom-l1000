@@ -179,6 +179,7 @@ configs/
 ├── hpge.yaml
 ├── pmts_pos.yaml
 ├── pmts.yaml
+├── runs.yaml
 ├── sipm.yaml
 └── string.yaml
 ```
@@ -304,6 +305,22 @@ The boule data does not change the geometry. It generates the drift-time map for
 the post-processing of the pulse-shape discrimination, and it goes into the
 [generated metadata](#generated-metadata).
 
+(runs-config)=
+
+### `runs.yaml` - Runs of the generated metadata
+
+The runs of the [generated metadata](#generated-metadata). A geometry does not
+describe runs, so this file invents them. It has no effect on the geometry.
+
+```{literalinclude} ../../src/pygeoml1000/configs/runs.yaml
+:language: yaml
+```
+
+The generator writes `runinfo` and `runlists` into the tree as they stand here.
+It derives both `validity.yaml` files from `runinfo`. The channel map is valid
+from the earliest start key, and the earliest run also names the file. See
+[The runs](#the-runs).
+
 (compilation)=
 
 ## Compilation
@@ -362,25 +379,26 @@ Simflow imports this package and builds the files directly into its specified
 metadata folder based on the geometry config of the experiment. See
 [How simflow uses this](#simflow-integration).
 
-The generated metadata tree holds everything that describes the detectors. Four
-files come from a template. The generator derives all other files from the
+The generated metadata tree holds everything that describes the detectors. Two
+files come from the raw [`runs.yaml`](#runs-config), and the generator derives
+the two validity files from the runs. It derives all other files from the
 compiled channel map.
 
 | file                                                | content                                                       |
 | --------------------------------------------------- | ------------------------------------------------------------- |
-| `datasets/runinfo.yaml`                             | template: the runs, their start keys and live times           |
-| `datasets/runlists.yaml`                            | template: the named run lists                                 |
-| `datasets/statuses/validity.yaml`                   | template: from when the statuses apply                        |
+| `datasets/runinfo.yaml`                             | the runs, their start keys and live times, from `runs.yaml`   |
+| `datasets/runlists.yaml`                            | the named run lists, from `runs.yaml`                         |
+| `datasets/statuses/validity.yaml`                   | from when the statuses apply                                  |
 | `datasets/statuses/<name>.yaml`                     | one analysis status per channel                               |
-| `hardware/configuration/channelmaps/validity.yaml`  | template: from when the channel map applies                   |
+| `hardware/configuration/channelmaps/validity.yaml`  | from when the channel map applies                             |
 | `hardware/configuration/channelmaps/<name>.yaml`    | `name`, `system`, `location` and `daq` of every channel       |
 | `hardware/detectors/germanium/diodes/<DET>.yaml`    | one per HPGe: type, production, geometry and characterization |
 | `hardware/detectors/germanium/crystals/<XTAL>.yaml` | one per crystal boule the detectors were cut from             |
 | `special_metadata.yaml`                             | the compiled special metadata                                 |
 
-The `apply:` entries of the adjacent `validity.yaml` set `<name>`. Nothing reads
-these names. A workflow selects a file by comparing its `valid_from` with the
-start key of a run. The template thus controls how the files are called.
+The `apply:` entry of the adjacent `validity.yaml` sets `<name>`. Nothing reads
+this name. A workflow selects a file by comparing its `valid_from` with the
+start key of a run.
 
 The real legend-metadata has no `special_metadata.yaml`. This file carries the
 compiled geometry, and it makes the tree sufficient to rebuild that geometry.
@@ -544,66 +562,61 @@ The diode file wins this merge. It therefore carries none of `system`, `daq` or
 `location`. Any of these keys would replace the raw ID and the position of the
 channel.
 
-(metadata-template)=
+(the-runs)=
 
-### The template
+### The runs
 
-The template holds what a geometry cannot know: the runs, their duration, and
-the start of validity of the metadata. It ships as
-`src/pygeoml1000/configs/template_metadata.tar.gz` and holds four files. The
-four blocks below are those files, unpacked while this page is built.
+The runs hold what a geometry cannot know: the runs themselves, their duration,
+and the start of validity of the metadata. They come from the raw
+[`runs.yaml`](#runs-config), like every other input of this package.
 
-`datasets/runinfo.yaml` gives the start key of each run. Every validity file
-resolves against a start key, so this file is the clock of the whole tree.
+`runinfo` gives the start key of each run. Every validity file resolves against
+a start key. The generator makes the channel map valid from the earliest start
+key. A lookup at any run therefore finds a channel map and a status.
 
-```{literalinclude} _generated/template_metadata/datasets/runinfo.yaml
-:language: yaml
+`runlists` names a group of runs. Keep the entries as `rNNN..rMMM` range
+expressions. A workflow adds the experiment name only to an entry with the shape
+of a range. It reads a plain `r000` as a complete run identifier, which never
+resolves.
+
+All runs share one channel map and one status file. A channel map describes the
+setup of a run, and a compiled config describes one setup. Add runs freely, but
+keep the setup the same. A second setup needs a second geometry, and this
+generator does not write one.
+
+#### Change the runs
+
+Override `runs` like any other raw config. The override deep-merges into the
+packaged file, so give only what changes:
+
+```yaml
+# geom-config.yaml
+raw_config:
+  runs:
+    runinfo:
+      p01: null # drop the packaged period
+      p02:
+        r000:
+          cal:
+            start_key: 20300101T000000Z
+          phy:
+            start_key: 20300102T000000Z
+            livetime_in_s: 31557600.0
+    runlists:
+      valid:
+        cal:
+          p02: [r000..r000]
+        phy:
+          p02: [r000..r000]
 ```
 
-`datasets/runlists.yaml` names a group of runs. Keep the entries as `rNNN..rMMM`
-range expressions.
+A period or a run set to `null` is dropped, and nothing empty reaches the tree.
+Use `--dump-raw-configs <dir>` to get a copy of the packaged file as a starting
+point.
 
-```{literalinclude} _generated/template_metadata/datasets/runlists.yaml
-:language: yaml
-```
-
-`datasets/statuses/validity.yaml` says from when the per-channel statuses apply,
-and under which name the generator writes them.
-
-```{literalinclude} _generated/template_metadata/datasets/statuses/validity.yaml
-:language: yaml
-```
-
-`hardware/configuration/channelmaps/validity.yaml` does the same for the channel
-map.
-
-```{literalinclude} _generated/template_metadata/hardware/configuration/channelmaps/validity.yaml
-:language: yaml
-```
-
-#### Change the template
-
-1. Unpack a copy of the template.
-2. Edit the files.
-3. Give the copy to the generator.
-
-```console
-$ tar xzf $(python -c "import pygeoml1000, pathlib; \
-    print(pathlib.Path(pygeoml1000.__file__).parent / 'configs/template_metadata.tar.gz')") -C my_template
-$ $EDITOR my_template/datasets/runinfo.yaml
-$ legend-pygeom-l1000 --write-metadata out.tar.gz --metadata-template my_template
-```
-
-The packaged template carries a comment on each setting. Read those before you
-change a value.
-
-Keep the run list entries as `rNNN..rMMM` range expressions. A workflow adds the
-experiment name only to an entry with the shape of a range. It reads a plain
-`r000` as a complete run identifier, which never resolves.
-
-The template does not hold the per-channel statuses either. A geometry cannot
-know how a channel behaved in a run, so the generator gives every channel the
-same status: `usability: "on"`, `processable: true`, and for a germanium channel
+The runs do not hold the per-channel statuses either. A geometry cannot know how
+a channel behaved in a run, so the generator gives every channel the same
+status: `usability: "on"`, `processable: true`, and for a germanium channel
 `psd.status.low_aoe: valid`.
 
 There is no config key for this. To turn a channel off, edit its entry in the

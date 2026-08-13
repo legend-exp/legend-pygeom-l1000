@@ -44,6 +44,38 @@ properties:
     type: array
     items:
       type: object
+  runs:
+    description: >-
+      The runs of the generated metadata, taken from the raw 'runs' config: the
+      experiment name, the run info and the named run lists. The validity of the
+      channel map follows from the run info. It travels with the compiled
+      objects so that a resolved config holds everything the generated metadata
+      is built from. It has no effect on the geometry.
+    type: object
+    required: [experiment, runinfo, runlists]
+    properties:
+      experiment:
+        type: string
+      runinfo:
+        type: object
+        patternProperties:
+          ".*":
+            type: object
+            patternProperties:
+              ".*":
+                type: object
+                patternProperties:
+                  ".*":
+                    type: object
+                    required: [start_key]
+                    properties:
+                      start_key:
+                        type: string
+                        pattern: "^\\d{8}T\\d{6}Z$"
+                      livetime_in_s:
+                        type: number
+      runlists:
+        type: object
   metadata:
     description: >-
       Path to a generated metadata tree, either a folder or a '.tar.gz' archive,

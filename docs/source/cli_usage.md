@@ -208,15 +208,24 @@ exact scope.
 archive. It imports this package and writes the same files straight into its
 metadata folder, from the geometry config of the experiment.
 
-A template supplies what a geometry cannot know, such as the runs and their
-duration. Unpack the packaged template, change it, and give the folder back with
-`--metadata-template`:
+The raw `runs.yaml` supplies what a geometry cannot know, such as the runs and
+their duration. Change it like any other raw config, through `raw_config` in the
+geometry config file:
 
-```console
-legend-pygeom-l1000 --write-metadata out.tar.gz --metadata-template my_template
+```yaml
+# geom-config.yaml
+raw_config:
+  runs:
+    runinfo:
+      p01:
+        r000:
+          phy:
+            start_key: 20300101T000000Z
+            livetime_in_s: 31557600.0
 ```
 
-See {doc}`runtime-cfg` for where the packaged template is and what it holds.
+Use `--dump-raw-configs <dir>` to get a copy of the packaged file first. See
+{doc}`runtime-cfg` for what it holds.
 
 ### Quality Control
 
