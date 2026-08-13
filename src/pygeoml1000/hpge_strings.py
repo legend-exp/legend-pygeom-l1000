@@ -196,7 +196,7 @@ def _place_front_end_and_insulators(
         [math.pi, 0, angle_signal],
         [x_cable, y_cable, z_pos["cable"]],  # this offset of 12 is measured from the CAD file.
         signal_cable,
-        f"cable_signal_{det_unit.name}_string_{string_id}",
+        f"hpge_cable_signal_{det_unit.name}",
         b.mother_lv,
         b.registry,
     )
@@ -204,7 +204,7 @@ def _place_front_end_and_insulators(
         [math.pi, 0, angle_signal],
         [x_clamp, y_clamp, z_pos["clamp"]],  # this offset of 12 is measured from the CAD file.
         signal_clamp,
-        f"ultem_clamp_signal_{det_unit.name}_string_{string_id}",
+        f"hpge_assembly_clamp_signal_ultem_{det_unit.name}",
         b.mother_lv,
         b.registry,
     )
@@ -216,7 +216,7 @@ def _place_front_end_and_insulators(
             z_pos["cable"] - thickness["cable"] - 0.5,
         ],  # this offset of 12 is measured from the CAD file.
         signal_asic,
-        f"signal_asic_{det_unit.name}_string_{string_id}",
+        f"hpge_assembly_asic_{det_unit.name}",
         b.mother_lv,
         b.registry,
     )
@@ -229,7 +229,7 @@ def _place_front_end_and_insulators(
             cap_rot,
             list(cap_pos),
             _get_signal_cap(thickness["cable"], unit_length, n_cables, cap_to_cable, b),
-            f"signal_cap_string_{string_id}",
+            f"hpge_string_signal_cap_string{string_id}",
             b.mother_lv,
             b.registry,
         )
@@ -260,7 +260,7 @@ def _place_front_end_and_insulators(
         [0, 0, angle_hv],
         [x_cable, y_cable, z_pos["cable"]],
         hv_cable,
-        f"cable_hv_{det_unit.name}_string_{string_id}",
+        f"hpge_cable_hv_{det_unit.name}",
         b.mother_lv,
         b.registry,
     )
@@ -268,7 +268,7 @@ def _place_front_end_and_insulators(
         [0, 0, angle_hv],
         [x_clamp, y_clamp, z_pos["clamp"]],
         hv_clamp,
-        f"ultem_clamp_hv_{det_unit.name}_string_{string_id}",
+        f"hpge_assembly_clamp_hv_ultem_{det_unit.name}",
         b.mother_lv,
         b.registry,
     )
@@ -281,7 +281,7 @@ def _place_front_end_and_insulators(
             cap_rot,
             list(cap_pos),
             _get_hv_cap(thickness["cable"], unit_length, n_cables, cap_to_cable, b),
-            f"hv_cap_string_{string_id}",
+            f"hpge_string_hv_cap_string{string_id}",
             b.mother_lv,
             b.registry,
         )
@@ -320,7 +320,7 @@ def _place_front_end_and_insulators(
                 z_pos["weldment"],
             ],
             weldment,
-            f"hpge_support_copper_weldment_top_{det_unit.name}_{i}",
+            f"hpge_string_support_weldment_copper_{det_unit.name}_{i}",
             b.mother_lv,
             b.registry,
         )
@@ -332,7 +332,7 @@ def _place_front_end_and_insulators(
                 z_pos["insulator"],
             ],
             insulator,
-            f"ultem_insulator_du_holder_{det_unit.name}_{i}",
+            f"hpge_assembly_insulator_ultem_{det_unit.name}_{i}",
             b.mother_lv,
             b.registry,
         )
@@ -419,7 +419,7 @@ def _place_hpge_unit(
             list(pen_rot),
             [string_info["x_pos"], string_info["y_pos"], z_pos["pen"]],
             pen_plate,
-            "pen_" + det_unit.name,
+            "hpge_assembly_plate_pen_" + det_unit.name,
             b.mother_lv,
             b.registry,
         )
@@ -487,13 +487,13 @@ def _place_hpge_string(
         )  # defined as the bottom of the clap at the moment.
         unit_length = det_unit.rodlength  # * 0.997
         string_info = {
-            "string_id": string_id,
             "string_rot": string_rot,
             "string_rot_m": string_rot_m,
             "string_meta": string_meta,
             "x_pos": x_pos,
             "y_pos": y_pos,
             "max_unit_id": max_unit_id,
+            "string_id": string_id,
         }
 
         thicknesses = {
@@ -518,7 +518,7 @@ def _place_hpge_string(
         [0, 0, np.deg2rad(30) + string_rot],
         [x_pos, y_pos, z_pos_dict["copper_rod_upper_end"]],
         support,
-        support.name + "_string_" + string_id,
+        f"hpge_string_support_hanger_copper_string{string_id}",
         b.mother_lv,
         b.registry,
     )
@@ -526,7 +526,7 @@ def _place_hpge_string(
         [0, 0, string_rot],
         [x_pos, y_pos, z_pos_dict["copper_rod_upper_end"] - 1e-6],
         tristar,
-        tristar.name + "_string_" + string_id,
+        f"hpge_string_support_tristar_copper_string{string_id}",
         b.mother_lv,
         b.registry,
     )
@@ -540,7 +540,7 @@ def _place_hpge_string(
             [0, 0, 0],
             [x_pos + delta[0], y_pos + delta[1], z_pos_dict["copper_rod_upper_end"] - copper_rod_length / 2],
             copper_rod,
-            f"hpge_support_copper_rod_string_{string_id}_{i}",
+            f"hpge_string_support_rod_copper_string{string_id}_{i}",
             b.mother_lv,
             b.registry,
         )
@@ -555,7 +555,7 @@ def _get_pen_plate(
         msg = f"Invalid PEN-plate size {size}"
         raise ValueError(msg)
 
-    pen_lv_name = f"pen_{size}"
+    pen_lv_name = f"hpge_assembly_plate_pen_{size}"
     if pen_lv_name not in registry.logicalVolumeDict:
         if size != "ppc_small":
             pen_file = resources.files("pygeoml1000") / "models" / f"BasePlate_{size}.stl"
@@ -563,7 +563,7 @@ def _get_pen_plate(
             pen_file = resources.files("pygeoml1000") / "models" / "TopPlate_ppc.stl"
 
         pen_solid = pyg4ometry.stl.Reader(
-            pen_file, solidname=f"pen_{size}", centre=False, registry=registry
+            pen_file, solidname=pen_lv_name, centre=False, registry=registry
         ).getSolid()
         pen_lv = geant4.LogicalVolume(pen_solid, materials.pen, pen_lv_name, registry)
         pen_lv.pygeom_color_rgba = (1, 1, 1, 0.3)
@@ -580,24 +580,24 @@ def _get_support_structure(
 
     .. note :: Both models' coordinate origins are a the top face of the tristar structure."""
 
-    if "hpge_support_copper_string_support_structure" not in registry.logicalVolumeDict:
+    if "hpge_string_support_hanger_copper" not in registry.logicalVolumeDict:
         support_file = resources.files("pygeoml1000") / "models" / "StringSupportStructure.stl"
         support_solid = pyg4ometry.stl.Reader(
-            support_file, solidname="string_support_structure", centre=False, registry=registry
+            support_file, solidname="hpge_string_support_hanger_copper", centre=False, registry=registry
         ).getSolid()
         support_lv = geant4.LogicalVolume(
-            support_solid, materials.metal_copper, "hpge_support_copper_string_support_structure", registry
+            support_solid, materials.metal_copper, "hpge_string_support_hanger_copper", registry
         )
         support_lv.pygeom_color_rgba = (0.72, 0.45, 0.2, 1)
     else:
-        support_lv = registry.logicalVolumeDict["hpge_support_copper_string_support_structure"]
+        support_lv = registry.logicalVolumeDict["hpge_string_support_hanger_copper"]
 
-    tristar_lv_name = f"hpge_support_copper_tristar_{size}"
+    tristar_lv_name = f"hpge_string_support_tristar_copper_{size}"
     if tristar_lv_name not in registry.logicalVolumeDict:
         tristar_file = resources.files("pygeoml1000") / "models" / f"TriStar_{size}.stl"
 
         tristar_solid = pyg4ometry.stl.Reader(
-            tristar_file, solidname=f"tristar_{size}", centre=False, registry=registry
+            tristar_file, solidname=tristar_lv_name, centre=False, registry=registry
         ).getSolid()
         tristar_lv = geant4.LogicalVolume(tristar_solid, materials.metal_copper, tristar_lv_name, registry)
         tristar_lv.pygeom_color_rgba = (0.72, 0.45, 0.2, 1)
@@ -634,7 +634,7 @@ def _get_hv_cable(
     .. note :: both ``n_cables`` and ``is_top`` change the solid, so they are part of the cache
        key -- otherwise every unit would silently reuse the cable built for the first one.
     """
-    cable_name = f"cable_hv_{cable_length:.2f}_n{n_cables}" + ("_top" if is_top else "")
+    cable_name = f"hpge_cable_hv_{cable_length:.2f}_n{n_cables}" + ("_top" if is_top else "")
     if cable_name in b.registry.logicalVolumeDict:
         return b.registry.logicalVolumeDict[cable_name]
 
@@ -781,7 +781,7 @@ def _get_hv_cap(
     the cap's frame, so that the two cannot overlap by construction. That displacement is part of
     the cache key: on the HV side it differs between strings, see :func:`_cap_to_cable`.
     """
-    cap_name = f"hv_cap_{cable_length:.2f}_n{n_cables}_{_cap_tag(cap_to_cable)}"
+    cap_name = f"hpge_string_hv_cap_{cable_length:.2f}_n{n_cables}_{_cap_tag(cap_to_cable)}"
     if cap_name in b.registry.logicalVolumeDict:
         return b.registry.logicalVolumeDict[cap_name]
 
@@ -814,7 +814,7 @@ def _get_hv_cap(
 
 def _get_hv_clamp(clamp_thickness: float, b: core.InstrumentationData) -> geant4.LogicalVolume:
     """Get the HV cable clamp, creating it on first use."""
-    clamp_name = "ultem_clamp_hv"
+    clamp_name = "hpge_assembly_clamp_hv_ultem"
     if clamp_name in b.registry.logicalVolumeDict:
         return b.registry.logicalVolumeDict[clamp_name]
 
@@ -854,7 +854,7 @@ def _get_signal_cable(
     .. note :: both ``n_cables`` and ``is_top`` change the solid, so they are part of the cache
        key -- otherwise every unit would silently reuse the cable built for the first one.
     """
-    cable_name = f"cable_signal_{cable_length:.2f}_n{n_cables}" + ("_top" if is_top else "")
+    cable_name = f"hpge_cable_signal_{cable_length:.2f}_n{n_cables}" + ("_top" if is_top else "")
     if cable_name in b.registry.logicalVolumeDict:
         return b.registry.logicalVolumeDict[cable_name]
 
@@ -998,7 +998,7 @@ def _get_signal_cap(
     The cable is subtracted out of the cap body around ``cap_to_cable``, its measured position in
     the cap's frame, so that the two cannot overlap by construction.
     """
-    cap_name = f"signal_cap_{cable_length:.2f}_n{n_cables}_{_cap_tag(cap_to_cable)}"
+    cap_name = f"hpge_string_signal_cap_{cable_length:.2f}_n{n_cables}_{_cap_tag(cap_to_cable)}"
     if cap_name in b.registry.logicalVolumeDict:
         return b.registry.logicalVolumeDict[cap_name]
 
@@ -1031,7 +1031,7 @@ def _get_signal_cap(
 
 def _get_signal_clamp(clamp_thickness: float, b: core.InstrumentationData) -> geant4.LogicalVolume:
     """Get the signal cable clamp, creating it on first use."""
-    clamp_name = "ultem_clamp_signal"
+    clamp_name = "hpge_assembly_clamp_signal_ultem"
     if clamp_name in b.registry.logicalVolumeDict:
         return b.registry.logicalVolumeDict[clamp_name]
 
@@ -1079,7 +1079,7 @@ def _get_signal_clamp(clamp_thickness: float, b: core.InstrumentationData) -> ge
 
 def _get_signal_asic(b: core.InstrumentationData) -> geant4.LogicalVolume:
     """Get the front-end ASIC die, creating it on first use."""
-    asic_name = "signal_asic"
+    asic_name = "hpge_assembly_asic"
     if asic_name in b.registry.logicalVolumeDict:
         return b.registry.logicalVolumeDict[asic_name]
 
@@ -1108,7 +1108,7 @@ def _get_weldment(
     b: core.InstrumentationData,
 ) -> geant4.LogicalVolume:
     """Get the copper weldment holding a detector unit to the support rods."""
-    weldment_name = "hpge_support_copper_weldment_top"
+    weldment_name = "hpge_string_support_weldment_copper"
     if weldment_name in b.registry.logicalVolumeDict:
         return b.registry.logicalVolumeDict[weldment_name]
 
@@ -1177,7 +1177,7 @@ def _get_insulator(
     b: core.InstrumentationData,
 ) -> geant4.LogicalVolume:
     """Get the Ultem insulator of the requested top length, creating it on first use."""
-    insulator_name = f"ultem_insulator_du_holder_{insulator_top_length:.2f}"
+    insulator_name = f"hpge_assembly_insulator_ultem_{insulator_top_length:.2f}"
     if insulator_name in b.registry.logicalVolumeDict:
         return b.registry.logicalVolumeDict[insulator_name]
 
@@ -1251,7 +1251,7 @@ def _get_insulator(
 
 def _get_copper_rod(copper_rod_length: float, b: core.InstrumentationData) -> geant4.LogicalVolume:
     """Get a string support rod of the requested length, creating it on first use."""
-    rod_name = f"hpge_support_copper_rod_{copper_rod_length:.2f}"
+    rod_name = f"hpge_string_support_rod_copper_{copper_rod_length:.2f}"
     if rod_name in b.registry.logicalVolumeDict:
         return b.registry.logicalVolumeDict[rod_name]
 

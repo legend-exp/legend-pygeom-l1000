@@ -189,8 +189,8 @@ class ModuleFactoryBase(ABC):
 
     def _cached_sipm_volumes(self) -> None:
         """Creates (dummy) SiPM volumes for use at the top/bottom of straight fiber sections."""
-        v_suffix = f"_r{self.radius}_nmod{self.number_of_sipm_modules}"
-        v_name = f"sipm{v_suffix}"
+        v_suffix = f"_r{self.radius:.2f}_nmod{self.number_of_sipm_modules}"
+        v_name = f"larinstr_undergroundlar_sipm_silicon{v_suffix}"
         if v_name in self.registry.solidDict:
             return
 
@@ -211,7 +211,7 @@ class ModuleFactoryBase(ABC):
         self.sipm_lv = g4.LogicalVolume(sipm, self.materials.metal_silicon, v_name, self.registry)
 
         sipm_outer1 = g4.solid.Tubs(
-            f"sipm_outer1{v_suffix}",
+            f"larinstr_undergroundlar_sipm_wrap_copper_outer1{v_suffix}",
             self.radius - sipm_dim / 2 - self.SIPM_OUTER_EXTRA,
             self.radius + sipm_dim / 2 + self.SIPM_OUTER_EXTRA,
             self.SIPM_HEIGHT + self.SIPM_OUTER_EXTRA + self.SIPM_OVERLAP,
@@ -221,7 +221,7 @@ class ModuleFactoryBase(ABC):
             "mm",
         )
         sipm_outer_without_buffer = g4.solid.Tubs(
-            f"sipm_outer_without_buffer{v_suffix}",
+            f"larinstr_undergroundlar_sipm_wrap_copper_without_buffer{v_suffix}",
             self.radius - sipm_dim / 2 - 1e-9,
             self.radius + sipm_dim / 2 + 1e-9,
             self.SIPM_HEIGHT + 2 * self.SIPM_GAP + self.SIPM_OVERLAP,
@@ -232,7 +232,7 @@ class ModuleFactoryBase(ABC):
         )
 
         sipm_outer_buffer = g4.solid.Tubs(
-            f"sipm_outer_buffer_1{v_suffix}",
+            f"larinstr_undergroundlar_sipm_wrap_copper_buffer_1{v_suffix}",
             self.radius - sipm_dim / 2 - 1e-9,
             self.radius + sipm_dim / 2 + 1e-9,
             self.SIPM_GAP + self.SIPM_OVERLAP - 1e-9,
@@ -243,14 +243,14 @@ class ModuleFactoryBase(ABC):
         )
 
         sipm_outer_top_wo_buffer = g4.solid.Subtraction(
-            f"sipm_outer_top{v_suffix}",
+            f"larinstr_undergroundlar_sipm_wrap_copper_top_wo_buffer{v_suffix}",
             sipm_outer1,
             sipm_outer_without_buffer,
             [[0, 0, 0], [0, 0, -self.SIPM_OUTER_EXTRA / 2]],
             self.registry,
         )
         sipm_outer_top_w_buffer_1 = g4.solid.Union(
-            f"sipm_outer_top_w_buffer_1_{v_suffix}",
+            f"larinstr_undergroundlar_sipm_wrap_copper_top_w_buffer_1{v_suffix}",
             sipm_outer_top_wo_buffer,
             sipm_outer_buffer,
             [
@@ -260,7 +260,7 @@ class ModuleFactoryBase(ABC):
             self.registry,
         )
         sipm_outer_top = g4.solid.Union(
-            f"sipm_outer_top_{v_suffix}",
+            f"larinstr_undergroundlar_sipm_wrap_copper_top{v_suffix}",
             sipm_outer_top_w_buffer_1,
             sipm_outer_buffer,
             [
@@ -271,14 +271,14 @@ class ModuleFactoryBase(ABC):
         )
 
         sipm_outer_bottom_wo_buffer = g4.solid.Subtraction(
-            f"sipm_outer_bottom{v_suffix}",
+            f"larinstr_undergroundlar_sipm_wrap_copper_bottom_wo_buffer{v_suffix}",
             sipm_outer1,
             sipm_outer_without_buffer,
             [[0, 0, 0], [0, 0, +self.SIPM_OUTER_EXTRA / 2]],
             self.registry,
         )
         sipm_outer_bottom_w_buffer_1 = g4.solid.Union(
-            f"sipm_outer_bottom_w_buffer_1_{v_suffix}",
+            f"larinstr_undergroundlar_sipm_wrap_copper_bottom_w_buffer_1{v_suffix}",
             sipm_outer_bottom_wo_buffer,
             sipm_outer_buffer,
             [
@@ -288,7 +288,7 @@ class ModuleFactoryBase(ABC):
             self.registry,
         )
         sipm_outer_bottom = g4.solid.Union(
-            f"sipm_outer_bottom_{v_suffix}",
+            f"larinstr_undergroundlar_sipm_wrap_copper_bottom{v_suffix}",
             sipm_outer_bottom_w_buffer_1,
             sipm_outer_buffer,
             [
@@ -326,14 +326,14 @@ class ModuleFactoryBase(ABC):
         self.sipm_outer_top_lv = g4.LogicalVolume(
             sipm_outer_top,
             self.materials.metal_copper,
-            f"sipm_outer_top{v_suffix}",
+            f"larinstr_undergroundlar_sipm_wrap_copper_top{v_suffix}",
             self.registry,
         )
 
         self.sipm_outer_bottom_lv = g4.LogicalVolume(
             sipm_outer_bottom,
             self.materials.metal_copper,
-            f"sipm_outer_bottom{v_suffix}",
+            f"larinstr_undergroundlar_sipm_wrap_copper_bottom{v_suffix}",
             self.registry,
         )
 
@@ -413,7 +413,7 @@ class ModuleFactoryBase(ABC):
             [0, 0, -start_angle],
             [x_position_mm, y_position_mm, z_outer],
             self.sipm_outer_top_lv if is_top else self.sipm_outer_bottom_lv,
-            f"{sipm_name}_wrap",
+            f"larinstr_undergroundlar_sipm_wrap_copper_{sipm_name}",
             mother_lv,
             self.registry,
         )
@@ -499,7 +499,9 @@ class ModuleFactorySingleFibers(ModuleFactoryBase):
 
     def _cached_fiber_volumes(self) -> None:
         """Create solids, logical and physical volumes for the fibers, as specified by the parameters of this instance."""
-        v_suffix = f"_l{self.fiber_length}_b{self.bend_radius_mm}"
+        v_suffix = f"_l{self.fiber_length:.2f}"
+        if self.bend_radius_mm is not None:
+            v_suffix += f"_b{self.bend_radius_mm:.2f}"
         if f"fiber_cl2{v_suffix}" in self.registry.solidDict:
             return
 
@@ -510,7 +512,7 @@ class ModuleFactorySingleFibers(ModuleFactoryBase):
                     continue
                 fibers_to_gen += [
                     (
-                        f"_l{self.fiber_length + delta_length}_b{self.bend_radius_mm}",
+                        f"_l{self.fiber_length + delta_length:.2f}_b{self.bend_radius_mm:.2f}",
                         self.fiber_length + delta_length,
                     )
                 ]
@@ -659,8 +661,8 @@ class ModuleFactorySingleFibers(ModuleFactoryBase):
             raise ValueError(msg)
         fiber_length = self.fiber_length + delta_length
 
-        v_suffix = f"{'_bend' if bend else ''}_l{fiber_length}_tpb{tpb_thickness_nm}"
-        v_name = f"fiber_coating{v_suffix}"
+        v_suffix = f"{'_bend' if bend else ''}_l{fiber_length:.2f}_tpb{tpb_thickness_nm}"
+        v_name = f"fiber_coating_tpb{v_suffix}"
         if v_name in self.registry.solidDict:
             return self.registry.logicalVolumeDict[v_name]
 
@@ -734,7 +736,7 @@ class ModuleFactorySingleFibers(ModuleFactoryBase):
                         [0, 0, -th],
                         [x, y, z_displacement_straight - delta_length / 2],
                         coating_lv,
-                        f"fiber_{mod.name}_{m}_{n}",
+                        f"fiber_coating_tpb_{mod.name}_{m}_{n}",
                         b.mother_lv,
                         self.registry,
                     )
@@ -776,7 +778,7 @@ class ModuleFactorySingleFibers(ModuleFactoryBase):
                         [0, 0, -th],
                         [x2, y2, z],
                         self.sipm_outer_bottom_lv_bend,
-                        f"{mod.channel_bottom_name}_{n}_wrap",
+                        f"larinstr_undergroundlar_sipm_wrap_copper_{mod.channel_bottom_name}_{n}",
                         b.mother_lv,
                         self.registry,
                     )
@@ -866,7 +868,7 @@ class ModuleFactorySegment(ModuleFactoryBase):
 
     def _cached_sipm_volumes_bend(self) -> None:
         """Creates (dummy) SiPM volumes for use at the bottom of bent fiber sections."""
-        v_suffix = f"_bend{self.bend_radius_mm}_r{self.radius}_nmod{self.number_of_sipm_modules}"
+        v_suffix = f"_bend{self.bend_radius_mm}_r{self.radius:.2f}_nmod{self.number_of_sipm_modules}"
         v_name = f"sipm{v_suffix}"
         if v_name in self.registry.solidDict:
             return
@@ -924,7 +926,7 @@ class ModuleFactorySegment(ModuleFactoryBase):
 
     def _cached_fiber_volumes(self) -> None:
         """Create solids, logical and physical volumes for the fibers, as specified by the parameters of this instance."""
-        v_suffix = f"_l{self.fiber_length}"
+        v_suffix = f"_l{self.fiber_length:.2f}"
         if f"fiber_cl2{v_suffix}" in self.registry.solidDict:
             return
 
@@ -1041,8 +1043,8 @@ class ModuleFactorySegment(ModuleFactoryBase):
         The TPB-Layer is dependent on the module (i.e. the applied thickness varies slightly),
         so we cannot cache it globally on this instance.
         """
-        v_suffix = f"{'_bend' if bend else ''}_l{self.fiber_length}_tpb{tpb_thickness_nm}"
-        v_name = f"fiber_coating{v_suffix}"
+        v_suffix = f"{'_bend' if bend else ''}_l{self.fiber_length:.2f}_tpb{tpb_thickness_nm}"
+        v_name = f"fiber_coating_tpb{v_suffix}"
         if v_name in self.registry.solidDict:
             return self.registry.logicalVolumeDict[v_name]
 
@@ -1109,7 +1111,7 @@ class ModuleFactorySegment(ModuleFactoryBase):
                     [0, 0, -th],
                     [mod.x_position_mm, mod.y_position_mm, z_displacement_straight],
                     coating_lv,
-                    f"fiber_{mod.name}_{m}_s",
+                    f"fiber_coating_tpb_{mod.name}_{m}",
                     b.mother_lv,
                     self.registry,
                 )
@@ -1189,7 +1191,7 @@ class ModuleFactorySegment(ModuleFactoryBase):
                 [0, 0, -start_angle],
                 [0, 0, z],
                 self.sipm_outer_bottom_lv_bend,
-                f"{mod.channel_bottom_name}_wrap",
+                f"larinstr_undergroundlar_sipm_wrap_copper_{mod.channel_bottom_name}",
                 b.mother_lv,
                 self.registry,
             )

@@ -56,31 +56,43 @@ def place_inner_wlsr_in_argon(
 
     # Create TPB polycones (PARENT/MOTHER volume)
     tpb_outer_bound = g4.solid.GenericPolycone(
-        "tpb_inner_argon_outer_bound", 0, 2 * np.pi, result.tpb_outer_r, result.tpb_outer_z, registry, "mm"
+        "underground_wlsr_tpb_outer_bound",
+        0,
+        2 * np.pi,
+        result.tpb_outer_r,
+        result.tpb_outer_z,
+        registry,
+        "mm",
     )
     tpb_inner_bound = g4.solid.GenericPolycone(
-        "tpb_inner_argon_inner_bound", 0, 2 * np.pi, result.tpb_inner_r, result.tpb_inner_z, registry, "mm"
+        "underground_wlsr_tpb_inner_bound",
+        0,
+        2 * np.pi,
+        result.tpb_inner_r,
+        result.tpb_inner_z,
+        registry,
+        "mm",
     )
     tpb_solid = g4.solid.Subtraction(
-        "tpb_inner_argon_solid", tpb_outer_bound, tpb_inner_bound, [[0, 0, 0], [0, 0, 0, "mm"]], registry
+        "underground_wlsr_tpb", tpb_outer_bound, tpb_inner_bound, [[0, 0, 0], [0, 0, 0, "mm"]], registry
     )
 
     wls_tpb_inner_lv = g4.LogicalVolume(
-        tpb_solid, materials.tpb_on_tetratex, "wls_tpb_inner_argon_lv", registry
+        tpb_solid, materials.tpb_on_tetratex, "underground_wlsr_tpb", registry
     )
     wls_tpb_inner_lv.pygeom_color_rgba = False
     tpb_inner_pv = g4.PhysicalVolume(
         [0, 0, 0],
         [0, 0, 0, "mm"],
         wls_tpb_inner_lv,
-        "wls_tpb_inner_argon",
+        "underground_wlsr_tpb",
         lar_cavity_lv,
         registry=registry,
     )
 
     # Create TTX polycones (DAUGHTER volume inside TPB)
     tetratex_outer_bound = g4.solid.GenericPolycone(
-        "tetratex_inner_argon_outer_bound",
+        "underground_wlsr_tetratex_outer_bound",
         0,
         2 * np.pi,
         result.ttx_outer_r,
@@ -89,7 +101,7 @@ def place_inner_wlsr_in_argon(
         "mm",
     )
     tetratex_inner_bound = g4.solid.GenericPolycone(
-        "tetratex_inner_argon_inner_bound",
+        "underground_wlsr_tetratex_inner_bound",
         0,
         2 * np.pi,
         result.ttx_inner_r,
@@ -98,7 +110,7 @@ def place_inner_wlsr_in_argon(
         "mm",
     )
     tetratex_solid = g4.solid.Subtraction(
-        "wls_tetratex_inner_argon_solid",
+        "underground_wlsr_tetratex",
         tetratex_outer_bound,
         tetratex_inner_bound,
         [[0, 0, 0], [0, 0, 0, "mm"]],
@@ -106,7 +118,7 @@ def place_inner_wlsr_in_argon(
     )
 
     wls_tetratex_inner_lv = g4.LogicalVolume(
-        tetratex_solid, materials.tetratex, "wls_tetratex_inner_argon_lv", registry
+        tetratex_solid, materials.tetratex, "underground_wlsr_tetratex", registry
     )
     wls_tetratex_inner_lv.pygeom_color_rgba = (1.0, 1.0, 1.0, 0.1)
 
@@ -115,7 +127,7 @@ def place_inner_wlsr_in_argon(
         [0, 0, 0],
         [0, 0, 0, "mm"],
         wls_tetratex_inner_lv,
-        "wls_tetratex_inner_argon",
+        "underground_wlsr_tetratex",
         wls_tpb_inner_lv,
         registry=registry,
     )
@@ -145,7 +157,7 @@ def place_outer_wlsr_in_atmospheric(
 
     # Create TPB polycones (PARENT/MOTHER volume)
     tpb_outer_bound = g4.solid.GenericPolycone(
-        "tpb_outer_atmospheric_outer_bound",
+        "atmospheric_wlsr_tpb_outer_bound",
         0,
         2 * np.pi,
         result.tpb_outer_r,
@@ -154,7 +166,7 @@ def place_outer_wlsr_in_atmospheric(
         "mm",
     )
     tpb_inner_bound = g4.solid.GenericPolycone(
-        "tpb_outer_atmospheric_inner_bound",
+        "atmospheric_wlsr_tpb_inner_bound",
         0,
         2 * np.pi,
         result.tpb_inner_r,
@@ -163,7 +175,7 @@ def place_outer_wlsr_in_atmospheric(
         "mm",
     )
     tpb_solid = g4.solid.Subtraction(
-        "tpb_outer_atmospheric_solid",
+        "atmospheric_wlsr_tpb",
         tpb_outer_bound,
         tpb_inner_bound,
         [[0, 0, 0], [0, 0, 0, "mm"]],
@@ -171,21 +183,21 @@ def place_outer_wlsr_in_atmospheric(
     )
 
     wls_tpb_outer_lv = g4.LogicalVolume(
-        tpb_solid, materials.tpb_on_tetratex, "wls_tpb_outer_atmospheric_lv", registry
+        tpb_solid, materials.tpb_on_tetratex, "atmospheric_wlsr_tpb", registry
     )
     wls_tpb_outer_lv.pygeom_color_rgba = False
     tpb_outer_pv = g4.PhysicalVolume(
         [0, 0, 0],
         [0, 0, 0, "mm"],
         wls_tpb_outer_lv,
-        "wls_tpb_outer_atmospheric",
+        "atmospheric_wlsr_tpb",
         lar_mother_lv,
         registry=registry,
     )
 
     # Create TTX polycones (DAUGHTER volume inside TPB)
     tetratex_outer_bound = g4.solid.GenericPolycone(
-        "tetratex_outer_atmospheric_outer_bound",
+        "atmospheric_wlsr_tetratex_outer_bound",
         0,
         2 * np.pi,
         result.ttx_outer_r,
@@ -194,7 +206,7 @@ def place_outer_wlsr_in_atmospheric(
         "mm",
     )
     tetratex_inner_bound = g4.solid.GenericPolycone(
-        "tetratex_outer_atmospheric_inner_bound",
+        "atmospheric_wlsr_tetratex_inner_bound",
         0,
         2 * np.pi,
         result.ttx_inner_r,
@@ -203,7 +215,7 @@ def place_outer_wlsr_in_atmospheric(
         "mm",
     )
     tetratex_solid = g4.solid.Subtraction(
-        "wls_tetratex_outer_atmospheric_solid",
+        "atmospheric_wlsr_tetratex",
         tetratex_outer_bound,
         tetratex_inner_bound,
         [[0, 0, 0], [0, 0, 0, "mm"]],
@@ -211,7 +223,7 @@ def place_outer_wlsr_in_atmospheric(
     )
 
     wls_tetratex_outer_lv = g4.LogicalVolume(
-        tetratex_solid, materials.tetratex, "wls_tetratex_outer_atmospheric_lv", registry
+        tetratex_solid, materials.tetratex, "atmospheric_wlsr_tetratex", registry
     )
     wls_tetratex_outer_lv.pygeom_color_rgba = (1.0, 1.0, 1.0, 0.1)
 
@@ -220,7 +232,7 @@ def place_outer_wlsr_in_atmospheric(
         [0, 0, 0],
         [0, 0, 0, "mm"],
         wls_tetratex_outer_lv,
-        "wls_tetratex_outer_atmospheric",
+        "atmospheric_wlsr_tetratex",
         wls_tpb_outer_lv,
         registry=registry,
     )

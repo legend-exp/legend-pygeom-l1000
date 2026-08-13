@@ -35,12 +35,12 @@ def test_volume_caching():
 
     # name stem -> expected number of placements
     expected_placements = {
-        "ultem_clamp_hv": 336,
-        "ultem_clamp_signal": 336,
-        "signal_asic": 336,
-        "hpge_support_copper_weldment_top": 1008,
-        "ultem_insulator_du_holder": 1008,
-        "hpge_support_copper_rod": 126,
+        "hpge_assembly_clamp_hv_ultem": 336,
+        "hpge_assembly_clamp_signal_ultem": 336,
+        "hpge_assembly_asic": 336,
+        "hpge_string_support_weldment_copper": 1008,
+        "hpge_assembly_insulator_ultem": 1008,
+        "hpge_string_support_rod_copper": 126,
     }
 
     for stem, n_expected in expected_placements.items():
@@ -51,10 +51,10 @@ def test_volume_caching():
         assert len(pvs) == n_expected, f"{stem}: expected {n_expected} placements, got {len(pvs)}"
 
     expected_per_position = {
-        "cable_hv": (8, 336),
-        "cable_signal": (8, 336),
-        "hv_cap": (1, 42),
-        "signal_cap": (1, 42),
+        "hpge_cable_hv": (8, 336),
+        "hpge_cable_signal_": (8, 336),
+        "hpge_string_hv_cap": (1, 42),
+        "hpge_string_signal_cap": (1, 42),
     }
 
     for stem, (n_lvs, n_pvs) in expected_per_position.items():
