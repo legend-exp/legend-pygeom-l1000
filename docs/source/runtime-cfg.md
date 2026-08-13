@@ -63,14 +63,14 @@ Write one with `--write-config` and then edit it. See
 
 ### Generated metadata
 
-The `metadata` key points to the tarball that `--write-metadata` wrote. That
-tarball holds the same information as the compiled configuration, but in the
+The `metadata` key points to the folder or tarball that `--write-metadata`
+wrote. It holds the same information as the compiled configuration, but in the
 form of the legend-metadata tree.
 
 This scheme exists for [legend-simflow](https://legend-simflow.readthedocs.io),
 where the geometry defined here defines the structure of the metadata content.
-Do not edit the tarball to change the geometry. Change a raw or a compiled
-config instead, and write a new tarball. See
+Do not edit the generated metadata to change the geometry. Change a raw or a
+compiled config instead, and regenerate it. See
 [Generated metadata](#generated-metadata).
 
 ## Config file reference
@@ -350,18 +350,21 @@ $ legend-pygeom-l1000 --config geom-config.yaml --write-config resolved.yaml l10
 ## Generated metadata
 
 To use the LEGEND-1000 geometry in simflow, one has to generate a metadata
-database:
+database. Provided the compiled configs, a generator can generate the `datasets`
+and `hardware` folders of the
+[legend-metadata](https://github.com/legend-exp/legend-metadata) format.
+`build_metadata_tree` generates the metadata tree as a dict and
+`write_metadata_tree` writes it to disk. The generator can also be called via
+the `--write-metadata` cli option. The output can be in the form of a folder or
+a tarball.
 
-```console
-$ legend-pygeom-l1000 --config geom-config.yaml --write-metadata l1000dsg01-geom-metadata.tar.gz
-```
+Simflow imports this package and builds the files directly into its specified
+metadata folder based on the geometry config of the experiment. See
+[How simflow uses this](#simflow-integration).
 
-The tree uses the same layout as the real
-[legend-metadata](https://github.com/legend-exp/legend-metadata). A workflow
-therefore reads it in the usual way.
-
-The archive holds everything that describes the detectors. Four files come from
-a template. The generator derives all other files from the compiled channel map.
+The generated metadata tree holds everything that describes the detectors. Four
+files come from a template. The generator derives all other files from the
+compiled channel map.
 
 | file                                                | content                                                       |
 | --------------------------------------------------- | ------------------------------------------------------------- |
@@ -381,6 +384,51 @@ start key of a run. The template thus controls how the files are called.
 
 The real legend-metadata has no `special_metadata.yaml`. This file carries the
 compiled geometry, and it makes the tree sufficient to rebuild that geometry.
+
+(generated-scope)=
+
+### What it generates, and what it does not
+
+`legend-metadata` is a collection of eight submodules. The generator writes a
+part of three, and nothing else.
+
+| generated path                        | upstream repository      | how much of it                                                                                                    |
+| ------------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `datasets/`                           | `legend-datasets`        | `runinfo.yaml`, `runlists.yaml` and `statuses/`. Not the groupings, the run overrides or the partition parameters |
+| `hardware/configuration/channelmaps/` | `legend-hardware-config` | the channel maps                                                                                                  |
+| `hardware/detectors/germanium/`       | `legend-detectors`       | the diodes and the crystals. Not `lar/`, so no SiPM or fiber files                                                |
+| `special_metadata.yaml`               | none                     | an addition of this package. `legend-metadata` has no such file                                                   |
+
+The generator never touches the following, and the user or the workflow supplies
+them:
+
+- `simprod/` — `legend-simflow-config`, the production settings. Simflow clones
+  it. The operational voltages under `pars/<experiment>/geds/opv/` are mandatory
+  there.
+- `dataprod/` — `legend-dataflow-config` and `legend-dataflow-overrides`.
+- `jldataprod/` — `legend-jldataflow-config` and `legend-jldataflow-overrides`.
+
+This boundary matters because the generated files and `simprod/` share one
+directory. A caller that regenerates the tree must remove only the roots in the
+table above.
+
+(simflow-integration)=
+
+### How simflow uses this
+
+Set `generated_metadata: true` in `simflow-config.yaml`. Simflow then does the
+following before it opens the metadata database:
+
+1. Clone `legend-simflow-config` into `paths.config`.
+2. Read the geometry config of the experiment, and make its paths absolute.
+3. Compile it with `pygeoml1000.config.resolve_config`, which accepts all three
+   [input schemes](#input-schemes).
+4. Build the tree and write it as plain files into `paths.metadata`.
+
+Simflow removes the generated roots first, so a detector that leaves the config
+also leaves the metadata. It does not touch `simprod/`. A digest of the geometry
+config decides whether the tree needs a rebuild. Simflow records it in a stamp
+file.
 
 (why-each-part)=
 
@@ -457,7 +505,7 @@ makes every hit of that detector invalid, and it does so quietly.
 #### `special_metadata.yaml`
 
 The workflow never reads this file. It holds the compiled geometry, so that this
-generator can rebuild the same setup from the tarball alone.
+generator can rebuild the same setup from the generated metadata alone.
 
 ```{note}
 The tree describes the detectors. It does not describe the production. The
@@ -466,7 +514,7 @@ voltages in `pars/<experiment>/geds/opv/` are mandatory there. A workflow that
 cannot read them fails while it builds the DAG.
 ```
 
-### Rebuild the geometry from the tarball
+### Rebuild the geometry from the generated metadata
 
 A geometry config that points to a generated tree needs nothing else:
 
@@ -569,18 +617,6 @@ V00101A:
   psd:
     status:
       low_aoe: valid
-```
-
-Commit the tarball with that edit. A later `--write-metadata` writes the
-defaults again, so re-apply the change after a regeneration.
-
-```{note}
-A generated tree is not a Git repository. `legendmeta.LegendMetadata` reads such
-a tree, but its version check does not. Call `channelmap` with
-`skip_version_check=True`.
-
-Unpack the archive before you give the folder to `LegendMetadata`. For a path
-that is empty or absent, it clones the real legend-metadata over SSH.
 ```
 
 ## Best practices

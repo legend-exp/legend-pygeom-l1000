@@ -199,10 +199,9 @@ def _parse_cli_args(argv: list[str] | None = None) -> argparse.Namespace:
     out_opts.add_argument(
         "--write-metadata",
         action="store",
-        help="""Filename to write a stand-in legend-metadata tree to, describing the detectors of
-        this geometry. A folder, or a '.tar.gz' archive if the name ends in one. The archive is what
-        a workflow unpacks into its metadata folder, and it can be fed back in through the
-        'metadata' key of a config file to rebuild the same geometry.""",
+        help="""Filename to write the detectors of this geometry to, as the 'datasets' and
+        'hardware' parts of a legend-metadata tree. A folder, or a '.tar.gz' archive if the name
+        ends in one. Nothing under 'simprod', 'dataprod' or 'jldataprod' is written.""",
     )
     out_opts.add_argument(
         "--metadata-template",

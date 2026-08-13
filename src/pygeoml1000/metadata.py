@@ -1,17 +1,32 @@
-"""Generation of a stand-in ``legend-metadata`` tree from a compiled geometry.
+"""Generation of the detector part of a ``legend-metadata`` tree.
 
-A LEGEND-1000 production has no metadata database, so this module writes one.
-The tree uses the same layout as the real ``legend-metadata``.
-:class:`legendmeta.LegendMetadata` and the
-`legend-simflow <https://legend-simflow.readthedocs.io>`_ workflow therefore
-read it in the usual way.
+A LEGEND-1000 production has no metadata database, so this module writes one
+from a compiled geometry configs. The files use the layout and the format of the real
+``legend-metadata``, so :class:`legendmeta.LegendMetadata` and the
+`legend-simflow <https://legend-simflow.readthedocs.io>`_ workflow read them in
+the usual way.
 
-The tree goes into one tarball next to the geometry config.
-:func:`metadata_to_config` rebuilds the geometry from that tarball alone. Two
-files thus make a production reproducible.
+Scope
+-----
 
-This module does not write ``simprod/config/``. That folder holds the production
-settings, and the user writes those.
+``legend-metadata`` collects eight repositories. This module writes a part of
+three of them, and nothing else:
+
+``datasets/`` (``legend-datasets``)
+    ``runinfo.yaml``, ``runlists.yaml`` and ``statuses/``. Not the groupings,
+    the run overrides or the partition parameters.
+``hardware/configuration/channelmaps/`` (``legend-hardware-config``)
+    the channel maps.
+``hardware/detectors/germanium/`` (``legend-detectors``)
+    the diodes and the crystals. Not ``lar/``, so no SiPM or fiber files.
+
+``special_metadata.yaml`` has no counterpart upstream. This module adds it, so
+that :func:`metadata_to_config` rebuilds the same geometry from the tree alone.
+
+This module never writes ``simprod/``, ``dataprod/`` or ``jldataprod/``. Those
+hold the production settings, and the user or the workflow supplies them. A
+caller that writes into a directory which also holds those parts must remove
+only the roots listed above.
 
 Layout
 ------
@@ -260,7 +275,10 @@ def crystals_from_tree(tree: dict[str, Any]) -> list[dict]:
 
 
 def build_metadata_tree(config: dict, template: dict[str, Any] | None = None) -> dict[str, Any]:
-    """Build a complete metadata tree from a compiled geometry.
+    """Build the ``datasets`` and ``hardware`` parts of a metadata tree.
+
+    Adds ``special_metadata.yaml``, which holds the compiled geometry. Writes
+    nothing else. The module docstring lists what each part covers.
 
     Parameters
     ----------
@@ -314,9 +332,9 @@ def _applied_names(tree: dict[str, Any], directory: str) -> list[str]:
 def metadata_to_config(path: str | Path) -> dict:
     """Rebuild the compiled geometry inputs from a generated metadata tree.
 
-    This is the inverse of :func:`build_metadata_tree`: it merges the channel map
+    This is the inverse of :func:`build_metadata_tree`. It merges the channel map
     back together from the three files it was split over, so that a geometry can
-    be rebuilt from the tarball alone.
+    be rebuilt from a generated tree alone.
 
     This module reads the tree with plain file access, and not through
     :class:`legendmeta.LegendMetadata`. That class clones ``legend-metadata``

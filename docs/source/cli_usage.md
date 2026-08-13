@@ -188,24 +188,25 @@ legend-pygeom-l1000 --dump-raw-configs .
 
 ### Generated Metadata
 
-LEGEND-1000 has no metadata database. The generator writes one that describes
-the detectors of the geometry it built:
+LEGEND-1000 has no metadata database. The generator writes the detector part of
+one:
 
 ```console
 legend-pygeom-l1000 --config geom-config.yaml --write-metadata l1000dsg01-geom-metadata.tar.gz
 ```
 
-The result is a stand-in for
-[legend-metadata](https://github.com/legend-exp/legend-metadata) with the same
-layout. A workflow such as
-[legend-simflow](https://legend-simflow.readthedocs.io) unpacks the archive into
-its metadata folder and reads it in the usual way. Give a plain folder name to
-write the tree directly.
+The files use the layout and the format of
+[legend-metadata](https://github.com/legend-exp/legend-metadata), so a workflow
+reads them in the usual way. Give a plain folder name to write the tree directly
+instead of an archive.
 
-The archive also carries the compiled geometry. The `metadata` key of a config
-file rebuilds that same geometry from the archive alone. Two files are therefore
-sufficient to describe a production. See {doc}`runtime-cfg` for the layout, and
-for what the tree does _not_ contain.
+The generator covers the `datasets` and `hardware` parts only. It writes nothing
+under `simprod`, `dataprod` or `jldataprod`. See {doc}`runtime-cfg` for the
+exact scope.
+
+[legend-simflow](https://legend-simflow.readthedocs.io) does not need the
+archive. It imports this package and writes the same files straight into its
+metadata folder, from the geometry config of the experiment.
 
 A template supplies what a geometry cannot know, such as the runs and their
 duration. Unpack the packaged template, change it, and give the folder back with
