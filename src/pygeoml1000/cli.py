@@ -13,7 +13,7 @@ from pygeomtools import detectors, visualization, write_pygeom
 from . import _version, core, manifest
 from .config import (
     DEFAULT_DETAIL,
-    copy_raw_configs,
+    copy_pre_compiled_configs,
     load_config,
     resolve_config,
     write_config,
@@ -42,9 +42,9 @@ def dump_gdml_cli(argv: list[str] | None = None) -> None:
     ):
         config = load_geometry_config(args)
 
-    if args.dump_raw_configs:
-        folder = copy_raw_configs(args.dump_raw_configs)
-        log.info("copied raw config files to %s", folder)
+    if args.dump_pre_compiled_configs:
+        folder = copy_pre_compiled_configs(args.dump_pre_compiled_configs)
+        log.info("copied pre-compiled config files to %s", folder)
 
     if args.write_config:
         log.info("writing resolved config to %s", args.write_config)
@@ -192,9 +192,9 @@ def _parse_cli_args(argv: list[str] | None = None) -> argparse.Namespace:
     out_opts.add_argument(
         "--write-config",
         action="store",
-        help="""Filename to write the resolved config to, i.e. the config with the raw configuration
-        compiled into an explicit channelmap and special_metadata. The result can be edited by hand
-        and fed back in via --config.""",
+        help="""Filename to write the resolved config to, i.e. the config with the pre-compiled
+        configs compiled into an explicit channelmap and special_metadata. The result can be edited
+        by hand and fed back in via --config.""",
     )
     out_opts.add_argument(
         "--write-metadata",
@@ -204,10 +204,11 @@ def _parse_cli_args(argv: list[str] | None = None) -> argparse.Namespace:
         ends in one. Nothing under 'simprod', 'dataprod' or 'jldataprod' is written.""",
     )
     out_opts.add_argument(
-        "--dump-raw-configs",
+        "--dump-pre-compiled-configs",
         action="store",
-        help="""Write a copy of the raw config files shipped with this package into a 'configs'
-        folder below the given directory, as a starting point for a custom configuration.""",
+        help="""Write a copy of the pre-compiled config files shipped with this package into a
+        'configs' folder below the given directory, as a starting point for a custom
+        configuration.""",
     )
     parser.add_argument(
         "filename",
@@ -224,7 +225,7 @@ def _parse_cli_args(argv: list[str] | None = None) -> argparse.Namespace:
         and not args.write_manifest
         and not args.write_config
         and not args.write_metadata
-        and not args.dump_raw_configs
+        and not args.dump_pre_compiled_configs
     ):
         parser.error("no output file, no visualization, and no config output specified")
     if (args.vis_macro_file or args.det_macro_file) and args.filename is None:

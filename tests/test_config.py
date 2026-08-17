@@ -15,7 +15,7 @@ def default_config():
 
 
 def test_default_is_fully_resolved(default_config):
-    """Resolving an empty config compiles the packaged raw configs and fills in the defaults."""
+    """Resolving an empty config compiles the packaged pre-compiled configs and fills in the defaults."""
     assert set(default_config) == {
         "channelmap",
         "special_metadata",
@@ -59,36 +59,36 @@ def test_cli_arguments_take_precedence():
     assert resolved["detail"] == "cosmogenic"
 
 
-def test_raw_config_is_layered_over_the_defaults():
-    """An inline raw config overrides single values, it does not replace whole files."""
+def test_pre_compiled_config_is_layered_over_the_defaults():
+    """An inline pre-compiled config overrides single values, it does not replace whole files."""
     from pygeoml1000 import config
 
-    raw = config.load_raw_config({"string": {"units": {"n": 4}}})
+    raw = config.load_pre_compiled_config({"string": {"units": {"n": 4}}})
 
     assert raw["string"]["units"]["n"] == 4
     # everything else in string.yaml survives ...
     assert raw["string"]["units"]["l"] == 140.1
     assert raw["string"]["n_sipm_modules_per_string"] == 3
-    # ... and so do the other raw config files.
+    # ... and so do the other pre-compiled config files.
     assert raw["array"]["radius_in_mm"] == 213.5
 
 
-def test_raw_config_changes_the_compiled_output():
+def test_pre_compiled_config_changes_the_compiled_output():
     from pygeoml1000 import config
 
-    resolved = config.resolve_config({"raw_config": {"string": {"units": {"n": 4}}}})
+    resolved = config.resolve_config({"pre_compiled_config": {"string": {"units": {"n": 4}}}})
     geds = [ch for ch in resolved["channelmap"].values() if ch["system"] == "geds"]
 
     assert len(geds) == 4 * len(resolved["special_metadata"]["hpge_string"])
 
 
-def test_raw_config_from_folder(tmp_path):
+def test_pre_compiled_config_from_folder(tmp_path):
     from pygeoml1000 import config
 
-    folder = config.copy_raw_configs(tmp_path)
+    folder = config.copy_pre_compiled_configs(tmp_path)
     utils.write_dict({"units": {"n": 4}, "n_sipm_modules_per_string": 3}, str(folder / "string.yaml"))
 
-    resolved = config.resolve_config({"raw_config": str(folder)})
+    resolved = config.resolve_config({"pre_compiled_config": str(folder)})
     geds = [ch for ch in resolved["channelmap"].values() if ch["system"] == "geds"]
     first_hpge = next(iter(resolved["special_metadata"]["hpges"]))
 
@@ -101,7 +101,7 @@ def test_crystal_records_are_assigned_deterministically():
 
     resolved = config.resolve_config(
         {
-            "raw_config": {
+            "pre_compiled_config": {
                 "string": {"units": {"n": 2}},
                 "crystal": [{"name": "c1", "order": 1}, {"name": "c2", "order": 1}],
             }
@@ -119,7 +119,7 @@ def test_hpge_records_are_assigned_deterministically():
 
     resolved = config.resolve_config(
         {
-            "raw_config": {
+            "pre_compiled_config": {
                 "string": {"units": {"n": 2}},
                 "hpge": [
                     {
@@ -147,11 +147,11 @@ def test_hpge_records_are_assigned_deterministically():
     assert assigned == ["c1", "c2", "c1", "c2"]
 
 
-def test_missing_raw_config_folder_raises():
+def test_missing_pre_compiled_config_folder_raises():
     from pygeoml1000 import config
 
     with pytest.raises(FileNotFoundError):
-        config.resolve_config({"raw_config": "/nonexistent"})
+        config.resolve_config({"pre_compiled_config": "/nonexistent"})
 
 
 @pytest.mark.parametrize(
@@ -217,12 +217,12 @@ def test_construct_honours_enable_optical(enable_optical, expect_lar_optics):
     assert ("liquidargon_RINDEX" in registry.defineDict) == expect_lar_optics
 
 
-def test_schema_is_not_loaded_as_raw_config():
-    """The schema sits next to the raw configs, but is not one of them."""
+def test_schema_is_not_loaded_as_a_pre_compiled_config():
+    """The schema sits next to the pre-compiled configs, but is not one of them."""
     from pygeoml1000 import config
 
-    assert config.schema_file().parent == config.raw_config_dir()
-    assert "runtime_config_schema" not in config.load_raw_config()
+    assert config.schema_file().parent == config.pre_compiled_config_dir()
+    assert "runtime_config_schema" not in config.load_pre_compiled_config()
 
 
 @pytest.mark.parametrize("empty", [[], ""])
@@ -298,12 +298,12 @@ def test_construct_does_not_mutate_its_config(default_config):
     assert config_in == before
 
 
-def test_copy_raw_configs(tmp_path):
+def test_copy_pre_compiled_configs(tmp_path):
     from pygeoml1000 import config
 
-    folder = config.copy_raw_configs(tmp_path)
+    folder = config.copy_pre_compiled_configs(tmp_path)
 
     assert folder == tmp_path / "configs"
-    # every raw config is copied, and nothing else - notably not the schema.
-    assert {f.stem for f in folder.iterdir()} == set(config.load_raw_config())
+    # every pre-compiled config is copied, and nothing else - notably not the schema.
+    assert {f.stem for f in folder.iterdir()} == set(config.load_pre_compiled_config())
     assert not (folder / config.schema_file().name).exists()

@@ -1,3 +1,25 @@
+"""The runtime config: how a geometry is described, and how that description is resolved.
+
+A geometry is built from two compiled objects, ``channelmap`` and
+``special_metadata``. Three input schemes supply them, and a config selects a
+scheme by the keys it sets::
+
+    pre-compiled config     `pre_compiled_config`, or nothing at all
+        |                   the shape of the setup, in configs/*.yaml
+        |  compilation.compile_pre_compiled_config
+        v
+    compiled config         `channelmap` + `special_metadata`
+        |                   every channel, one by one
+        |  metadata.build_metadata_tree
+        v
+    generated metadata      `metadata`
+                            a legend-metadata tree, which holds both objects
+
+:func:`resolve_config` accepts all three and always returns the middle one, with
+the defaults filled in. The more explicit scheme wins, and the generator warns
+about every key it drops.
+"""
+
 from __future__ import annotations
 
 import copy
@@ -8,35 +30,34 @@ from pathlib import Path
 from typing import Any
 
 import jsonschema
-import numpy as np
 from dbetto import utils
 from pygeomtools.utils import load_dict_from_config
 
-from . import metadata
-from .utils import deep_merge
+from . import compilation, metadata
+from .utils import convert_to_plain_types, deep_merge, normalize_records
 
 log = logging.getLogger(__name__)
 
 DEFAULT_DETAIL = "radiogenic"
 DEFAULT_ENABLE_OPTICAL = True
 """Optical properties are registered for every material unless the config says otherwise."""
-_RAW_CONFIG_SUFFIXES = (".yaml", ".json")
-#: substring marking a file in the configs folder that is not raw configuration.
-_NOT_RAW_CONFIG = "_schema"
+_PRE_COMPILED_SUFFIXES = (".yaml", ".json")
+#: substring marking a file in the configs folder that is not a pre-compiled config.
+_NOT_PRE_COMPILED = "_schema"
 #: keys consumed by :func:`resolve_config` itself, and hence absent from a resolved config.
-_RESOLVED_KEYS = ("raw_config", "metadata")
+_RESOLVED_KEYS = ("pre_compiled_config", "metadata")
 #: keys accepted for interoperability with other generators, but without effect here.
 _IGNORED_KEYS = ("public_geom", "metadata_timestamp", "executable")
 
 
-def raw_config_dir() -> Path:
-    """Directory holding the raw config files shipped with this package."""
+def pre_compiled_config_dir() -> Path:
+    """Directory holding the pre-compiled config files shipped with this package."""
     return Path(str(resources.files("pygeoml1000") / "configs"))
 
 
 def schema_file() -> Path:
     """The JSON schema the config files are validated against."""
-    return raw_config_dir() / "runtime_config_schema.yaml"
+    return pre_compiled_config_dir() / "runtime_config_schema.yaml"
 
 
 def load_config(filename: str | Path | None) -> dict:
@@ -64,11 +85,15 @@ def validate_config(config: dict) -> None:
 
 
 def resolve_config(config: dict | None = None, **cli_overrides: Any) -> dict:
-    """Resolve a config into one that explicitly contains the compiled geometry inputs.
+    """Resolve a config of any input scheme into a compiled one.
 
     The returned dict is itself a valid config file: it has ``channelmap`` and
     ``special_metadata`` filled in, ``assemblies`` expanded into an absolute list, and no
-    ``raw_config`` left to compile. Resolving it again is a no-op.
+    ``pre_compiled_config`` left to compile. Resolving it again is a no-op.
+
+    The module docstring shows the three schemes. This function reads them in
+    order, most explicit first: :func:`_read_generated_metadata`, then the
+    compiled objects the config gives, then :func:`_compile`.
 
     Parameters
     ----------
@@ -91,34 +116,19 @@ def resolve_config(config: dict | None = None, **cli_overrides: Any) -> dict:
             del config[key]
 
     if "metadata" in config:
-        # a generated metadata tree already carries both compiled objects
-        for key in ("channelmap", "special_metadata", "raw_config"):
-            if key in config:
-                log.warning("'%s' is ignored because 'metadata' is given", key)
-                del config[key]
-        config.update(metadata.metadata_to_config(config["metadata"]))
+        config = _read_generated_metadata(config)
 
-    is_compiled = "channelmap" in config and "special_metadata" in config
-    if is_compiled and "raw_config" in config:
-        log.warning("'raw_config' is ignored because both 'channelmap' and 'special_metadata' are given")
-
-    # compiling is only needed for the objects that are not given already.
-    raw = None if is_compiled else load_raw_config(config.get("raw_config"))
-    compiled = ({}, {}) if raw is None else compile_raw_config(raw)
+    pre_compiled, compiled = _compile(config)
     channelmap = load_dict_from_config(config, "channelmap", lambda: compiled[0])
     special_metadata = load_dict_from_config(config, "special_metadata", lambda: compiled[1])
-    crystals = config.get("crystals")
-    runs = config.get("runs")
-    if crystals is None or runs is None:
-        fallback = raw if raw is not None else load_raw_config()
-        crystals = fallback.get("crystal") if crystals is None else crystals
-        runs = fallback.get("runs") if runs is None else runs
 
     resolved = {k: v for k, v in config.items() if k not in _RESOLVED_KEYS}
     resolved["channelmap"] = convert_to_plain_types(channelmap)
     resolved["special_metadata"] = convert_to_plain_types(special_metadata)
-    resolved["crystals"] = convert_to_plain_types(_normalize_records(crystals))
-    resolved["runs"] = convert_to_plain_types(runs)
+    resolved["crystals"] = convert_to_plain_types(
+        normalize_records(_catalog(config, pre_compiled, "crystals", "crystal"))
+    )
+    resolved["runs"] = convert_to_plain_types(_catalog(config, pre_compiled, "runs", "runs"))
 
     detail_level = config.get("detail", DEFAULT_DETAIL)
     if detail_level not in special_metadata.get("detail", {}):
@@ -140,35 +150,85 @@ def resolve_config(config: dict | None = None, **cli_overrides: Any) -> dict:
     return resolved
 
 
-def load_raw_config(raw_config: dict | str | None = None) -> dict:
-    """Load the packaged raw configs, deep-merged with the user's overrides.
+def _read_generated_metadata(config: dict) -> dict:
+    """The generated metadata scheme: read both compiled objects out of a tree.
 
-    ``raw_config`` is either an inline mapping (keyed by raw config file name without its
-    extension) or the path to a folder of raw config files. In both cases the packaged configs
+    A tree holds everything a compiled config holds, so it wins over every other
+    key. Returns a copy of ``config`` with the tree's contents merged in.
+    """
+    config = dict(config)
+
+    for key in ("channelmap", "special_metadata", "pre_compiled_config"):
+        if key in config:
+            log.warning("'%s' is ignored because 'metadata' is given", key)
+            del config[key]
+
+    config.update(metadata.metadata_to_config(config["metadata"]))
+    return config
+
+
+def _compile(config: dict) -> tuple[dict | None, tuple[dict, dict]]:
+    """The pre-compiled scheme: compile the configs into the two objects.
+
+    Compiling is skipped when the config already gives both compiled objects.
+    Returns ``(pre_compiled_configs, (channelmap, special_metadata))``, where the
+    first element is ``None`` for a config that skipped the step.
+    """
+    if "channelmap" in config and "special_metadata" in config:
+        if "pre_compiled_config" in config:
+            log.warning(
+                "'pre_compiled_config' is ignored because both 'channelmap' and 'special_metadata' are given"
+            )
+        return None, ({}, {})
+
+    pre_compiled = load_pre_compiled_config(config.get("pre_compiled_config"))
+    return pre_compiled, compilation.compile_pre_compiled_config(pre_compiled)
+
+
+def _catalog(config: dict, pre_compiled: dict | None, key: str, pre_compiled_key: str) -> Any:
+    """A catalog that travels in a resolved config, such as the crystals or the runs.
+
+    A catalog does not describe the geometry, so a compiled config carries it
+    unchanged. Only a config that has none falls back to the pre-compiled one.
+    """
+    if config.get(key) is not None:
+        return config[key]
+
+    if pre_compiled is None:
+        # the geometry came compiled, so nothing was loaded yet
+        pre_compiled = load_pre_compiled_config()
+    return pre_compiled.get(pre_compiled_key)
+
+
+def load_pre_compiled_config(pre_compiled_config: dict | str | None = None) -> dict:
+    """Load the packaged pre-compiled configs, deep-merged with the user's overrides.
+
+    ``pre_compiled_config`` is either an inline mapping (keyed by file name without its
+    extension) or the path to a folder of such files. In both cases the packaged configs
     are used as the base, so only the values that actually change have to be given.
     """
-    configs = _load_raw_config_dir(raw_config_dir())
+    configs = _load_pre_compiled_config_dir(pre_compiled_config_dir())
 
-    if isinstance(raw_config, str):
-        raw_config = _load_raw_config_dir(Path(raw_config))
-    if raw_config:
-        configs = deep_merge(configs, raw_config)
+    if isinstance(pre_compiled_config, str):
+        pre_compiled_config = _load_pre_compiled_config_dir(Path(pre_compiled_config))
+    if pre_compiled_config:
+        configs = deep_merge(configs, pre_compiled_config)
 
     return configs
 
 
-def _load_raw_config_dir(path: Path) -> dict:
-    """Load every raw config file in ``path``, keyed by file name without the extension."""
+def _load_pre_compiled_config_dir(path: Path) -> dict:
+    """Load every pre-compiled config file in ``path``, keyed by file name without the extension."""
     if not path.is_dir():
-        msg = f"raw config folder {path} does not exist"
+        msg = f"pre-compiled config folder {path} does not exist"
         raise FileNotFoundError(msg)
 
-    return {f.stem: utils.load_dict(str(f)) for f in sorted(path.iterdir()) if _is_raw_config(f)}
+    return {f.stem: utils.load_dict(str(f)) for f in sorted(path.iterdir()) if _is_pre_compiled_config(f)}
 
 
-def _is_raw_config(path: Path) -> bool:
-    """Whether ``path`` is a raw config file, and not e.g. the JSON schema next to them."""
-    return path.is_file() and path.suffix in _RAW_CONFIG_SUFFIXES and _NOT_RAW_CONFIG not in path.stem
+def _is_pre_compiled_config(path: Path) -> bool:
+    """Whether ``path`` is a pre-compiled config, and not e.g. the JSON schema next to them."""
+    return path.is_file() and path.suffix in _PRE_COMPILED_SUFFIXES and _NOT_PRE_COMPILED not in path.stem
 
 
 def parse_assemblies(arg: str | Collection[str] | None, detail: dict) -> set[str] | None:
@@ -266,335 +326,16 @@ def write_metadata(config: dict, filename: str | Path) -> Path:
     return metadata.write_metadata(metadata.build_metadata_tree(resolve_config(config)), filename)
 
 
-def copy_raw_configs(destination: str | Path) -> Path:
-    """Copy the packaged raw config files into a ``configs`` folder below ``destination``.
+def copy_pre_compiled_configs(destination: str | Path) -> Path:
+    """Copy the packaged pre-compiled configs into a ``configs`` folder below ``destination``.
 
     Returns the folder the files were written to.
     """
     destination = Path(destination) / "configs"
     destination.mkdir(parents=True, exist_ok=True)
 
-    for item in sorted(raw_config_dir().iterdir()):
-        if _is_raw_config(item):
+    for item in sorted(pre_compiled_config_dir().iterdir()):
+        if _is_pre_compiled_config(item):
             (destination / item.name).write_bytes(item.read_bytes())
 
     return destination
-
-
-# ----------------------------------------------------------------------------
-# compilation of the raw configuration into channelmap and special_metadata, previously in config_compilation.py
-# ----------------------------------------------------------------------------
-
-
-def calculate_and_place_pmts(channelmap: dict, configs: dict, rawid_start: int = 6000) -> None:
-    from . import watertank  # noqa: PLC0415
-
-    # Floor PMTs are pretty trivial to place
-    rawid = rawid_start
-    for row in configs["pmts_pos"]["floor"].values():
-        row_index = row["id"]
-        pmts_in_row = row["n"]
-        radius = row["r"]
-
-        for i in range(pmts_in_row):
-            name = f"PMT0{row_index}{i + 1:02d}"
-            x = radius * np.cos(np.radians(360 / pmts_in_row * i))
-            y = radius * np.sin(np.radians(360 / pmts_in_row * i))
-            z = 0.0
-
-            # If the PMT is outside of the pit move it up.
-            if radius > watertank.tank_pit_radius:
-                z = watertank.tank_pit_height
-
-            channelmap[name] = copy.deepcopy(configs["pmts"])
-            channelmap[name]["daq"]["rawid"] = rawid
-            rawid += 1
-            channelmap[name]["name"] = name
-            channelmap[name]["location"] = {"name": "floor", "x": x, "y": y, "z": z}
-            channelmap[name]["location"]["direction"] = {"nx": 0, "ny": 0, "nz": 1}
-
-    # The wall PMTs require some polygon math
-    faces = configs["pmts_pos"]["tyvek"]["faces"]
-    # Geant4 uses r as inscribe radius, but we need the circumradius
-    radius = configs["pmts_pos"]["tyvek"]["r"] / np.cos(np.pi / faces)
-
-    # Compute vertices of the polygon
-    vertices = [
-        (radius * np.cos(2 * np.pi * i / faces), radius * np.sin(2 * np.pi * i / faces)) for i in range(faces)
-    ]
-    for row in configs["pmts_pos"]["wall"].values():
-        row_index = row["id"]
-        pmts_in_row = row["n"]
-        z = row["z"]
-
-        # Distribute detectors evenly across faces
-        detectors_per_face = pmts_in_row // faces  # How many detectors per face (integer division)
-        extra_detectors = pmts_in_row % faces  # Remaining detectors to distribute
-        pmt_id = 0
-
-        # Now some crazy algorithm to distribute the extra detectors homogeneously
-        # Invented by Lorenz Gebler
-        m = extra_detectors  # short variable names to make the code more readable
-        n = faces
-        # Try splitting the polygon faces in repetitive cells
-        scl = n // m  # shortest cell length
-        sc = [0] * scl  # shortest cell
-        sc[0] = 1  # Set the first element to 1
-        extra_detectors_per_face = sc * m
-        # In case we cannot split the polygon in equal cells
-        if n % m != 0:
-            k = n - len(extra_detectors_per_face)
-            sclk = m // k
-            sck = sc * sclk + [0]
-            extra_detectors_per_face = sck * k + sc * (m - k)
-        # We need to truncate the list as somehow it creates too big cells
-        extra_detectors_per_face = extra_detectors_per_face[:n]
-
-        for i in range(faces):
-            x1, y1 = vertices[i]
-            x2, y2 = vertices[(i + 1) % faces]  # Wrap around
-
-            # Compute face normal for PMT orientation
-            edge_x = x2 - x1
-            edge_y = y2 - y1
-            normal_x = edge_y
-            normal_y = -edge_x
-
-            # Normalize the normal vector
-            norm_length = np.sqrt(normal_x**2 + normal_y**2)
-            normal_x /= norm_length
-            normal_y /= norm_length
-            normal_z = 0
-
-            # Compute the number of detectors on this face, permutate the extras by the row index
-            num_detectors_this_face = detectors_per_face + extra_detectors_per_face[(i + row_index) % faces]
-
-            for j in range(num_detectors_this_face):
-                name = f"PMT{row_index + 10}{pmt_id + 1:02d}"
-                pmt_id += 1
-                # Interpolate position along the face
-                t = (j + 1) / (num_detectors_this_face + 1)  # Normalized position (avoid exact endpoints)
-                x = x1 * (1 - t) + x2 * t
-                y = y1 * (1 - t) + y2 * t
-
-                channelmap[name] = copy.deepcopy(configs["pmts"])
-                channelmap[name]["daq"]["rawid"] = rawid
-                rawid += 1
-                channelmap[name]["name"] = name
-                channelmap[name]["location"] = {"name": "wall", "x": x, "y": y, "z": z}
-                channelmap[name]["location"]["direction"] = {"nx": normal_x, "ny": normal_y, "nz": normal_z}
-
-        # Check that all PMTs are placed. We do not totally trust the distribution algorithm
-        if pmt_id != pmts_in_row:
-            msg = (
-                "Not all PMTs were placed. Check the distribution algorithm. PMTs placed: "
-                + str(pmt_id)
-                + " PMTs to place: "
-                + str(pmts_in_row)
-            )
-            raise ValueError(msg)
-
-
-def generate_special_metadata(string_idx: list, hpge_names: list, configs: dict) -> dict:
-    """Generate special_metadata.yaml file."""
-
-    special_output = {}
-
-    special_output["hpge_string"] = {
-        f"{string_idx[i][j] + 1}": {
-            "center": {
-                "x_in_mm": configs["array"]["center"]["x_in_mm"][i],
-                "y_in_mm": configs["array"]["center"]["y_in_mm"][i],
-            },
-            "angle_in_deg": configs["array"]["angle_in_deg"][j],
-            "radius_in_mm": configs["array"]["radius_in_mm"],
-            "rod_radius_in_mm": configs["string"]["copper_rods"]["r_offset_from_center"],
-        }
-        for i, j in np.ndindex(string_idx.shape)
-    }
-
-    special_output["hpges"] = {
-        f"{name}": {"rodlength_in_mm": configs["string"]["units"]["l"], "baseplate": "xlarge"}
-        for name in hpge_names
-    }
-
-    special_output["fibers"] = {
-        f"S{string + 1:02d}{n + 1:02d}": {
-            "name": f"S{string + 1:02d}{n + 1:02d}",
-            "type": "single_string",
-            "geometry": {"tpb": {"thickness_in_nm": 1093}},
-            "location": {
-                "x": float(
-                    configs["array"]["center"]["x_in_mm"][string // len(configs["array"]["angle_in_deg"])]
-                    + configs["array"]["radius_in_mm"]
-                    * np.cos(
-                        np.radians(
-                            configs["array"]["angle_in_deg"][string % len(configs["array"]["angle_in_deg"])]
-                        )
-                    )
-                ),
-                "y": float(
-                    configs["array"]["center"]["y_in_mm"][string // len(configs["array"]["angle_in_deg"])]
-                    - configs["array"]["radius_in_mm"]
-                    * np.sin(
-                        np.radians(
-                            configs["array"]["angle_in_deg"][string % len(configs["array"]["angle_in_deg"])]
-                        )
-                    )
-                ),
-                "module_num": n,
-            },
-        }
-        for string in string_idx.flatten()
-        for n in range(configs["string"]["n_sipm_modules_per_string"])
-    }
-
-    special_output["calibration"] = {}
-
-    special_output["watertank_instrumentation"] = {
-        "tyvek": {
-            "r": configs["pmts_pos"]["tyvek"]["r"],
-            "faces": configs["pmts_pos"]["tyvek"]["faces"],
-        },
-    }
-
-    special_output["detail"] = configs["detail"]
-
-    return special_output
-
-
-def _normalize_records(inp: Any) -> list[dict]:
-    """Normalize crystal/hpge input into a non-empty list of record mappings."""
-
-    if isinstance(inp, dict):
-        inp = [inp]
-    if not isinstance(inp, list):
-        msg = "crystal metadata must be a list of records or a mapping containing one record"
-        raise TypeError(msg)
-    if inp == []:
-        msg = "crystal metadata must contain at least one record"
-        raise ValueError(msg)
-    if not all(isinstance(record, dict) for record in inp):
-        msg = "each crystal record must be a mapping"
-        raise TypeError(msg)
-    return inp
-
-
-def generate_channelmap(
-    string_idx: list,
-    hpge_names: list,
-    hpge_rawid: list,
-    configs: dict,
-    unit_divisor: int = 100,
-) -> dict:
-    """Generate channelmap.json file."""
-
-    channelmap = {}
-
-    crystal_records = _normalize_records(configs.get("crystal"))
-    hpge_records = _normalize_records(configs.get("hpge"))
-
-    n_diods = len(hpge_records)
-
-    for index, (name, rawid) in enumerate(zip(hpge_names, hpge_rawid, strict=True)):
-        channelmap[name] = copy.deepcopy(hpge_records[index % n_diods])
-        channelmap[name]["name"] = name
-        channelmap[name]["daq"]["rawid"] = rawid
-        channelmap[name]["location"]["string"] = rawid // unit_divisor
-        channelmap[name]["location"]["position"] = rawid % unit_divisor
-        crystal = crystal_records[index % len(crystal_records)]
-        channelmap[name]["production"]["crystal"] = crystal["name"]
-        channelmap[name]["production"]["order"] = crystal["order"]
-
-    max_hpge_rawid = int(max(hpge_rawid)) if len(hpge_rawid) > 0 else 0
-    rawid = sipm_rawid_start = max(5000, _round_up(max_hpge_rawid + 1, 1000))
-    for string in string_idx.flatten():
-        for n in range(configs["string"]["n_sipm_modules_per_string"]):
-            name = f"S{string + 1:02d}{n + 1:02d}T"
-            channelmap[name] = copy.deepcopy(configs["sipm"])
-            channelmap[name]["name"] = name
-            channelmap[name]["location"]["fiber"] = name[:-1]
-            channelmap[name]["location"]["position"] = "top"
-            channelmap[name]["location"]["barrel"] = string + 1
-            channelmap[name]["daq"]["rawid"] = rawid
-            rawid += 1
-
-        for n in range(configs["string"]["n_sipm_modules_per_string"]):
-            name = f"S{string + 1:02d}{n + 1:02d}B"
-            channelmap[name] = copy.deepcopy(configs["sipm"])
-            channelmap[name]["name"] = name
-            channelmap[name]["location"]["fiber"] = name[:-1]
-            channelmap[name]["location"]["position"] = "bottom"
-            channelmap[name]["location"]["barrel"] = string + 1
-            channelmap[name]["daq"]["rawid"] = rawid
-            rawid += 1
-
-    pmt_rawid_start = max(6000, _round_up(rawid, 1000))
-    if sipm_rawid_start != 5000 or pmt_rawid_start != 6000:
-        log.info(
-            "array too large for the default raw ID blocks, using %d for SiPMs and %d for PMTs",
-            sipm_rawid_start,
-            pmt_rawid_start,
-        )
-    calculate_and_place_pmts(channelmap, configs, rawid_start=pmt_rawid_start)
-
-    return channelmap
-
-
-def _round_up(value: int, multiple: int) -> int:
-    """Round ``value`` up to the next integer multiple of ``multiple``."""
-    return (value // multiple) * multiple
-
-
-def convert_to_plain_types(obj):
-    """Convert numpy types and dict subclasses to plain Python types, recursively."""
-    if isinstance(obj, dict):
-        return {str(key): convert_to_plain_types(value) for key, value in obj.items()}
-    if isinstance(obj, list):
-        return [convert_to_plain_types(item) for item in obj]
-    if isinstance(obj, np.integer):
-        return int(obj)
-    if isinstance(obj, np.floating):
-        return float(obj)
-    if isinstance(obj, np.ndarray):
-        return obj.tolist()
-    if isinstance(obj, np.str_):
-        return str(obj)
-    return obj
-
-
-def compile_raw_config(configs: dict) -> tuple[dict, dict]:
-    """Compile the raw configuration into the objects the geometry is built from.
-
-    Parameters
-    ----------
-    configs
-        the raw configuration, keyed by raw config file name without its extension. Use
-        :func:`pygeoml1000.config.load_raw_config` to obtain it.
-
-    Returns
-    -------
-    tuple
-        ``(channelmap, special_metadata)``
-    """
-    string_idx = np.arange(
-        len(configs["array"]["center"]["x_in_mm"]) * len(configs["array"]["angle_in_deg"])
-    ).reshape(len(configs["array"]["center"]["x_in_mm"]), len(configs["array"]["angle_in_deg"]))
-
-    n_units = configs["string"]["units"]["n"]
-
-    unit_width = max(2, len(str(n_units)))
-    string_width = 5 - unit_width
-
-    hpge_names, hpge_rawid = [], []
-    for i in range(string_idx.size):
-        for j in range(n_units):
-            hpge_names.append(f"V{i + 1:0{string_width}d}{j + 1:0{unit_width}d}A")
-            hpge_rawid.append((i + 1) * 10**unit_width + j + 1)
-    hpge_names = np.array(hpge_names)
-    hpge_rawid = np.array(hpge_rawid)
-
-    special_metadata = generate_special_metadata(string_idx, hpge_names, configs)
-    channelmap = generate_channelmap(string_idx, hpge_names, hpge_rawid, configs, unit_divisor=10**unit_width)
-
-    return convert_to_plain_types(channelmap), convert_to_plain_types(special_metadata)

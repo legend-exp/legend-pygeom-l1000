@@ -34,7 +34,7 @@ def default_geds(default_channelmap):
 def default_crystals():
     from pygeoml1000 import config
 
-    return config.load_raw_config()["crystal"]
+    return config.load_pre_compiled_config()["crystal"]
 
 
 # ----------------------------------------------------------------------------
@@ -152,7 +152,7 @@ def runs():
     """The packaged run config, i.e. what a resolved config carries as ``runs``."""
     from pygeoml1000 import config
 
-    return config.load_raw_config()["runs"]
+    return config.load_pre_compiled_config()["runs"]
 
 
 @pytest.fixture
@@ -209,7 +209,7 @@ def test_the_diode_file_cannot_override_the_channel_map(channelmap):
 def test_a_key_added_to_a_template_reaches_the_tree(channelmap):
     """The channel half takes whatever the diode half does not claim.
 
-    A raw config may add keys to a detector template, and a real channel map
+    A pre-compiled config may add keys to a detector template, and a real channel map
     carries `voltage` and `electronics`. A fixed allow-list on the channel half
     would drop them, and the geometry rebuilt from the tarball would differ.
     """
@@ -332,7 +332,7 @@ def test_the_packaged_run_config_reaches_the_tree(tree, runs):
 
 
 def test_a_user_run_config_reaches_the_tree(small_config):
-    """``raw_config`` overrides the packaged runs, as it does for every other raw config."""
+    """``pre_compiled_config`` overrides the packaged runs, as it does for every other pre-compiled config."""
     from pygeoml1000 import config, metadata
 
     runinfo = {
@@ -340,8 +340,8 @@ def test_a_user_run_config_reaches_the_tree(small_config):
         "p01": None,
         "p02": {"r000": {"phy": {"start_key": "20300101T000000Z", "livetime_in_s": 1.0}}},
     }
-    raw_config = dict(small_config["raw_config"], runs={"runinfo": runinfo})
-    resolved = config.resolve_config({"raw_config": raw_config})
+    pre_compiled = dict(small_config["pre_compiled_config"], runs={"runinfo": runinfo})
+    resolved = config.resolve_config({"pre_compiled_config": pre_compiled})
 
     # the packaged run lists survive the deep merge
     assert resolved["runs"]["runlists"]["valid"]["phy"]["p01"] == ["r000..r000"]
@@ -403,7 +403,7 @@ def test_runinfo_phy_runs_have_a_livetime(tree):
 def small_config():
     """A single cluster of six strings with two units each, to keep compilation cheap."""
     return {
-        "raw_config": {
+        "pre_compiled_config": {
             "array": {"center": {"x_in_mm": [0.0], "y_in_mm": [0.0]}},
             "string": {"units": {"n": 2}},
         }
@@ -432,7 +432,7 @@ def test_geometry_inputs_survive_the_round_trip(small_config, small_tarball):
 
 
 def test_a_resolved_metadata_config_no_longer_refers_to_the_tarball(small_tarball):
-    """'metadata' is consumed by resolving, like 'raw_config', so a resolved config stands alone."""
+    """'metadata' is consumed by resolving, like 'pre_compiled_config', so a resolved config stands alone."""
     from pygeoml1000 import config
 
     resolved = config.resolve_config({"metadata": str(small_tarball)})

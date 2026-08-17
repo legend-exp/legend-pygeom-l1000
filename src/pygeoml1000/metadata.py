@@ -31,7 +31,7 @@ only the roots listed above.
 Layout
 ------
 
-The runs come from the raw ``runs.yaml``, which a resolved config carries as
+The runs come from the pre-compiled ``runs.yaml``, which a resolved config carries as
 ``runs``. This module writes the run info and the run lists as they stand there,
 derives both ``validity.yaml`` files from the run info, and derives all other
 files from the compiled channel map::
@@ -198,7 +198,7 @@ def split_channel(entry: dict) -> tuple[dict, dict | None]:
 
     The diode takes a fixed set of keys, because it must not carry ``system``,
     ``daq`` or ``location``. The channel takes everything else, and not a fixed
-    set of its own. A raw config can add a key to a detector template, such as
+    set of its own. A pre-compiled config can add a key to a detector template, such as
     the ``voltage`` and ``electronics`` blocks of a real channel map, and that
     key must reach the tree instead of disappearing here.
     """
