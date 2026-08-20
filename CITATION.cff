@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 title: "legend-pygeom-l1000"
-doi: 10.5281/zenodo.1234
+doi: 10.5281/zenodo.22030739
 date-released: 2026-08-20
 url: "https://github.com/legend-exp/legend-pygeom-l1000"
 authors:
