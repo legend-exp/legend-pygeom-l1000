@@ -188,7 +188,7 @@ IMAGES = {
 
 
 def _subset_metadata(
-    strings: set[int] | None, positions: set[int] | None, raw_config: dict | str = ""
+    strings: set[int] | None, positions: set[int] | None, pre_compiled: dict | str = ""
 ) -> dict:
     """Build a config restricted to the given strings (and detector positions).
 
@@ -199,7 +199,7 @@ def _subset_metadata(
     if strings is None:
         return {}
 
-    resolved = config.resolve_config({"raw_config": raw_config} if raw_config else {})
+    resolved = config.resolve_config({"pre_compiled_config": pre_compiled} if pre_compiled else {})
     channelmap = resolved["channelmap"]
     special_metadata = resolved["special_metadata"]
 

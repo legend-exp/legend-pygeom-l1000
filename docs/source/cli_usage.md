@@ -167,11 +167,12 @@ legend-pygeom-l1000 l1000.gdml --config geom-config.yaml
 ```
 
 Everything that defines the geometry can be set there, including the detail
-level, the assembly selection, overrides of the raw configuration, and a fully
-compiled `channelmap`/`special_metadata`. `--detail` and `--assemblies` override
-their config file counterparts. See {doc}`runtime-cfg` for the full reference.
+level, the assembly selection, overrides of the pre-compiled configs, and a
+fully compiled `channelmap`/`special_metadata`. `--detail` and `--assemblies`
+override their config file counterparts. See {doc}`runtime-cfg` for the full
+reference.
 
-To write out the resolved configuration, i.e, the raw configuration compiled
+To write out the resolved configuration, i.e, the pre-compiled configs compiled
 into an explicit `channelmap` and `special_metadata`, for archival or
 hand-editing:
 
@@ -179,12 +180,53 @@ hand-editing:
 legend-pygeom-l1000 --config geom-config.yaml --write-config resolved.yaml l1000.gdml
 ```
 
-To get a copy of the raw config files shipped with the package as a starting
-point for a custom configuration:
+To get a copy of the pre-compiled config files shipped with the package as a
+starting point for a custom configuration:
 
 ```console
-legend-pygeom-l1000 --dump-raw-configs .
+legend-pygeom-l1000 --dump-pre-compiled-configs .
 ```
+
+### Generated Metadata
+
+LEGEND-1000 has no metadata database. The generator writes the detector part of
+one:
+
+```console
+legend-pygeom-l1000 --config geom-config.yaml --write-metadata l1000dsg01-geom-metadata.tar.gz
+```
+
+The files use the layout and the format of
+[legend-metadata](https://github.com/legend-exp/legend-metadata), so a workflow
+reads them in the usual way. Give a plain folder name to write the tree directly
+instead of an archive.
+
+The generator covers the `datasets` and `hardware` parts only. It writes nothing
+under `simprod`, `dataprod` or `jldataprod`. See {doc}`runtime-cfg` for the
+exact scope.
+
+[legend-simflow](https://legend-simflow.readthedocs.io) does not need the
+archive. It imports this package and writes the same files straight into its
+metadata folder, from the geometry config of the experiment.
+
+The pre-compiled `runs.yaml` supplies what a geometry cannot know, such as the
+runs and their duration. Change it like any other pre-compiled config, through
+`pre_compiled_config` in the geometry config file:
+
+```yaml
+# geom-config.yaml
+pre_compiled_config:
+  runs:
+    runinfo:
+      p01:
+        r000:
+          phy:
+            start_key: 20300101T000000Z
+            livetime_in_s: 31557600.0
+```
+
+Use `--dump-pre-compiled-configs <dir>` to get a copy of the packaged file
+first. See {doc}`runtime-cfg` for what it holds.
 
 ### Quality Control
 

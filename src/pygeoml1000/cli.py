@@ -11,7 +11,14 @@ from pygeomoptics.store import load_user_material_code
 from pygeomtools import detectors, visualization, write_pygeom
 
 from . import _version, core, manifest
-from .config import DEFAULT_DETAIL, copy_raw_configs, load_config, resolve_config, write_config
+from .config import (
+    DEFAULT_DETAIL,
+    copy_pre_compiled_configs,
+    load_config,
+    resolve_config,
+    write_config,
+    write_metadata,
+)
 
 log = logging.getLogger(__name__)
 
@@ -26,16 +33,26 @@ def dump_gdml_cli(argv: list[str] | None = None) -> None:
         logging.root.setLevel(logging.DEBUG)
 
     config = None
-    if args.write_config or args.filename is not None or args.visualize or args.write_manifest:
+    if (
+        args.write_config
+        or args.write_metadata
+        or args.filename is not None
+        or args.visualize
+        or args.write_manifest
+    ):
         config = load_geometry_config(args)
 
-    if args.dump_raw_configs:
-        folder = copy_raw_configs(args.dump_raw_configs)
-        log.info("copied raw config files to %s", folder)
+    if args.dump_pre_compiled_configs:
+        folder = copy_pre_compiled_configs(args.dump_pre_compiled_configs)
+        log.info("copied pre-compiled config files to %s", folder)
 
     if args.write_config:
         log.info("writing resolved config to %s", args.write_config)
         write_config(config, args.write_config)
+
+    if args.write_metadata:
+        log.info("writing generated metadata to %s", args.write_metadata)
+        write_metadata(config, args.write_metadata)
 
     if config is None or (args.filename is None and not args.visualize and not args.write_manifest):
         return
@@ -175,15 +192,23 @@ def _parse_cli_args(argv: list[str] | None = None) -> argparse.Namespace:
     out_opts.add_argument(
         "--write-config",
         action="store",
-        help="""Filename to write the resolved config to, i.e. the config with the raw configuration
-        compiled into an explicit channelmap and special_metadata. The result can be edited by hand
-        and fed back in via --config.""",
+        help="""Filename to write the resolved config to, i.e. the config with the pre-compiled
+        configs compiled into an explicit channelmap and special_metadata. The result can be edited
+        by hand and fed back in via --config.""",
     )
     out_opts.add_argument(
-        "--dump-raw-configs",
+        "--write-metadata",
         action="store",
-        help="""Write a copy of the raw config files shipped with this package into a 'configs'
-        folder below the given directory, as a starting point for a custom configuration.""",
+        help="""Filename to write the detectors of this geometry to, as the 'datasets' and
+        'hardware' parts of a legend-metadata tree. A folder, or a '.tar.gz' archive if the name
+        ends in one. Nothing under 'simprod', 'dataprod' or 'jldataprod' is written.""",
+    )
+    out_opts.add_argument(
+        "--dump-pre-compiled-configs",
+        action="store",
+        help="""Write a copy of the pre-compiled config files shipped with this package into a
+        'configs' folder below the given directory, as a starting point for a custom
+        configuration.""",
     )
     parser.add_argument(
         "filename",
@@ -199,7 +224,8 @@ def _parse_cli_args(argv: list[str] | None = None) -> argparse.Namespace:
         and args.filename is None
         and not args.write_manifest
         and not args.write_config
-        and not args.dump_raw_configs
+        and not args.write_metadata
+        and not args.dump_pre_compiled_configs
     ):
         parser.error("no output file, no visualization, and no config output specified")
     if (args.vis_macro_file or args.det_macro_file) and args.filename is None:

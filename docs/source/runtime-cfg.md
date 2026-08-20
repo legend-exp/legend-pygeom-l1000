@@ -19,34 +19,169 @@ through one workflow rule.
 
 The geometry itself is built from two objects: `special_metadata`, a detailed
 spatial configuration, and `channelmap`, the detector mapping and electronics
-configuration (similar to the channelmap in the usual metadata). Those can be
-supplied in two ways, and the choice is made by which keys the config file
-contains, not by which command line flags are used:
+configuration (similar to the channelmap in the usual metadata).
 
-- as a **raw** configuration: high-level geometry parameters (number of
-  detectors per string, PMT positions, ...) that get _compiled_ into
-  `special_metadata` and `channelmap`. This is the default. `raw_config`
-  overrides individual raw values.
-- as a **compiled** configuration: `special_metadata` and `channelmap` given
-  directly, either inline or as paths to separate files. Then no compilation
-  happens at all.
+(input-schemes)=
 
-The typical workflow uses both: change the raw config for structural changes,
-write the result out with `--write-config`, and edit that for fine-grained
-adjustments.
+## The three input schemes
+
+Three schemes supply those two objects. The keys in the config file select the
+scheme. Each scheme is one step further along the same pipeline:
+
+```text
+  pre-compiled configs          configs/*.yaml, overridden by `pre_compiled_config`
+  the shape of the setup        7 clusters, 6 strings each, 8 detectors per string
+          |
+          |  compile            pygeoml1000.compilation
+          v
+  compiled objects              `channelmap` + `special_metadata`
+  every channel, one by one     V00101A at string 1, position 1, rawid 101, ...
+          |                \
+          |  build          \  construct
+          v                  \
+  generated metadata          -> the GDML geometry
+  a legend-metadata tree
+  `metadata`
+```
+
+Every step keeps what the step before it produced, so a config can enter the
+pipeline at any of the three points.
+
+| scheme                                     | key                                 | what it sets                                             | edit it by hand?             |
+| ------------------------------------------ | ----------------------------------- | -------------------------------------------------------- | ---------------------------- |
+| [pre-compiled](#pre-compiled-config-files) | `pre_compiled_config`               | the shape of the setup, such as the detectors per string | yes, for a high-level change |
+| [compiled](#compilation)                   | `channelmap` and `special_metadata` | every detector, one by one                               | yes, for a low-level change  |
+| [generated metadata](#generated-metadata)  | `metadata`                          | a whole metadata tree, which holds both objects          | no, this one is for simflow  |
+
+A config file that gives more than one scheme keeps the most explicit one.
+`metadata` wins over the other two. `channelmap` together with
+`special_metadata` wins over `pre_compiled_config`. The generator writes a
+warning for each key that it drops.
+
+`--write-config` always writes the middle scheme, whichever scheme went in. That
+output is called a resolved config: the compiled objects, plus the defaults that
+the generator filled in.
+
+### Pre-compiled
+
+The pre-compiled configs hold the parameters that describe the shape of the
+setup: the number of strings, the number of detectors on a string, the position
+of the PMTs. The generator compiles them into the two objects. This is the
+default.
+
+Use it for a change that modifies many parts at the same time. Such a change is
+usually a few lines, because `pre_compiled_config` is deep-merged on top of the
+packaged files. Everything it does not name stays as it is:
+
+```yaml
+# geom-config.yaml
+detail: radiogenic
+pre_compiled_config:
+  string:
+    units:
+      n: 10 # 10 detectors per string, instead of 8
+```
+
+```console
+$ legend-pygeom-l1000 --config geom-config.yaml l1000.gdml
+```
+
+A geometry config with no `pre_compiled_config` at all uses the packaged files
+unchanged, so `legend-pygeom-l1000 l1000.gdml` is this scheme as well. See
+[Pre-compiled config files](#pre-compiled-config-files).
+
+### Compiled
+
+A compiled configuration gives the two objects directly, either in the config
+file or as a path to a separate file. The generator then compiles nothing.
+
+Use it for a change that the pre-compiled parameters cannot express: to remove a
+single detector, to move a single string, or to give one detector its own
+geometry. The key names match
+[legend-pygeom-l200](https://legend-pygeom-l200.readthedocs.io), so a config of
+this shape drives both generators.
+
+Do not write it from nothing. Compile once, then edit the result:
+
+```console
+$ legend-pygeom-l1000 --config geom-config.yaml --write-config resolved.yaml
+```
+
+```yaml
+# resolved.yaml, as written by the command above
+channelmap:
+  V00101A:
+    name: V00101A
+    system: geds
+    location: { string: 1, position: 1 }
+    daq: { rawid: 101 }
+    # ... type, production, geometry, characterization
+special_metadata:
+  hpge_string:
+    "1": { center: { x_in_mm: 0.0, y_in_mm: 0.0 }, angle_in_deg: 0, ... }
+  hpges:
+    V00101A: { rodlength_in_mm: 140.1, baseplate: xlarge }
+  detail: { radiogenic: { ... }, cosmogenic: { ... } }
+crystals: [...] # travels along for the generated metadata
+runs: { ... } # likewise
+detail: radiogenic
+enable_optical: true
+```
+
+Delete the `V00101A` entry from both `channelmap` and `special_metadata.hpges`,
+and that detector is gone. Feed the file straight back in:
+
+```console
+$ legend-pygeom-l1000 --config resolved.yaml l1000.gdml
+```
+
+Both keys also take a path, which keeps the geometry config short:
+
+```yaml
+# geom-config.yaml
+channelmap: ./channelmap.yaml
+special_metadata: ./special_metadata.yaml
+```
+
+See [Compilation](#compilation), and
+[Removing a specific detector](#removing-a-detector) for a script that does the
+edit.
+
+### Generated metadata
+
+The `metadata` key points to the folder or tarball that `--write-metadata`
+wrote. It holds the same information as the compiled configuration, but in the
+form of the legend-metadata tree.
+
+```yaml
+# l1000dsg01-geom-config.yaml
+executable: legend-pygeom-l1000
+metadata: ./l1000dsg01-geom-metadata.tar.gz
+```
+
+```console
+$ legend-pygeom-l1000 --config l1000dsg01-geom-config.yaml l1000.gdml
+```
+
+This scheme exists for [legend-simflow](https://legend-simflow.readthedocs.io),
+where the geometry defined here defines the structure of the metadata content.
+Do not edit the generated metadata to change the geometry. Change a pre-compiled
+or a compiled config instead, and regenerate it. See
+[Generated metadata](#generated-metadata).
 
 ## Config file reference
 
-| key                  | type            | meaning                                                                              |
-| -------------------- | --------------- | ------------------------------------------------------------------------------------ |
-| `detail`             | string          | detail level preset, a key of `detail.yaml` (default: `radiogenic`)                  |
-| `assemblies`         | list or string  | assemblies to build, see [Selecting assemblies](#selecting-assemblies)               |
-| `raw_config`         | mapping or path | raw configuration overrides, see [Raw configuration files](#raw-configuration-files) |
-| `special_metadata`   | mapping or path | compiled spatial configuration, skips compiling it from the raw config               |
-| `channelmap`         | mapping or path | compiled channel map, skips compiling it from the raw config                         |
-| `enable_optical`     | bool or list    | materials that get optical properties, see [Optical properties](#optical-properties) |
-| `sipm_use_pde_curve` | bool            | if false, use a flat SiPM photon detection efficiency instead of the PDE curve       |
-| `sipm_efficiencies`  | mapping         | per-channel scale factors for the SiPM detection efficiency                          |
+| key                   | type            | meaning                                                                                                 |
+| --------------------- | --------------- | ------------------------------------------------------------------------------------------------------- |
+| `detail`              | string          | detail level preset, a key of `detail.yaml` (default: `radiogenic`)                                     |
+| `assemblies`          | list or string  | assemblies to build, see [Selecting assemblies](#selecting-assemblies)                                  |
+| `pre_compiled_config` | mapping or path | overrides of the pre-compiled configs, see [Pre-compiled config files](#pre-compiled-config-files)      |
+| `special_metadata`    | mapping or path | compiled spatial configuration, skips compiling it from the pre-compiled configs                        |
+| `channelmap`          | mapping or path | compiled channel map, skips compiling it from the pre-compiled configs                                  |
+| `metadata`            | path            | generated metadata tree that holds both compiled objects, see [Generated metadata](#generated-metadata) |
+| `enable_optical`      | bool or list    | materials that get optical properties, see [Optical properties](#optical-properties)                    |
+| `sipm_use_pde_curve`  | bool            | if false, use a flat SiPM photon detection efficiency instead of the PDE curve                          |
+| `sipm_efficiencies`   | mapping         | per-channel scale factors for the SiPM detection efficiency                                             |
 
 Every option that defines the geometry lives in this file. The command line only
 selects which artifacts to produce (`--write-manifest`, `--det-macro-file`, the
@@ -99,38 +234,39 @@ enable_optical: [liquidargon, pen] # only these materials
 Turn the optical properties off for a geometry that only needs the mass model,
 for example a radiogenic background study. The GDML file is then much smaller.
 
-(raw-configuration-files)=
+(pre-compiled-config-files)=
 
-## Raw configuration files
+## Pre-compiled config files
 
-The raw configuration files are YAML files located in
+The pre-compiled config files are YAML files located in
 `src/pygeoml1000/configs/`. Each file controls a specific aspect of the
 geometry.
 
-The `raw_config` key overrides them. It is deep-merged on top of the packaged
-files, so only the values that actually change have to be given:
+The `pre_compiled_config` key overrides them. It is deep-merged on top of the
+packaged files, so only the values that actually change have to be given:
 
 ```yaml
-raw_config:
+pre_compiled_config:
   string:
     units:
       n: 10 # 10 detector units per string, everything else unchanged
 ```
 
-It can also be the path to a folder of raw config files, which is again merged
-over the packaged ones. A file that is not in the folder simply keeps its
+It can also be the path to a folder of pre-compiled config files, which is again
+merged over the packaged ones. A file that is not in the folder simply keeps its
 packaged contents:
 
 ```yaml
-raw_config: /path/to/my/configs
+pre_compiled_config: /path/to/my/configs
 ```
 
-Use `--dump-raw-configs <dir>` to get a copy of the packaged files as a starting
-point. `raw_config` is ignored (with a warning) if both `channelmap` and
-`special_metadata` are given, since then nothing needs to be compiled.
+Use `--dump-pre-compiled-configs <dir>` to get a copy of the packaged files as a
+starting point. `pre_compiled_config` is ignored (with a warning) if both
+`channelmap` and `special_metadata` are given, since then nothing needs to be
+compiled.
 
-The `configs` folder in the source directory contains the following raw config
-files:
+The `configs` folder in the source directory contains the following pre-compiled
+config files:
 
 ```bash
 configs/
@@ -140,6 +276,7 @@ configs/
 ├── hpge.yaml
 ├── pmts_pos.yaml
 ├── pmts.yaml
+├── runs.yaml
 ├── sipm.yaml
 └── string.yaml
 ```
@@ -251,18 +388,44 @@ Each key is a named preset (e.g. `cosmogenic`, `radiogenic`) selectable via the
 `pygeomtools` assembly detail convention (`omit`, `simple`, `stl`, `detailed`,
 `metadata`, `place`).
 
-### `crystal.yaml` - Crystal boule profile
+### `crystal.yaml` - Crystal boule catalog
 
-Stores the impurity profile and slice offsets for the HPGe crystal boule used as
-the default detector template, with the same format as in the metadata. It is
-required to generate the drift-time map used in the post-processing of the
-pulse-shape discrimination, but is not read by the geometry generation itself.
+A list of crystal boules. Each boule has an impurity profile and slice offsets,
+in the same format as in the metadata.
+
+The compilation assigns the detectors to the boules of the catalog in order.
+Each detector takes the `name` and the `order` of its boule. A workflow uses
+these two fields to find the boule again. A detector therefore always points to
+a crystal that exists.
+
+The boule data does not change the geometry. It generates the drift-time map for
+the post-processing of the pulse-shape discrimination, and it goes into the
+[generated metadata](#generated-metadata).
+
+(runs-config)=
+
+### `runs.yaml` - Runs of the generated metadata
+
+The runs of the [generated metadata](#generated-metadata). A geometry does not
+describe runs, so this file invents them. It has no effect on the geometry.
+
+```{literalinclude} ../../src/pygeoml1000/configs/runs.yaml
+:language: yaml
+```
+
+The generator writes `runinfo` and `runlists` into the tree as they stand here.
+It derives both `validity.yaml` files from `runinfo`. The channel map is valid
+from the earliest start key, and the earliest run also names the file. See
+[The runs](#the-runs).
+
+(compilation)=
 
 ## Compilation
 
-The compilation step converts the raw config files into the two runtime objects
-
-- `special_metadata` and `channelmap` - via `config.py`.
+The compilation step converts the pre-compiled config files into the two runtime
+objects, `special_metadata` and `channelmap`. It lives in `compilation.py`, and
+`config.resolve_config` runs it. A config that already gives both objects skips
+the step.
 
 **`special_metadata`** contains the detailed spatial layout used for geometry
 placement:
@@ -297,25 +460,299 @@ that builds the geometry:
 $ legend-pygeom-l1000 --config geom-config.yaml --write-config resolved.yaml l1000.gdml
 ```
 
+(generated-metadata)=
+
+## Generated metadata
+
+To use the LEGEND-1000 geometry in simflow, one has to generate a metadata
+database. Provided the compiled configs, a generator can generate the `datasets`
+and `hardware` folders of the
+[legend-metadata](https://github.com/legend-exp/legend-metadata) format.
+`build_metadata_tree` generates the metadata tree as a dict and
+`write_metadata_tree` writes it to disk. The generator can also be called via
+the `--write-metadata` cli option. The output can be in the form of a folder or
+a tarball.
+
+Simflow imports this package and builds the files directly into its specified
+metadata folder based on the geometry config of the experiment. See
+[How simflow uses this](#simflow-integration).
+
+The generated metadata tree holds everything that describes the detectors. Two
+files come from the pre-compiled [`runs.yaml`](#runs-config), and the generator
+derives the two validity files from the runs. It derives all other files from
+the compiled channel map.
+
+| file                                                | content                                                       |
+| --------------------------------------------------- | ------------------------------------------------------------- |
+| `datasets/runinfo.yaml`                             | the runs, their start keys and live times, from `runs.yaml`   |
+| `datasets/runlists.yaml`                            | the named run lists, from `runs.yaml`                         |
+| `datasets/statuses/validity.yaml`                   | from when the statuses apply                                  |
+| `datasets/statuses/<name>.yaml`                     | one analysis status per channel                               |
+| `hardware/configuration/channelmaps/validity.yaml`  | from when the channel map applies                             |
+| `hardware/configuration/channelmaps/<name>.yaml`    | `name`, `system`, `location` and `daq` of every channel       |
+| `hardware/detectors/germanium/diodes/<DET>.yaml`    | one per HPGe: type, production, geometry and characterization |
+| `hardware/detectors/germanium/crystals/<XTAL>.yaml` | one per crystal boule the detectors were cut from             |
+| `special_metadata.yaml`                             | the compiled special metadata                                 |
+
+The `apply:` entry of the adjacent `validity.yaml` sets `<name>`. Nothing reads
+this name. A workflow selects a file by comparing its `valid_from` with the
+start key of a run.
+
+The real legend-metadata has no `special_metadata.yaml`. This file carries the
+compiled geometry, and it makes the tree sufficient to rebuild that geometry.
+
+(generated-scope)=
+
+### What it generates, and what it does not
+
+`legend-metadata` is a collection of eight submodules. The generator writes a
+part of three, and nothing else.
+
+| generated path                        | upstream repository      | how much of it                                                                                                    |
+| ------------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `datasets/`                           | `legend-datasets`        | `runinfo.yaml`, `runlists.yaml` and `statuses/`. Not the groupings, the run overrides or the partition parameters |
+| `hardware/configuration/channelmaps/` | `legend-hardware-config` | the channel maps                                                                                                  |
+| `hardware/detectors/germanium/`       | `legend-detectors`       | the diodes and the crystals. Not `lar/`, so no SiPM or fiber files                                                |
+| `special_metadata.yaml`               | none                     | an addition of this package. `legend-metadata` has no such file                                                   |
+
+The generator never touches the following, and the user or the workflow supplies
+them:
+
+- `simprod/` — `legend-simflow-config`, the production settings. Simflow clones
+  it. The operational voltages under `pars/<experiment>/geds/opv/` are mandatory
+  there.
+- `dataprod/` — `legend-dataflow-config` and `legend-dataflow-overrides`.
+- `jldataprod/` — `legend-jldataflow-config` and `legend-jldataflow-overrides`.
+
+This boundary matters because the generated files and `simprod/` share one
+directory. A caller that regenerates the tree must remove only the roots in the
+table above.
+
+(simflow-integration)=
+
+### How simflow uses this
+
+Set `generated_metadata: true` in `simflow-config.yaml`. Simflow then does the
+following before it opens the metadata database:
+
+1. Clone `legend-simflow-config` into `paths.config`.
+2. Read the geometry config of the experiment, and make its paths absolute.
+3. Compile it with `pygeoml1000.config.resolve_config`, which accepts all three
+   [input schemes](#input-schemes).
+4. Build the tree and write it as plain files into `paths.metadata`.
+
+Simflow removes the generated roots first, so a detector that leaves the config
+also leaves the metadata. It does not touch `simprod/`. A digest of the geometry
+config decides whether the tree needs a rebuild. Simflow records it in a stamp
+file.
+
+(why-each-part)=
+
+### Why each part is necessary
+
+Each part answers a question that
+[legend-simflow](https://legend-simflow.readthedocs.io) asks while it builds the
+DAG, or while it runs a job. This section names the reader of each part and the
+effect of its absence.
+
+#### `datasets/runinfo.yaml`
+
+Gives the start key of each run. The workflow resolves every validity file
+against a start key. It also gives `livetime_in_s` for a physics run. The
+workflow splits the simulated events over the runs in proportion to that number.
+
+Without it no run identifier resolves, and the workflow cannot select a channel
+map or a status.
+
+#### `datasets/runlists.yaml`
+
+Names a group of runs, so that a production can ask for
+`~runlists:valid.phy.p01` instead of a list of run identifiers.
+
+The workflow reads this file only for a request of that form. A production that
+lists its run identifiers one by one never touches it.
+
+#### `datasets/statuses/`
+
+Holds the analysis status of each channel. `LegendMetadata.channelmap` attaches
+the status to the channel as `analysis`. The workflow then reads
+`analysis.usability` to decide whether it simulates a detector, and
+`analysis.psd.status.low_aoe` for the pulse-shape discrimination.
+
+This part is the one that fails hardest. The workflow reads `analysis.usability`
+without a guard while it builds the DAG. A germanium channel without a status
+stops the production before the first job starts.
+
+#### `hardware/configuration/channelmaps/`
+
+Lists the channels. The workflow reads `system` to separate the germanium
+detectors from the SiPMs and the PMTs, and `daq.rawid` to match a channel to the
+raw identifier that the simulation writes.
+
+Without it the workflow sees no channels, and there is nothing to simulate.
+
+#### `hardware/detectors/germanium/diodes/`
+
+One file per germanium detector, with four separate jobs:
+
+- `geometry` builds the detector solid for the drift-time map.
+- `characterization.combined_0vbb_analysis.fccd_in_mm.value` gives the dead
+  layer. Without it the workflow falls back to 1 mm and writes a warning for
+  each detector in each job.
+- `characterization.l200_site.depletion_voltage_in_V` decides whether a detector
+  runs far enough above depletion to be modeled. A detector without it gets no
+  pulse-shape model.
+- `type`, `production.order` and `production.crystal` build the name of the
+  crystal. That name is the file the workflow looks for in the next folder.
+
+The workflow also hands the whole file to the Julia code that builds the
+drift-time map.
+
+#### `hardware/detectors/germanium/crystals/`
+
+One file per crystal boule. `impurity_curve.parameters` gives the impurity
+profile along the boule, which the drift-time map needs. A detector whose
+crystal has no impurity curve is not modelable.
+
+`slices[<slice>].status` decides whether the simulated hits of a detector count.
+The workflow copies it into the hit tier as `is_valid_sim`. A missing status
+makes every hit of that detector invalid, and it does so quietly.
+
+#### `special_metadata.yaml`
+
+The workflow never reads this file. It holds the compiled geometry, so that this
+generator can rebuild the same setup from the generated metadata alone.
+
+```{note}
+The tree describes the detectors. It does not describe the production. The
+settings under `simprod/config/` stay with the user, and the operational
+voltages in `pars/<experiment>/geds/opv/` are mandatory there. A workflow that
+cannot read them fails while it builds the DAG.
+```
+
+### Rebuild the geometry from the generated metadata
+
+A geometry config that points to a generated tree needs nothing else:
+
+```yaml
+# l1000dsg01-geom-config.yaml
+executable: legend-pygeom-l1000
+metadata: ./l1000dsg01-geom-metadata.tar.gz
+```
+
+```console
+$ legend-pygeom-l1000 --config l1000dsg01-geom-config.yaml l1000.gdml
+```
+
+The generator reads both compiled objects from the tree. The keys `channelmap`,
+`special_metadata` and `pre_compiled_config` thus have no effect next to
+`metadata`, and the generator ignores them with a warning. Commit the two files
+together to make a production reproducible from them alone.
+
+### One channel in three files
+
+The generator splits a channel map entry into three disjoint parts, because the
+database merges them again when it reads them. The reader loads the channel map
+first. It then merges the matching diode file over the channel. Last, it
+attaches the status as `analysis`.
+
+The diode file wins this merge. It therefore carries none of `system`, `daq` or
+`location`. Any of these keys would replace the raw ID and the position of the
+channel.
+
+(the-runs)=
+
+### The runs
+
+The runs hold what a geometry cannot know: the runs themselves, their duration,
+and the start of validity of the metadata. They come from the pre-compiled
+[`runs.yaml`](#runs-config), like every other input of this package.
+
+`runinfo` gives the start key of each run. Every validity file resolves against
+a start key. The generator makes the channel map valid from the earliest start
+key. A lookup at any run therefore finds a channel map and a status.
+
+`runlists` names a group of runs. Keep the entries as `rNNN..rMMM` range
+expressions. A workflow adds the experiment name only to an entry with the shape
+of a range. It reads a plain `r000` as a complete run identifier, which never
+resolves.
+
+All runs share one channel map and one status file. A channel map describes the
+setup of a run, and a compiled config describes one setup. Add runs freely, but
+keep the setup the same. A second setup needs a second geometry, and this
+generator does not write one.
+
+#### Change the runs
+
+Override `runs` like any other pre-compiled config. The override deep-merges
+into the packaged file, so give only what changes:
+
+```yaml
+# geom-config.yaml
+pre_compiled_config:
+  runs:
+    runinfo:
+      p01: null # drop the packaged period
+      p02:
+        r000:
+          cal:
+            start_key: 20300101T000000Z
+          phy:
+            start_key: 20300102T000000Z
+            livetime_in_s: 31557600.0
+    runlists:
+      valid:
+        cal:
+          p02: [r000..r000]
+        phy:
+          p02: [r000..r000]
+```
+
+A period or a run set to `null` is dropped, and nothing empty reaches the tree.
+Use `--dump-pre-compiled-configs <dir>` to get a copy of the packaged file as a
+starting point.
+
+The runs do not hold the per-channel statuses either. A geometry cannot know how
+a channel behaved in a run, so the generator gives every channel the same
+status: `usability: "on"`, `processable: true`, and for a germanium channel
+`psd.status.low_aoe: valid`.
+
+There is no config key for this. To turn a channel off, edit its entry in the
+generated `datasets/statuses/` file:
+
+```yaml
+V00101A:
+  reason: "noisy"
+  usability: "off"
+  processable: true
+  psd:
+    status:
+      low_aoe: valid
+```
+
 ## Best practices
 
-1. **Start from `raw_config`** for high-level structural changes (e.g. number of
-   strings, PMT ring positions). Because it is deep-merged over the packaged raw
-   configs, a change is usually a handful of lines in the geometry config file
-   and needs no copy of the defaults:
+[The three input schemes](#input-schemes) compares the schemes. This section
+shows how to move from one to the next.
+
+1. **Start from `pre_compiled_config`** for high-level structural changes (e.g.
+   number of strings, PMT ring positions). Because it is deep-merged over the
+   packaged pre-compiled configs, a change is usually a handful of lines in the
+   geometry config file and needs no copy of the defaults:
 
    ```yaml
    # geom-config.yaml
    detail: radiogenic
-   raw_config:
+   pre_compiled_config:
      string:
        units:
          n: 10
    ```
 
 2. **Move to a resolved config** for fine-grained adjustments (e.g. removing
-   individual detectors, overriding a single position or raw ID) that the raw
-   configuration cannot express. Write it out, edit it, and pass it back in:
+   individual detectors, overriding a single position or raw ID) that the
+   pre-compiled configs cannot express. Write it out, edit it, and pass it back
+   in:
 
    ```console
    $ legend-pygeom-l1000 --config geom-config.yaml --write-config resolved.yaml
@@ -331,8 +768,9 @@ $ legend-pygeom-l1000 --config geom-config.yaml --write-config resolved.yaml l10
    channelmap: ./channelmap.yaml
    ```
 
-Since a resolved config carries both compiled objects, `raw_config` no longer
-has any effect on it. It is ignored with a warning if it is left in place.
+Since a resolved config carries both compiled objects, `pre_compiled_config` no
+longer has any effect on it. It is ignored with a warning if it is left in
+place.
 
 ## Examples
 
@@ -354,7 +792,7 @@ list in `array.yaml` with a single entry at the origin:
 
 ```yaml
 # geom-config.yaml
-raw_config:
+pre_compiled_config:
   array:
     center:
       x_in_mm: [0.0]
@@ -388,7 +826,7 @@ entries in `array.yaml`:
 
 ```yaml
 # geom-config.yaml
-raw_config:
+pre_compiled_config:
   array:
     center:
       x_in_mm: [0.0, 533.7]
@@ -397,6 +835,8 @@ raw_config:
 
 Compiling this produces 12 strings (`V0101`-`V1208`, 96 HPGe detectors), 72 SiPM
 channels, and the full PMT complement.
+
+(removing-a-detector)=
 
 ### Removing a specific detector or string from the resolved config
 
@@ -437,9 +877,10 @@ entries in `hpges` in the `special_metadata`.
 
 ### Replacing the default HPGe template with a custom one
 
-To use a custom HPGe template, override `hpge` in `raw_config` with the desired
-geometry and characterization fields. The geometry is defined using the standard
-format of the legend metadata (e.g. the example geometries found in the remage
+To use a custom HPGe template, override `hpge` in `pre_compiled_config` with the
+desired geometry and characterization fields. The geometry is defined using the
+standard format of the legend metadata (e.g. the example geometries found in the
+remage
 [tutorial](https://remage.readthedocs.io/en/stable/tutorial.html#experimental-geometry)).
 At the moment, there is only support for using a single geometry template for
 all detectors, though in the future this will be generalized to allow for

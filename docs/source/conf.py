@@ -28,12 +28,14 @@ source_suffix = {
 }
 exclude_patterns = [
     "_build",
+    "_generated",
     "**.ipynb_checkpoints",
     "Thumbs.db",
     ".DS_Store",
     ".env",
     ".venv",
 ]
+
 master_doc = "index"
 language = "python"
 

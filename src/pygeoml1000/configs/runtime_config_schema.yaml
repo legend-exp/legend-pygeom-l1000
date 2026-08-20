@@ -35,6 +35,54 @@ properties:
     description:
       Inline channel map, or a path to a YAML/JSON file containing it.
     type: [object, string]
+  crystals:
+    description: >-
+      The crystal boules the detectors were cut from, taken from the
+      pre-compiled 'crystal' catalog. It travels with the compiled objects so
+      that a resolved config holds everything the generated metadata is built
+      from. It has no effect on the geometry.
+    type: array
+    items:
+      type: object
+  runs:
+    description: >-
+      The runs of the generated metadata, taken from the pre-compiled 'runs'
+      config: the experiment name, the run info and the named run lists. The
+      validity of the channel map follows from the run info. It travels with the
+      compiled objects so that a resolved config holds everything the generated
+      metadata is built from. It has no effect on the geometry.
+    type: object
+    required: [experiment, runinfo, runlists]
+    properties:
+      experiment:
+        type: string
+      runinfo:
+        type: object
+        patternProperties:
+          ".*":
+            type: object
+            patternProperties:
+              ".*":
+                type: object
+                patternProperties:
+                  ".*":
+                    type: object
+                    required: [start_key]
+                    properties:
+                      start_key:
+                        type: string
+                        pattern: "^\\d{8}T\\d{6}Z$"
+                      livetime_in_s:
+                        type: number
+      runlists:
+        type: object
+  metadata:
+    description: >-
+      Path to a generated metadata tree, either a folder or a '.tar.gz' archive,
+      as written by '--write-metadata'. Both the channel map and the special
+      metadata are read back from it, so 'channelmap', 'special_metadata' and
+      'pre_compiled_config' have no effect alongside it.
+    type: string
   sipm_use_pde_curve:
     type: boolean
   sipm_efficiencies:
@@ -56,14 +104,15 @@ properties:
     pattern: "^\\d{8}T\\d{6}Z$"
   detail:
     description:
-      Name of the detail level preset to use (a key of the raw ``detail.yaml``).
+      Name of the detail level preset to use (a key of the pre-compiled
+      ``detail.yaml``).
     type: string
-  raw_config:
+  pre_compiled_config:
     description: >-
-      Raw configuration overrides, deep-merged on top of the raw configs shipped
-      with the package. Either an inline mapping (keyed by raw config file name
-      without extension), or a path to a folder of raw config files. Ignored if
-      both ``channelmap`` and ``special_metadata`` are given.
+      Overrides of the pre-compiled configs, deep-merged on top of the ones
+      shipped with the package. Either an inline mapping (keyed by file name
+      without extension), or a path to a folder of such files. Ignored if both
+      ``channelmap`` and ``special_metadata`` are given.
     type: [object, string]
   executable:
     description: >-
