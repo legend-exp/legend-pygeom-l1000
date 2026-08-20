@@ -10,6 +10,13 @@ name = "legend_pygeom_l1000"
 description = "Geometry model of the LEGEND-1000 experimental setup"
 authors = [
     { name = "Moritz Neuberger", email = "moritz.neuberger@tum.de" },
+    { name = "Manuel Huber", email = "info@manuelhu.de" },
+    { name = "Luigi Pertoldi", email = "gipert@pm.me" },
+    { name = "Eric Esch", email = "eric.esch@student.uni-tuebingen.de" },
+    { name = "Edgar Sánchez García", email = "esanchez@mpi-hd.mpg.de" },
+    { name = "Toby Dixon", email = "tdixon@berkeley.edu" },
+    { name = "CJ Barton", email = "CJ.Barton@coyotes.usd.edu" },
+    { name = "Cedric Emmanuel" },
 ]
 maintainers = [
     { name = "The LEGEND Collaboration" },
