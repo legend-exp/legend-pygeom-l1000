@@ -404,7 +404,6 @@ def _place_hpge_unit(
             and det_unit.baseplate == "medium"
             and det_unit.manufacturer == "Ortec"
         ):
-            # TODO: what is with "V01389A"?
             baseplate = "medium_ortec"
         pen_plate = _get_pen_plate(baseplate, b.materials, b.registry)
 

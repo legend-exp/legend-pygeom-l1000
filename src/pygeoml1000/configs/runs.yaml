@@ -1,0 +1,37 @@
+# The runs of the generated metadata.
+#
+# A geometry does not describe runs, so this file invents them. Two things have
+# an effect:
+#   * the start keys. The generator makes the channel map valid from the
+#     earliest one, so a lookup at any start key finds a channel map and a
+#     status.
+#   * livetime_in_s. legend-simflow splits the simulated events over the phy
+#     runs in proportion to this number.
+#
+# All runs share one channel map. Add runs freely, but keep the setup the same.
+
+# the first field of the generated file name,
+# <experiment>-<period>-r%-T%-all-config.yaml
+experiment: l1000
+
+# datasets/runinfo.yaml, written out as it appears in the tree. An override
+# deep-merges into this mapping, so set a period or a run to `null` to drop it.
+runinfo:
+  p01:
+    r000:
+      cal:
+        start_key: 20000101T000000Z
+      phy:
+        start_key: 20000102T000000Z
+        livetime_in_s: 315576000.0 # 10 years
+
+# datasets/runlists.yaml. Keep the entries as rNNN..rMMM range expressions. A
+# workflow reads a plain r000 as a full run identifier, which never resolves.
+runlists:
+  valid:
+    cal:
+      p01:
+        - r000..r000
+    phy:
+      p01:
+        - r000..r000

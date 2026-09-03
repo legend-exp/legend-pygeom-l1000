@@ -95,8 +95,8 @@ hexagonal arrangement.
 
 All strings together hang in the lower part of the reentrance tube which extends
 far above through the neck of the cryostat. The number of strings, their
-positions and the number of units per string are all set in the raw
-configuration files (see {doc}`runtime-cfg`).
+positions and the number of units per string are all set in the pre-compiled
+config files (see {doc}`runtime-cfg`).
 
 ## Cryostat
 
