@@ -40,12 +40,6 @@ _VIEW_DIRECTION_BELOW = (-1.0, -0.35, -1.25)
 
 _VIEW_ANGLE_DEG = 30.0
 
-STEEL = (0.5, 0.5, 0.5, 0.05)
-TUBE = (0.45, 0.55, 0.75, 0.10)
-WATER = (0, 0, 1, 0.08)
-AIR = (0.85, 0.9, 1, 0.07)
-TYVEK = (0.9, 0.9, 0.9, 0.05)
-
 CRYOSTAT_LVS = (
     "reentrance_tube_copper",
     "cryostat_outer_steel_316L",
@@ -82,17 +76,6 @@ DETECTOR_UNIT = {
     "view_direction": _VIEW_DIRECTION_BELOW,
 }
 
-# the window and the vacuum are built once per PMT and carry the channel name as a suffix
-# (``waterinstr_pmt_window_borosilicate_PMT00``), so a pattern has to allow for that suffix; only
-# the cathode is a shared volume with a literal name. The vacuum between window and cathode has no
-# color of its own, which leaves it at the viewer default -- fully opaque -- so it has to be hidden
-# explicitly, otherwise it fills every PMT no matter how transparent the glass around it is.
-PMT_TRANSPARENT = {
-    r"waterinstr_pmt_window_borosilicate_.*": (0.9, 0.8, 0.5, 0.05),
-    r"waterinstr_pmt_interior_vacuum_.*": HIDE,
-    "waterinstr_pmt_cathode": (0.545, 0.271, 0.074, 0.05),
-}
-
 # ----------------------------------------------------------------------------
 # the renderings
 # ----------------------------------------------------------------------------
@@ -111,42 +94,23 @@ IMAGES = {
     "string_fibers": {
         "assemblies": [*ARRAY_ASSEMBLIES, "fiber_curtain"],
         "strings": {1},
-        "overrides": {
-            **HIDE_CRYOSTAT,
-            r"fiber_coating_tpb_.*": (0, 1, 0.165, 0.25),
-        },
+        "overrides": HIDE_CRYOSTAT,
         "window_size": [400, 900],
     },
     "array_only": {
         "assemblies": [*ARRAY_ASSEMBLIES, "fiber_curtain"],
-        "overrides": {
-            **HIDE_CRYOSTAT,
-            r"fiber_coating_tpb_.*": (0, 1, 0.165, 0.25),
-        },
+        "overrides": HIDE_CRYOSTAT,
         "window_size": [500, 1000],
         "view_direction": _VIEW_DIRECTION_LEVEL,
     },
     "array_reentrance_tube": {
         "assemblies": [*ARRAY_ASSEMBLIES, "fiber_curtain"],
-        "overrides": {
-            "reentrance_tube_copper": TUBE,
-            **{lv: HIDE for lv in CRYOSTAT_LVS if lv != "reentrance_tube_copper"},
-            r"fiber_coating_tpb_.*": (0, 1, 0.165, 0.25),
-        },
+        "overrides": {lv: HIDE for lv in CRYOSTAT_LVS if lv != "reentrance_tube_copper"},
         "window_size": [500, 1000],
         "view_direction": _VIEW_DIRECTION_LEVEL,
     },
     "array_cryostat": {
         "assemblies": [*ARRAY_ASSEMBLIES, "fiber_curtain", "nm_plastic"],
-        "overrides": {
-            "reentrance_tube_copper": TUBE,
-            "cryostat_outer_steel_316L": STEEL,
-            "cryostat_inner_steel_316L": STEEL,
-            "neutron_moderator_pmma": STEEL,
-            "cryostat_skirt_steel_316L": STEEL,
-            "cryostat_foot_steel_316L": STEEL,
-            r"fiber_coating_tpb_.*": (0, 1, 0.165, 0.25),
-        },
         "window_size": [500, 1000],
         "view_direction": _VIEW_DIRECTION_LEVEL,
     },
@@ -166,19 +130,7 @@ IMAGES = {
             "fiber_curtain",
             "nm_plastic",
         ],
-        "overrides": {
-            "watertank_steel_304L": STEEL,
-            "watertank_water": WATER,
-            "reentrance_tube_copper": TUBE,
-            "cryostat_outer_steel_316L": STEEL,
-            "cryostat_inner_steel_316L": STEEL,
-            "neutron_moderator_pmma": STEEL,
-            "cryostat_skirt_steel_316L": STEEL,
-            "cryostat_foot_steel_316L": STEEL,
-            r"fiber_.*": (0, 1, 0.165, 0.125),
-            **PMT_TRANSPARENT,
-            "waterinstr_reflector_tyvek": TYVEK,
-        },
+        "overrides": {r"fiber_.*": (0, 1, 0.165, 0.125)},
         "window_size": [600, 600],
         "view_direction": _VIEW_DIRECTION_LEVEL,
     },
@@ -194,21 +146,7 @@ IMAGES = {
             "fiber_curtain",
             "nm_plastic",
         ],
-        "overrides": {
-            "rock": HIDE,
-            "cavern_air": AIR,
-            "watertank_steel_304L": STEEL,
-            "watertank_water": WATER,
-            "reentrance_tube_copper": TUBE,
-            "cryostat_outer_steel_316L": STEEL,
-            "cryostat_inner_steel_316L": STEEL,
-            "neutron_moderator_pmma": STEEL,
-            "cryostat_skirt_steel_316L": STEEL,
-            "cryostat_foot_steel_316L": STEEL,
-            r"fiber_.*": (0, 1, 0.165, 0.125),
-            **PMT_TRANSPARENT,
-            "waterinstr_reflector_tyvek": TYVEK,
-        },
+        "overrides": {r"fiber_.*": (0, 1, 0.165, 0.125)},
         "window_size": [800, 800],
         "view_direction": _VIEW_DIRECTION_LEVEL,
     },

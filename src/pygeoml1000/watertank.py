@@ -14,6 +14,7 @@ import pyg4ometry.geant4 as g4
 from pygeomtools import RemageDetectorInfo
 
 from . import core, cryo
+from .utils import COLORS
 
 # Everything in mm
 # Basic tank
@@ -307,7 +308,7 @@ def construct_and_place_tank(instr: core.InstrumentationData) -> core.Instrument
     if instr.detail["watertank"] == "omit":
         return instr
     tank_lv = construct_tank(instr.materials.metal_steel_304L, instr.registry, instr.detail["watertank"])
-    tank_lv.pygeom_color_rgba = False
+    tank_lv.pygeom_color_rgba = COLORS["steel"]
     g4.SkinSurface("tank_steel_surface", tank_lv, instr.materials.surfaces.to_tyvek, instr.registry)
     # Polycones are placed with the bottom positioned at the given coordinates.
     # But we want it such that the polycone is centered around (0,0,0)
@@ -324,7 +325,7 @@ def construct_and_place_tank(instr: core.InstrumentationData) -> core.Instrument
     )
 
     water_lv = construct_water(instr.materials.water, instr.registry, instr.detail["watertank"])
-    water_lv.pygeom_color_rgba = [0, 0, 1, 0.2]
+    water_lv.pygeom_color_rgba = COLORS["water"]
     water_pv = g4.PhysicalVolume([0, 0, 0], [0, 0, 0], water_lv, WATER_VOLUME_NAME, tank_lv, instr.registry)
 
     water_pv.set_pygeom_active_detector(RemageDetectorInfo("scintillator", 10002, {}))

@@ -16,6 +16,7 @@ from pygeomtools import RemageDetectorInfo
 from scipy.spatial.transform import Rotation as R
 
 from . import core, materials, watertank
+from .utils import COLORS
 
 # This is some rough calculation of the effective height of the tyvek foil inside of the tank.
 # This is to avoid overlaps with the curved top part of the water tank, while keeping the gap as
@@ -104,7 +105,7 @@ def construct_PMT_front(
     )
 
     pmt_cathode_lv = g4.LogicalVolume(pmt_cathode, vac_mat, "waterinstr_pmt_cathode", reg)
-    pmt_cathode_lv.pygeom_color_rgba = [0.545, 0.271, 0.074, 1]
+    pmt_cathode_lv.pygeom_color_rgba = COLORS["pmt_cathode"]
     g4.SkinSurface("pmt_cathode_surface", pmt_cathode_lv, surfaces.to_photocathode, reg)
 
     # Already place all of the daughters in the Mother.
@@ -230,8 +231,10 @@ def place_PMT_front(
     pmt_window_lv = _logical_volume_sharing_mesh(
         pmt_volumes[0], instr.materials.borosilicate, window_name, reg
     )
-    pmt_window_lv.pygeom_color_rgba = [0.9, 0.8, 0.5, 0.5]
+    pmt_window_lv.pygeom_color_rgba = COLORS["pmt_window"]
     pmt_vacuum_lv = _logical_volume_sharing_mesh(pmt_volumes[1], instr.materials.vacuum, vacuum_name, reg)
+    # the vacuum would fill the PMT no matter how transparent the glass around it is.
+    pmt_vacuum_lv.pygeom_color_rgba = False
 
     # We have to place the new logical volumes for every single PMT
     g4.PhysicalVolume([0, 0, 0], [0, 0, 0], pmt_vacuum_lv, vacuum_name, pmt_window_lv, reg)
@@ -320,7 +323,7 @@ def construct_and_place_instrumentation(instr: core.InstrumentationData) -> g4.P
     # Materials are temporary here
 
     tyvek_lv = construct_tyvek_foil(instr.materials.tyvek, instr)
-    tyvek_lv.pygeom_color_rgba = [1, 1, 1, 0.20]
+    tyvek_lv.pygeom_color_rgba = COLORS["tyvek"]
     g4.SkinSurface("tyvek_surface", tyvek_lv, instr.materials.surfaces.to_tyvek, instr.registry)
     g4.PhysicalVolume(
         [0, 0, 0], [0, 0, 2 * offset], tyvek_lv, "waterinstr_reflector_tyvek", instr.mother_lv, instr.registry

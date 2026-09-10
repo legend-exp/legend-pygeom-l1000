@@ -12,14 +12,15 @@ import pyg4ometry.geant4 as g4
 from pygeomtools import RemageDetectorInfo
 
 from . import core, watertank
-
-# Import new reentrance tube profile and WLSR functions
 from .rt_profiles import (
     make_316l_ss_profiles,
     make_inner_profile,
     make_ofhc_cu_profiles,
     make_outer_profile,
 )
+
+# Import new reentrance tube profile and WLSR functions
+from .utils import COLORS
 from .wlsr import place_inner_wlsr_in_argon, place_outer_wlsr_in_atmospheric
 
 log = logging.getLogger(__name__)
@@ -412,7 +413,7 @@ def construct_reentrance_tube_with_layers(
     # Construct steel tube
     tube_solid = g4.solid.GenericPolycone("reentrance_tube_copper", 0, 2 * np.pi, outer_r, outer_z, reg, "mm")
     tube_lv = g4.LogicalVolume(tube_solid, materials.metal_copper, "reentrance_tube_copper", reg)
-    tube_lv.pygeom_color_rgba = False  # all parts of the tube are covered by the WLSRs or the inner tubes.
+    tube_lv.pygeom_color_rgba = COLORS["copper"]
     g4.PhysicalVolume([0, 0, 0], [0, 0, 0, "mm"], tube_lv, "reentrance_tube_copper", atmlar_lv, registry=reg)
 
     # Construct underground argon cavity
@@ -547,7 +548,7 @@ def construct_moderator_simple(
         "mm",
     )
     mod_lv = g4.LogicalVolume(mod_solid, mod_material, "neutron_moderator_pmma", reg)
-    mod_lv.pygeom_color_rgba = (0.5, 0.5, 0.5, 0.1)
+    mod_lv.pygeom_color_rgba = COLORS["steel"]
     # g4.PhysicalVolume([0, 0, 0], [0, 0, -2900], mod_lv, "neutron_moderator_pmma", mother_lv, reg)  # -3000
     g4.PhysicalVolume([0, 0, 0], [0, 0, -2397], mod_lv, "neutron_moderator_pmma", mother_lv, reg)  # -3000
     # Z value used to be -body_height/2.*(1-bottom_fraction)
@@ -642,7 +643,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     skirt_lv = g4.LogicalVolume(
         skirt_solid, instr.materials.metal_steel_316L, "cryostat_skirt_steel_316L", instr.registry
     )
-    skirt_lv.pygeom_color_rgba = (0.5, 0.5, 0.5, 0.1)
+    skirt_lv.pygeom_color_rgba = COLORS["steel"]
     foot_solid = g4.solid.Tubs(
         "cryostat_foot_steel_316L",
         skirt_radius + 1e-9,
@@ -656,12 +657,12 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     foot_lv = g4.LogicalVolume(
         foot_solid, instr.materials.metal_steel_316L, "cryostat_foot_steel_316L", instr.registry
     )
-    foot_lv.pygeom_color_rgba = (0.5, 0.5, 0.5, 0.1)
+    foot_lv.pygeom_color_rgba = COLORS["steel"]
 
     outercryo_lv = construct_outer_cryostat(
         instr.materials.metal_steel_316L, instr.registry, ocryo_r, ocryo_z
     )
-    outercryo_lv.pygeom_color_rgba = (0.5, 0.5, 0.5, 0.1)
+    outercryo_lv.pygeom_color_rgba = COLORS["steel"]
 
     # For the vacuum gap, it should be as simple as subtracting the outer cryostat thicknesses
     # The neck height stays the same, effectively lowering the body by the thickness
@@ -697,7 +698,7 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     )
 
     icryo_lv = construct_inner_cryostat(instr.materials.metal_steel_316L, instr.registry, icryo_r, icryo_z)
-    icryo_lv.pygeom_color_rgba = (0.5, 0.5, 0.5, 0.1)
+    icryo_lv.pygeom_color_rgba = COLORS["steel"]
 
     # The next layer should be again just subtracting by the inner cryo thickness everywhere
     total_height = total_height - icryo_thickness

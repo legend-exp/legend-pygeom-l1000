@@ -6,6 +6,7 @@ import numpy as np
 import pyg4ometry.geant4 as g4
 
 from . import core, watertank
+from .utils import COLORS
 
 # z of the cavern's reference solid (the floor box' centre) above the detector origin. Everything
 # else in the cavern/rock chain is positioned relative to this.
@@ -36,7 +37,7 @@ def construct_and_place_cavern_and_labs(instr: core.InstrumentationData) -> None
             rock_depth_below,
             rock_depth_above,
         )
-        rock_lv.pygeom_color_rgba = (0.5, 0.5, 0.5, 0.25)
+        rock_lv.pygeom_color_rgba = COLORS["rock"]
 
         cavern_lv, cavern_x_offset, cavern_z_displacement = construct_cavern(
             instr.materials.air,
@@ -46,6 +47,7 @@ def construct_and_place_cavern_and_labs(instr: core.InstrumentationData) -> None
             rock_depth_below,
             rock_depth_above,
         )
+        cavern_lv.pygeom_color_rgba = COLORS["air"]
 
         # the rock is symmetric about its own origin, so placing it such that the cavern lands at
         # CAVERN_ORIGIN_Z fixes the whole chain. Using the solids' extents here instead would put the

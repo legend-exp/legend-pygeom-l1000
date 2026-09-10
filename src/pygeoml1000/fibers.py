@@ -10,6 +10,7 @@ from pyg4ometry import geant4 as g4
 from pygeomtools import RemageDetectorInfo
 
 from . import core, hpge_strings, materials
+from .utils import COLORS
 
 
 def place_fiber_modules(b: core.InstrumentationData) -> None:
@@ -685,7 +686,7 @@ class ModuleFactorySingleFibers(ModuleFactoryBase):
         coating_lv = g4.LogicalVolume(coating, self.materials.tpb_on_fibers, v_name, self.registry)
         g4.PhysicalVolume([0, 0, 0], [0, 0, 0], inner_lv, f"fiber_cl2{v_suffix}", coating_lv, self.registry)
 
-        coating_lv.pygeom_color_rgba = [0, 1, 0.165, 0.01]  # 520 nm
+        coating_lv.pygeom_color_rgba = COLORS["fiber_coating"]
 
         return coating_lv
 
@@ -1076,7 +1077,7 @@ class ModuleFactorySegment(ModuleFactoryBase):
             self.registry,
         )
 
-        coating_lv.pygeom_color_rgba = [0, 1, 0.165, 0.1]  # 520 nm
+        coating_lv.pygeom_color_rgba = COLORS["fiber_coating"]
 
         return coating_lv
 
