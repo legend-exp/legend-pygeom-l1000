@@ -548,7 +548,7 @@ def construct_moderator_simple(
         "mm",
     )
     mod_lv = g4.LogicalVolume(mod_solid, mod_material, "neutron_moderator_pmma", reg)
-    mod_lv.pygeom_color_rgba = COLORS["steel"]
+    mod_lv.pygeom_color_rgba = COLORS["acrylic"]
     # g4.PhysicalVolume([0, 0, 0], [0, 0, -2900], mod_lv, "neutron_moderator_pmma", mother_lv, reg)  # -3000
     g4.PhysicalVolume([0, 0, 0], [0, 0, -2397], mod_lv, "neutron_moderator_pmma", mother_lv, reg)  # -3000
     # Z value used to be -body_height/2.*(1-bottom_fraction)
