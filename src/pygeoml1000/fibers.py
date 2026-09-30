@@ -47,7 +47,8 @@ def place_fiber_modules(b: core.InstrumentationData) -> None:
                 tpb_thickness=fiber_metadata[ch.location.fiber].geometry.tpb.thickness_in_nm,
                 x_position_mm=fiber_metadata[ch.location.fiber].location.x,
                 y_position_mm=fiber_metadata[ch.location.fiber].location.y,
-                module_num=fiber_metadata[ch.location.fiber].location.module_num,
+                # the module number in a channel name counts from 1, the angular segments from 0.
+                module_num=ch.location.module - 1,
                 string_id=ch.location.barrel,
             )
             modules[ch.location.fiber] = mod
@@ -78,9 +79,7 @@ def place_fiber_modules(b: core.InstrumentationData) -> None:
         fiber_length_mm=fiber_length_mm,
         fiber_count_per_shroud=32,
         bend_radius_mm=None,
-        number_of_sipm_modules=len(
-            np.unique([fiber_metadata[ch.location.fiber].location.module_num for ch in ch_map.values()])
-        ),
+        number_of_sipm_modules=len({ch.location.module for ch in ch_map.values()}),
         z_displacement_mm=z_displacement_fiber_assembly,
         registry=b.registry,
         materials=b.materials,

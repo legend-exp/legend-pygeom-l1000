@@ -41,25 +41,16 @@ jobs:
           python -m pip install --upgrade pip wheel setuptools
           python -m pip install --upgrade .[test]
 
-      - name: Set LEGEND_METADATA variable
+      - name: Set LEGEND1000_METADATA variable
         run: |
-          echo "LEGEND_METADATA=$GITHUB_WORKSPACE/legend-metadata" >> $GITHUB_ENV
-        # secrets are not available in PRs from forks, so do not even attempt to clone metadata.
-        if:
-          "${{ github.event_name != 'pull_request' ||
-          github.event.pull_request.head.repo.owner.login == 'legend-exp' }}"
-      - name: Clone legend-metadata
+          echo "LEGEND1000_METADATA=$GITHUB_WORKSPACE/legend1000-metadata" >> $GITHUB_ENV
+      # legend1000-metadata is public, so this also works in PRs from forks.
+      - name: Clone legend1000-metadata
         uses: actions/checkout@v7
         with:
-          repository: legend-exp/legend-metadata
+          repository: legend-exp/legend1000-metadata
           fetch-depth: 0
-          token: ${{ secrets.CLONE_LEGEND_METADATA }}
-          path: ${{ env.LEGEND_METADATA }}
-          submodules: "recursive"
-        # secrets are not available in PRs from forks, so do not even attempt to clone metadata.
-        if:
-          "${{ github.event_name != 'pull_request' ||
-          github.event.pull_request.head.repo.owner.login == 'legend-exp' }}"
+          path: ${{ env.LEGEND1000_METADATA }}
 
       - name: Run unit tests
         run: |
@@ -77,25 +68,16 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Set LEGEND_METADATA variable
+      - name: Set LEGEND1000_METADATA variable
         run: |
-          echo "LEGEND_METADATA=$GITHUB_WORKSPACE/legend-metadata" >> $GITHUB_ENV
-        # secrets are not available in PRs from forks, so do not even attempt to clone metadata.
-        if:
-          "${{ github.event_name != 'pull_request' ||
-          github.event.pull_request.head.repo.owner.login == 'legend-exp' }}"
-      - name: Clone legend-metadata
+          echo "LEGEND1000_METADATA=$GITHUB_WORKSPACE/legend1000-metadata" >> $GITHUB_ENV
+      # legend1000-metadata is public, so this also works in PRs from forks.
+      - name: Clone legend1000-metadata
         uses: actions/checkout@v7
         with:
-          repository: legend-exp/legend-metadata
+          repository: legend-exp/legend1000-metadata
           fetch-depth: 0
-          token: ${{ secrets.CLONE_LEGEND_METADATA }}
-          path: ${{ env.LEGEND_METADATA }}
-          submodules: "recursive"
-        # secrets are not available in PRs from forks, so do not even attempt to clone metadata.
-        if:
-          "${{ github.event_name != 'pull_request' ||
-          github.event.pull_request.head.repo.owner.login == 'legend-exp' }}"
+          path: ${{ env.LEGEND1000_METADATA }}
 
       - name: Generate Report
         run: |
@@ -119,25 +101,16 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Set LEGEND_METADATA variable
+      - name: Set LEGEND1000_METADATA variable
         run: |
-          echo "LEGEND_METADATA=$GITHUB_WORKSPACE/legend-metadata" >> $GITHUB_ENV
-        # secrets are not available in PRs from forks, so do not even attempt to clone metadata.
-        if:
-          "${{ github.event_name != 'pull_request' ||
-          github.event.pull_request.head.repo.owner.login == 'legend-exp' }}"
-      - name: Clone legend-metadata
+          echo "LEGEND1000_METADATA=$GITHUB_WORKSPACE/legend1000-metadata" >> $GITHUB_ENV
+      # legend1000-metadata is public, so this also works in PRs from forks.
+      - name: Clone legend1000-metadata
         uses: actions/checkout@v7
         with:
-          repository: legend-exp/legend-metadata
+          repository: legend-exp/legend1000-metadata
           fetch-depth: 0
-          token: ${{ secrets.CLONE_LEGEND_METADATA }}
-          path: ${{ env.LEGEND_METADATA }}
-          submodules: "recursive"
-        # secrets are not available in PRs from forks, so do not even attempt to clone metadata.
-        if:
-          "${{ github.event_name != 'pull_request' ||
-          github.event.pull_request.head.repo.owner.login == 'legend-exp' }}"
+          path: ${{ env.LEGEND1000_METADATA }}
 
       - name: Setup build environment
         run: |

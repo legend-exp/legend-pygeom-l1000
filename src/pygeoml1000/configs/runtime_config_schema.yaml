@@ -44,14 +44,14 @@ properties:
         type: number
   public_geom:
     description: >-
-      Accepted for compatibility with legend-pygeom-l200. LEGEND-1000 has no
-      hardware metadata, so its geometry is always built from public data and
-      this option has no effect.
+      Accepted for compatibility with legend-pygeom-l200. All of
+      legend1000-metadata is public design data, so the geometry is always built
+      from public data and this option has no effect.
     type: boolean
   metadata_timestamp:
     description: >-
-      Accepted for compatibility with legend-pygeom-l200, but ignored:
-      LEGEND-1000 has no hardware metadata to select a snapshot from.
+      Timestamp the channel map is read for, in the legend1000-metadata
+      repository. Defaults to the start of its validity.
     type: string
     pattern: "^\\d{8}T\\d{6}Z$"
   detail:

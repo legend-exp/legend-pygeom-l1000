@@ -15,15 +15,6 @@ from pygeomtools.utils import load_dict_from_config
 log = logging.getLogger(__name__)
 
 DEFAULT_DETAIL = "radiogenic"
-DEFAULT_ENABLE_OPTICAL = True
-"""Optical properties are registered for every material unless the config says otherwise."""
-_RAW_CONFIG_SUFFIXES = (".yaml", ".json")
-#: substring marking a file in the configs folder that is not raw configuration.
-_NOT_RAW_CONFIG = "_schema"
-#: keys consumed by :func:`resolve_config` itself, and hence absent from a resolved config.
-_RESOLVED_KEYS = ("raw_config",)
-#: keys accepted for interoperability with other generators, but without effect here.
-_IGNORED_KEYS = ("public_geom", "metadata_timestamp", "executable")
 
 
 def raw_config_dir() -> Path:
@@ -82,7 +73,8 @@ def resolve_config(config: dict | None = None, **cli_overrides: Any) -> dict:
         if value is not None:
             config[key] = value
 
-    for key in _IGNORED_KEYS:
+    # these keys come from the legend-pygeom-l200 vocabulary and mean nothing here.
+    for key in ("public_geom", "executable"):
         if key in config:
             log.warning("'%s' has no effect on the LEGEND-1000 geometry, ignoring it", key)
             del config[key]
@@ -91,12 +83,17 @@ def resolve_config(config: dict | None = None, **cli_overrides: Any) -> dict:
     if is_compiled and "raw_config" in config:
         log.warning("'raw_config' is ignored because both 'channelmap' and 'special_metadata' are given")
 
-    # compiling is only needed for the objects that are not given already.
-    compiled = ({}, {}) if is_compiled else generate_dummy_metadata(load_raw_config(config.get("raw_config")))
-    channelmap = load_dict_from_config(config, "channelmap", lambda: compiled[0])
-    special_metadata = load_dict_from_config(config, "special_metadata", lambda: compiled[1])
+    # compiling is only needed for the objects that are not given already. The metadata is only
+    # read when the channel map itself has to be compiled.
+    raw = None if is_compiled else load_raw_config(config.get("raw_config"))
+    timestamp = config.get("metadata_timestamp")
 
-    resolved = {k: v for k, v in config.items() if k not in _RESOLVED_KEYS}
+    channelmap = load_dict_from_config(config, "channelmap", lambda: generate_channelmap(raw, timestamp))
+    special_metadata = load_dict_from_config(
+        config, "special_metadata", lambda: generate_special_metadata(raw)
+    )
+
+    resolved = {k: v for k, v in config.items() if k != "raw_config"}
     resolved["channelmap"] = convert_to_plain_types(channelmap)
     resolved["special_metadata"] = convert_to_plain_types(special_metadata)
 
@@ -109,7 +106,8 @@ def resolve_config(config: dict | None = None, **cli_overrides: Any) -> dict:
         raise ValueError(msg)
     resolved["detail"] = detail_level
 
-    resolved["enable_optical"] = config.get("enable_optical", DEFAULT_ENABLE_OPTICAL)
+    # every material gets optical properties unless the config says otherwise.
+    resolved["enable_optical"] = config.get("enable_optical", True)
 
     assemblies = parse_assemblies(config.get("assemblies"), special_metadata["detail"][detail_level])
     if assemblies is None:
@@ -148,7 +146,7 @@ def _load_raw_config_dir(path: Path) -> dict:
 
 def _is_raw_config(path: Path) -> bool:
     """Whether ``path`` is a raw config file, and not e.g. the JSON schema next to them."""
-    return path.is_file() and path.suffix in _RAW_CONFIG_SUFFIXES and _NOT_RAW_CONFIG not in path.stem
+    return path.is_file() and path.suffix in (".yaml", ".json") and "_schema" not in path.stem
 
 
 def _deep_merge(base: dict, override: dict) -> dict:
@@ -256,15 +254,33 @@ def copy_raw_configs(destination: str | Path) -> Path:
 
 
 # ----------------------------------------------------------------------------
-# compilation of the raw configuration into channelmap and special_metadata, previously in config_compilation.py
+# compilation of the raw configuration into channelmap and special_metadata.
+# The raw configuration says which channels exist and where the PMTs sit. The rest of a channel
+# entry follows from its name, and legend1000-metadata derives it.
 # ----------------------------------------------------------------------------
 
 
-def calculate_and_place_pmts(channelmap: dict, configs: dict, rawid_start: int = 6000) -> None:
+def hpge_names(configs: dict) -> list[str]:
+    """HPGe detector names, as ``V<string: 3 digits><position: 2 digits><slice>``."""
+    strings = len(configs["array"]["center"]["x_in_mm"]) * len(configs["array"]["angle_in_deg"])
+
+    return [
+        f"V{string:03d}{position:02d}Z"
+        for string in range(1, strings + 1)
+        for position in range(1, configs["string"]["units"]["n"] + 1)
+    ]
+
+
+def pmt_locations(configs: dict) -> dict[str, dict]:
+    """PMT position and direction in the water tank, keyed by name.
+
+    Rows below 10 are on the floor, the rows above it are on the wall.
+    """
     from . import watertank  # noqa: PLC0415
 
+    locations = {}
+
     # Floor PMTs are pretty trivial to place
-    rawid = rawid_start
     for row in configs["pmts_pos"]["floor"].values():
         row_index = row["id"]
         pmts_in_row = row["n"]
@@ -280,12 +296,7 @@ def calculate_and_place_pmts(channelmap: dict, configs: dict, rawid_start: int =
             if radius > watertank.tank_pit_radius:
                 z = watertank.tank_pit_height
 
-            channelmap[name] = copy.deepcopy(configs["pmts"])
-            channelmap[name]["daq"]["rawid"] = rawid
-            rawid += 1
-            channelmap[name]["name"] = name
-            channelmap[name]["location"] = {"name": "floor", "x": x, "y": y, "z": z}
-            channelmap[name]["location"]["direction"] = {"nx": 0, "ny": 0, "nz": 1}
+            locations[name] = {"x": x, "y": y, "z": z, "direction": {"nx": 0, "ny": 0, "nz": 1}}
 
     # The wall PMTs require some polygon math
     faces = configs["pmts_pos"]["tyvek"]["faces"]
@@ -351,12 +362,12 @@ def calculate_and_place_pmts(channelmap: dict, configs: dict, rawid_start: int =
                 x = x1 * (1 - t) + x2 * t
                 y = y1 * (1 - t) + y2 * t
 
-                channelmap[name] = copy.deepcopy(configs["pmts"])
-                channelmap[name]["daq"]["rawid"] = rawid
-                rawid += 1
-                channelmap[name]["name"] = name
-                channelmap[name]["location"] = {"name": "wall", "x": x, "y": y, "z": z}
-                channelmap[name]["location"]["direction"] = {"nx": normal_x, "ny": normal_y, "nz": normal_z}
+                locations[name] = {
+                    "x": x,
+                    "y": y,
+                    "z": z,
+                    "direction": {"nx": normal_x, "ny": normal_y, "nz": normal_z},
+                }
 
         # Check that all PMTs are placed. We do not totally trust the distribution algorithm
         if pmt_id != pmts_in_row:
@@ -368,9 +379,15 @@ def calculate_and_place_pmts(channelmap: dict, configs: dict, rawid_start: int =
             )
             raise ValueError(msg)
 
+    return locations
 
-def generate_special_metadata(string_idx: list, hpge_names: list, configs: dict) -> dict:
-    """Generate special_metadata.yaml file."""
+
+def generate_special_metadata(configs: dict) -> dict:
+    """Generate the spatial configuration that the metadata does not describe."""
+
+    n_centers = len(configs["array"]["center"]["x_in_mm"])
+    n_angles = len(configs["array"]["angle_in_deg"])
+    string_idx = np.arange(n_centers * n_angles).reshape(n_centers, n_angles)
 
     special_output = {}
 
@@ -388,8 +405,8 @@ def generate_special_metadata(string_idx: list, hpge_names: list, configs: dict)
     }
 
     special_output["hpges"] = {
-        f"{name}": {"rodlength_in_mm": configs["string"]["units"]["l"], "baseplate": "xlarge"}
-        for name in hpge_names
+        name: {"rodlength_in_mm": configs["string"]["units"]["l"], "baseplate": "xlarge"}
+        for name in hpge_names(configs)
     }
 
     special_output["fibers"] = {
@@ -416,7 +433,6 @@ def generate_special_metadata(string_idx: list, hpge_names: list, configs: dict)
                         )
                     )
                 ),
-                "module_num": n,
             },
         }
         for string in string_idx.flatten()
@@ -437,112 +453,51 @@ def generate_special_metadata(string_idx: list, hpge_names: list, configs: dict)
     return special_output
 
 
-def generate_channelmap(
-    string_idx: list,
-    hpge_names: list,
-    hpge_rawid: list,
-    configs: dict,
-    unit_divisor: int = 100,
-) -> dict:
-    """Generate channelmap.json file."""
+def generate_channelmap(configs: dict, timestamp: str | None = None) -> dict:
+    """Channel records from legend1000-metadata, with the PMT positions merged in."""
+    # imported here because legendmeta pulls in pandas, which costs half a second.
+    from git import GitCommandError  # noqa: PLC0415
+    from legendmeta import Legend1000Metadata  # noqa: PLC0415
 
-    channelmap = {}
-    for name, rawid in zip(hpge_names, hpge_rawid, strict=True):
-        channelmap[name] = copy.deepcopy(configs["hpge"])
-        channelmap[name]["name"] = name
-        channelmap[name]["daq"]["rawid"] = rawid
-        channelmap[name]["location"]["string"] = rawid // unit_divisor
-        channelmap[name]["location"]["position"] = rawid % unit_divisor
-
-    max_hpge_rawid = int(max(hpge_rawid)) if len(hpge_rawid) > 0 else 0
-    rawid = sipm_rawid_start = max(5000, _round_up(max_hpge_rawid + 1, 1000))
-    for string in string_idx.flatten():
-        for n in range(configs["string"]["n_sipm_modules_per_string"]):
-            name = f"S{string + 1:02d}{n + 1:02d}T"
-            channelmap[name] = copy.deepcopy(configs["sipm"])
-            channelmap[name]["name"] = name
-            channelmap[name]["location"]["fiber"] = name[:-1]
-            channelmap[name]["location"]["position"] = "top"
-            channelmap[name]["location"]["barrel"] = string + 1
-            channelmap[name]["daq"]["rawid"] = rawid
-            rawid += 1
-
-        for n in range(configs["string"]["n_sipm_modules_per_string"]):
-            name = f"S{string + 1:02d}{n + 1:02d}B"
-            channelmap[name] = copy.deepcopy(configs["sipm"])
-            channelmap[name]["name"] = name
-            channelmap[name]["location"]["fiber"] = name[:-1]
-            channelmap[name]["location"]["position"] = "bottom"
-            channelmap[name]["location"]["barrel"] = string + 1
-            channelmap[name]["daq"]["rawid"] = rawid
-            rawid += 1
-
-    pmt_rawid_start = max(6000, _round_up(rawid, 1000))
-    if sipm_rawid_start != 5000 or pmt_rawid_start != 6000:
-        log.info(
-            "array too large for the default raw ID blocks, using %d for SiPMs and %d for PMTs",
-            sipm_rawid_start,
-            pmt_rawid_start,
+    try:
+        meta = Legend1000Metadata(lazy=True)
+    except GitCommandError as exc:
+        msg = (
+            "cannot read legend1000-metadata. Set $LEGEND1000_METADATA to a checkout of "
+            "https://github.com/legend-exp/legend1000-metadata, or give the geometry config an "
+            "explicit 'channelmap'."
         )
-    calculate_and_place_pmts(channelmap, configs, rawid_start=pmt_rawid_start)
+        raise RuntimeError(msg) from exc
+
+    strings = len(configs["array"]["center"]["x_in_mm"]) * len(configs["array"]["angle_in_deg"])
+    sipms = [
+        f"S{string:02d}{module:02d}{end}"
+        for string in range(1, strings + 1)
+        for end in ("T", "B")
+        for module in range(1, configs["string"]["n_sipm_modules_per_string"] + 1)
+    ]
+    pmts = pmt_locations(configs)
+
+    chmap = meta.channelmap(timestamp) if timestamp else meta.channelmap()
+    channelmap = {name: chmap[name].to_dict() for name in [*hpge_names(configs), *sipms, *pmts]}
+
+    # the position in the tank is the one thing a channel name does not give.
+    for name, location in pmts.items():
+        channelmap[name]["location"] |= location
 
     return channelmap
 
 
-def _round_up(value: int, multiple: int) -> int:
-    """Round ``value`` up to the next integer multiple of ``multiple``."""
-    return (value // multiple) * multiple
-
-
 def convert_to_plain_types(obj):
-    """Convert numpy types and dict subclasses to plain Python types, recursively."""
+    """Convert numpy scalars, dict subclasses and non-string keys, recursively.
+
+    A resolved config is written to YAML. Without this, an AttrsDict or a numpy float is dumped
+    as a ``!!python/object`` tag that no other reader understands.
+    """
     if isinstance(obj, dict):
         return {str(key): convert_to_plain_types(value) for key, value in obj.items()}
     if isinstance(obj, list):
         return [convert_to_plain_types(item) for item in obj]
-    if isinstance(obj, np.integer):
-        return int(obj)
-    if isinstance(obj, np.floating):
-        return float(obj)
-    if isinstance(obj, np.ndarray):
-        return obj.tolist()
-    if isinstance(obj, np.str_):
-        return str(obj)
+    if isinstance(obj, np.generic):
+        return obj.item()
     return obj
-
-
-def generate_dummy_metadata(configs: dict) -> tuple[dict, dict]:
-    """Compile the raw configuration into the two objects the geometry is built from.
-
-    Parameters
-    ----------
-    configs
-        the raw configuration, keyed by raw config file name without its extension. Use
-        :func:`pygeoml1000.config.load_raw_config` to obtain it.
-
-    Returns
-    -------
-    tuple
-        ``(channelmap, special_metadata)``
-    """
-    string_idx = np.arange(
-        len(configs["array"]["center"]["x_in_mm"]) * len(configs["array"]["angle_in_deg"])
-    ).reshape(len(configs["array"]["center"]["x_in_mm"]), len(configs["array"]["angle_in_deg"]))
-
-    n_units = configs["string"]["units"]["n"]
-
-    string_width = max(2, len(str(string_idx.size)))
-    unit_width = max(2, len(str(n_units)))
-
-    hpge_names, hpge_rawid = [], []
-    for i in range(string_idx.size):
-        for j in range(n_units):
-            hpge_names.append(f"V{i + 1:0{string_width}d}{j + 1:0{unit_width}d}")
-            hpge_rawid.append((i + 1) * 10**unit_width + j + 1)
-    hpge_names = np.array(hpge_names)
-    hpge_rawid = np.array(hpge_rawid)
-
-    special_metadata = generate_special_metadata(string_idx, hpge_names, configs)
-    channelmap = generate_channelmap(string_idx, hpge_names, hpge_rawid, configs, unit_divisor=10**unit_width)
-
-    return convert_to_plain_types(channelmap), convert_to_plain_types(special_metadata)

@@ -22,8 +22,11 @@ A separate package for the LEGEND-200 geometry is available at
 includes detailed documentation on the geometry components and development
 workflow.
 
-This package can run entirely without access to the
-[legend-metadata](https://legend-metadata.readthedocs.io/en/stable/).
+The channel map and the HPGe detector records come from
+[legend1000-metadata](https://github.com/legend-exp/legend1000-metadata). Set
+`$LEGEND1000_METADATA` to a checkout of it. If the variable is not set, the
+repository is cloned into a temporary directory. A geometry config that carries
+its own `channelmap` and `special_metadata` needs no checkout at all.
 
 ## Installation
 
