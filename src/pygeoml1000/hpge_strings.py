@@ -109,12 +109,6 @@ def place_hpge_strings(b: core.InstrumentationData) -> None:
     strings_to_build = {}
 
     for hpge_meta in ch_map:
-        # Temporary fix for gedet with null enrichment value or missing val enrichment attribute
-        enrichment = hpge_meta.production.enrichment
-        if (enrichment.val if hasattr(enrichment, "val") else enrichment) is None:
-            log.warning("%s has no enrichment in metadata - setting to dummy value 0.86!", hpge_meta.name)
-            hpge_meta.production.enrichment = 0.86
-
         hpge_string_id = str(hpge_meta.location.string)
         hpge_unit_id_in_string = hpge_meta.location.position
 

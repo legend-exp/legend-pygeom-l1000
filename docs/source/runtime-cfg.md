@@ -35,6 +35,11 @@ The typical workflow uses both: change the raw config for structural changes,
 write the result out with `--write-config`, and edit that for fine-grained
 adjustments.
 
+Compiling the `channelmap` reads
+[legend1000-metadata](https://github.com/legend-exp/legend1000-metadata), so set
+`$LEGEND1000_METADATA` to a checkout of it. A compiled configuration needs no
+checkout.
+
 ## Config file reference
 
 | key                  | type            | meaning                                                                              |
@@ -45,6 +50,7 @@ adjustments.
 | `special_metadata`   | mapping or path | compiled spatial configuration, skips compiling it from the raw config               |
 | `channelmap`         | mapping or path | compiled channel map, skips compiling it from the raw config                         |
 | `enable_optical`     | bool or list    | materials that get optical properties, see [Optical properties](#optical-properties) |
+| `metadata_timestamp` | string          | timestamp the channel map is read for (default: `20400101T000000Z`)                  |
 | `sipm_use_pde_curve` | bool            | if false, use a flat SiPM photon detection efficiency instead of the PDE curve       |
 | `sipm_efficiencies`  | mapping         | per-channel scale factors for the SiPM detection efficiency                          |
 
@@ -135,12 +141,8 @@ files:
 ```bash
 configs/
 ├── array.yaml
-├── crystal.yaml
 ├── detail.yaml
-├── hpge.yaml
 ├── pmts_pos.yaml
-├── pmts.yaml
-├── sipm.yaml
 └── string.yaml
 ```
 
@@ -184,26 +186,6 @@ n_sipm_modules_per_string: 3
 - `copper_rods.r_offset_from_center`: radial offset of the copper rods from the
   string center (in mm).
 - `n_sipm_modules_per_string`: number of SiPM fiber modules per string.
-
-### `hpge.yaml` - HPGe detector template
-
-Provides the template channelmap entry for all HPGe detectors. All detectors in
-the generated channelmap start from this template and have their `name`,
-`daq.rawid`, `location.string`, and `location.position` fields overwritten
-during compilation. The template includes full geometry, production, and
-characterization sub-fields following the standard LEGEND metadata format.
-
-### `sipm.yaml` - SiPM module template
-
-Provides the template channelmap entry for SiPM fiber modules. During
-compilation, `name`, `location.barrel`, `location.fiber`, `location.position`,
-and `daq.rawid` are filled in for each module. SiPM raw IDs start at 5000.
-
-### `pmts.yaml` - PMT template
-
-Provides the template channelmap entry for all PMTs. During compilation, `name`,
-`daq.rawid`, and `location` (including x, y, z coordinates and the PMT
-orientation direction) are filled in. PMT raw IDs start at 6000.
 
 ### `pmts_pos.yaml` - PMT placement
 
@@ -251,18 +233,10 @@ Each key is a named preset (e.g. `cosmogenic`, `radiogenic`) selectable via the
 `pygeomtools` assembly detail convention (`omit`, `simple`, `stl`, `detailed`,
 `metadata`, `place`).
 
-### `crystal.yaml` - Crystal boule profile
-
-Stores the impurity profile and slice offsets for the HPGe crystal boule used as
-the default detector template, with the same format as in the metadata. It is
-required to generate the drift-time map used in the post-processing of the
-pulse-shape discrimination, but is not read by the geometry generation itself.
-
 ## Compilation
 
 The compilation step converts the raw config files into the two runtime objects
-
-- `special_metadata` and `channelmap` - via `config.py`.
+`special_metadata` and `channelmap`, via `config.py`.
 
 **`special_metadata`** contains the detailed spatial layout used for geometry
 placement:
@@ -273,14 +247,28 @@ placement:
 - `watertank_instrumentation`: Tyvek polygon parameters.
 - `detail`: the full detail level presets copied from `detail.yaml`.
 
-**`channelmap`** contains the detector mapping and electronics configuration:
+**`channelmap`** contains one entry per channel, read from legend1000-metadata.
+The raw configs only say which channels exist. The name of a channel gives its
+position and its raw ID, and legend1000-metadata derives them:
 
-- One entry per HPGe detector with location (string and position index) and raw
-  ID.
-- One entry per SiPM top/bottom channel with fiber name, barrel index, and raw
-  ID.
-- One entry per PMT with x/y/z position, orientation direction vector, and raw
-  ID.
+| system | name                                                         | derived from it                                                                          |
+| ------ | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| HPGe   | `V<string: 3 digits><position: 2 digits>Z`, e.g. `V00101Z`   | `location.string`, `location.position`, `daq.rawid`                                      |
+| SiPM   | `S<string: 2 digits><module: 2 digits><T\|B>`, e.g. `S0101T` | `location.barrel`, `location.fiber`, `location.module`, `location.position`, `daq.rawid` |
+| PMT    | `PMT<row: 2 digits><position: 2 digits>`, e.g. `PMT0101`     | `location.name` (`floor` below row 10, else `wall`), `daq.rawid`                         |
+
+The HPGe entries also carry the detector record, so the `geometry`, `production`
+and `characterization` blocks come straight from the metadata.
+
+The one thing a name does not give is where a PMT sits in the water tank. This
+package computes `location.x`, `y`, `z` and `direction` from `pmts_pos.yaml` and
+merges them into the PMT entries.
+
+Every detector is a copy of the single design record in legend1000-metadata, so
+they all have the same shape. To change that shape, edit
+`hardware/detectors/germanium/diodes/V99999Z.yaml` in a checkout and point
+`$LEGEND1000_METADATA` at it. A shape per detector goes into a resolved
+`channelmap`, where each entry carries its own `geometry` block.
 
 `--write-config` writes the result out resolved into an explicit `channelmap`
 and `special_metadata`, together with the effective `detail` and `assemblies`.
@@ -315,7 +303,9 @@ $ legend-pygeom-l1000 --config geom-config.yaml --write-config resolved.yaml l10
 
 2. **Move to a resolved config** for fine-grained adjustments (e.g. removing
    individual detectors, overriding a single position or raw ID) that the raw
-   configuration cannot express. Write it out, edit it, and pass it back in:
+   configuration cannot express. Write it out, edit it, and pass it back in.
+   Take care with raw IDs: an edited one no longer matches what legend-simflow
+   reads for that detector out of legend1000-metadata.
 
    ```console
    $ legend-pygeom-l1000 --config geom-config.yaml --write-config resolved.yaml
@@ -367,7 +357,7 @@ Then build:
 $ legend-pygeom-l1000 -V --config geom-config.yaml
 ```
 
-This produces 6 strings (`V0101`-`V0608`, 48 HPGe detectors total), 36 SiPM
+This produces 6 strings (`V00101Z`-`V00608Z`, 48 HPGe detectors total), 36 SiPM
 channels, and the full PMT complement (unchanged, since `pmts_pos.yaml` was not
 modified).
 
@@ -395,8 +385,8 @@ raw_config:
       y_in_mm: [0.0, 184.9]
 ```
 
-Compiling this produces 12 strings (`V0101`-`V1208`, 96 HPGe detectors), 72 SiPM
-channels, and the full PMT complement.
+Compiling this produces 12 strings (`V00101Z`-`V01208Z`, 96 HPGe detectors), 72
+SiPM channels, and the full PMT complement.
 
 ### Removing a specific detector or string from the resolved config
 
@@ -412,11 +402,11 @@ channels, and the full PMT complement.
 
 After writing out the resolved config with `--write-config`, individual
 detectors can be removed by deleting their entries from its `channelmap` and
-`special_metadata.hpges` sections. For example, to remove `V0701` (position 1 of
-string 7) from the 12-string config:
+`special_metadata.hpges` sections. For example, to remove `V00701Z` (position 1
+of string 7) from the 12-string config:
 
-1. Delete the `V0701` key from `channelmap`.
-2. Delete the `V0701` key from `special_metadata.hpges`.
+1. Delete the `V00701Z` key from `channelmap`.
+2. Delete the `V00701Z` key from `special_metadata.hpges`.
 
 The remaining 95 HPGe detectors are placed normally. The missing slot is simply
 left empty in the string.
@@ -427,22 +417,34 @@ To remove an entire string (e.g. string 7) from the geometry, delete:
   - all `geds` entries with `location.string: 7`,
   - all `spms` entries with `location.barrel: 7`,
 - in the `special_metadata`:
-  - all entries with `V07xx` in `hpges`,
+  - all entries with `V007xxZ` in `hpges`,
   - all entries with `S07xx` in `fibers`, and
   - the entry for string `'7'` in `hpge_string`
 
 To remove all detectors of a string (e.g. string 7), but keep the SiPM modules
-and fibers, only delete the `geds` entries in the `channelmap` and the `V07xx`
+and fibers, only delete the `geds` entries in the `channelmap` and the `V007xxZ`
 entries in `hpges` in the `special_metadata`.
 
-### Replacing the default HPGe template with a custom one
+### Using a custom HPGe geometry
 
-To use a custom HPGe template, override `hpge` in `raw_config` with the desired
-geometry and characterization fields. The geometry is defined using the standard
-format of the legend metadata (e.g. the example geometries found in the remage
-[tutorial](https://remage.readthedocs.io/en/stable/tutorial.html#experimental-geometry)).
-At the moment, there is only support for using a single geometry template for
-all detectors, though in the future this will be generalized to allow for
-multiple geometries per setup. Per-detector geometries can already be set by
-hand in a resolved config, since each `channelmap` entry carries its own
-`geometry` block.
+Every detector is a copy of the one design record in legend1000-metadata, so
+they all have the same shape. There are two ways to change it.
+
+To change **every** detector, clone
+[legend1000-metadata](https://github.com/legend-exp/legend1000-metadata), edit
+`hardware/detectors/germanium/diodes/V99999Z.yaml`, and point
+`$LEGEND1000_METADATA` at the clone:
+
+```console
+$ export LEGEND1000_METADATA=~/legend1000-metadata
+$ legend-pygeom-l1000 l1000.gdml
+```
+
+The record uses the standard format of the legend metadata, the same as the
+example geometries in the remage
+[tutorial](https://remage.readthedocs.io/en/stable/tutorial.html#experimental-geometry).
+This is also the shape that legend-simflow then reads, so the simulation and its
+post-processing stay in step.
+
+To change **single** detectors, write the `geometry` block by hand into a
+resolved config. Each `channelmap` entry carries its own.

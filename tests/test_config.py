@@ -83,7 +83,7 @@ def test_raw_config_from_folder(tmp_path):
     geds = [ch for ch in resolved["channelmap"].values() if ch["system"] == "geds"]
 
     assert len(geds) == 4 * len(resolved["special_metadata"]["hpge_string"])
-    assert resolved["special_metadata"]["hpges"]["V0101"]["rodlength_in_mm"] == 140.1
+    assert resolved["special_metadata"]["hpges"]["V00101Z"]["rodlength_in_mm"] == 140.1
 
 
 def test_compiled_config_skips_compilation(default_config):
@@ -128,20 +128,40 @@ def test_schema_rejects(bad_config):
 def test_workflow_keys_are_accepted(default_config):
     """A legend-simflow geometry config must validate and build the same geometry.
 
-    ``public_geom``/``metadata_timestamp`` come from the l200 vocabulary, ``executable`` is what
-    simflow uses to pick the generator. None of them mean anything here.
+    ``public_geom`` comes from the l200 vocabulary, ``executable`` is what simflow uses to pick
+    the generator. Neither means anything here.
     """
     from pygeoml1000 import config
 
-    resolved = config.resolve_config(
-        {
-            "public_geom": True,
-            "metadata_timestamp": "20230311T235840Z",
-            "executable": "legend-pygeom-l1000",
-        }
-    )
+    resolved = config.resolve_config({"public_geom": True, "executable": "legend-pygeom-l1000"})
 
     assert resolved == default_config
+
+
+def test_metadata_timestamp_selects_the_channelmap():
+    """The LEGEND-1000 channel map is not valid before 2040, so this timestamp has no entry."""
+    from pygeoml1000 import config
+
+    with pytest.raises(RuntimeError, match="No valid entries"):
+        config.resolve_config({"metadata_timestamp": "20230311T235840Z"})
+
+
+def test_channel_names_resolve_in_the_metadata(default_config):
+    """The names this package builds must be ones legend1000-metadata can derive a record for."""
+    channelmap = default_config["channelmap"]
+
+    assert len(channelmap) == 42 * 8 + 42 * 3 * 2 + 314
+    assert channelmap["V00101Z"]["location"] == {"string": 1, "position": 1}
+    assert channelmap["S0101T"]["location"]["fiber"] == "S0101"
+    assert channelmap["PMT0101"]["location"]["name"] == "floor"
+
+
+def test_pmt_positions_are_merged_in(default_config):
+    """Where a PMT sits in the tank does not follow from its name, so this package adds it."""
+    location = default_config["channelmap"]["PMT0101"]["location"]
+
+    assert (location["x"], location["y"], location["z"]) == (3800.0, 0.0, 0.0)
+    assert location["direction"] == {"nx": 0, "ny": 0, "nz": 1}
 
 
 @pytest.mark.parametrize("enable_optical", [False, ["liquidargon"]])

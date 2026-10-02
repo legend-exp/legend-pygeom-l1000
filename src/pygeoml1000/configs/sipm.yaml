@@ -1,8 +1,0 @@
-name: S00
-system: spms
-location:
-  barrel: 0
-  fiber: ""
-  position: ""
-daq:
-  rawid: 1

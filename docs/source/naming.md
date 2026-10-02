@@ -7,7 +7,7 @@ other.
 
 - **volume names**:
   - Use snake_case, for example `cavern_air` or `hpge_cable_hv`.
-    - Exception: use **detector names** as they are, for example `V0101`,
+    - Exception: use **detector names** as they are, for example `V00101Z`,
       `S0101T` or `PMT0101`.
   - Follow the scheme `[<group>_]<component>[_<material>][_<extra>]`. Start with
     the group, then the component, for example `hpge_string_support_rod_copper`
