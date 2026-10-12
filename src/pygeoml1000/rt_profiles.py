@@ -325,9 +325,9 @@ def make_inner_profile(
     inner_z.insert(0, inner_bottom_z)
     inner_r.insert(0, 0)
 
-    # Top closure with 6 mm thickness at the top
-    top_thickness = _steel_thickness_from_top(0, tube_height)  # 6.0 mm at the top
-    inner_z.append(top_z_original - 5000 - top_thickness)
+    # Top closure: the tube is open at the top (the lock is not modelled yet), so close
+    # the argon only a protection gap below the top, leaving no copper lid there
+    inner_z.append(top_z_original - 5000 - PROTECTION_GAP_POLYCONE)
     inner_r.append(0)
 
     # Ensure proper closure with intermediate points
