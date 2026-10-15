@@ -448,3 +448,16 @@ post-processing stay in step.
 
 To change **single** detectors, write the `geometry` block by hand into a
 resolved config. Each `channelmap` entry carries its own.
+
+(supported-designs)=
+
+## supported designs `l1000cfgNN`
+
+The naming convention is `l1000dsgNN`, where `dsg` stands for "design" and `NN`
+is a zero-padded integer.
+
+- `l1000dsg01`: configuration as described in the LEGEND-1000 Conceptual Design
+  Report.
+
+Currently no selection of the design is implemented; the design always is always
+represented by the latest version of this package.
