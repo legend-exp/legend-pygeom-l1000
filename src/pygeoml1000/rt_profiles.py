@@ -304,17 +304,19 @@ def make_inner_profile(
         if r == 0:
             # Skip r=0 points during iteration - closures added separately
             continue
+        # Keep the argon a protection gap below the top face of its copper mother
+        inner_z_value = z - PROTECTION_GAP_POLYCONE if z_original == top_z_original else z
         if r == neck_radius:
             # Cylindrical section
             inner_r_value = max(0, r - thickness)
-            inner_z.append(z)
+            inner_z.append(inner_z_value)
             inner_r.append(inner_r_value)
         else:
             # Curved section - scale thickness by radius ratio
             radius_ratio = r / neck_radius
             scaled_thickness = thickness * radius_ratio
             inner_r_value = max(0, r - scaled_thickness)
-            inner_z.append(z)
+            inner_z.append(inner_z_value)
             inner_r.append(inner_r_value)
 
     # Add closures explicitly
@@ -325,9 +327,9 @@ def make_inner_profile(
     inner_z.insert(0, inner_bottom_z)
     inner_r.insert(0, 0)
 
-    # Top closure with 6 mm thickness at the top
-    top_thickness = _steel_thickness_from_top(0, tube_height)  # 6.0 mm at the top
-    inner_z.append(top_z_original - 5000 - top_thickness)
+    # Top closure: the tube is open at the top (the lock is not modelled yet), so close
+    # the argon only a protection gap below the top, leaving only a minor copper lid there.
+    inner_z.append(top_z_original - 5000 - PROTECTION_GAP_POLYCONE)
     inner_r.append(0)
 
     # Ensure proper closure with intermediate points
