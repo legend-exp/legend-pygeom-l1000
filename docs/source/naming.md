@@ -40,7 +40,7 @@ other.
 | `larinstr_undergroundlar_`                | non-optical LAr instrumentation hardware (SiPMs and their copper wraps) |
 | `larinstr_atmosphericlar_`                | (not yet implemented)                                                   |
 | `waterinstr_`                             | water tank instrumentation (Tyvek reflector, PMTs)                      |
-| `cryostat_`                               | cryostat vessels, insulation vacuum, skirt and foot                     |
+| `cryostat_`                               | cryostat vessels, insulation (vacuum, JACKODUR), skirt and foot         |
 | `reentrance_tube_`                        | the reentrance tube and its metal layers                                |
 | `underground_wlsr_` / `atmospheric_wlsr_` | the two wavelength-shifting reflectors                                  |
 | `liquid_argon_`                           | the two liquid argon volumes                                            |

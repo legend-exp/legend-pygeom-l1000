@@ -146,6 +146,7 @@ Available assemblies include:
 - `watertank`: Water tank and surrounding infrastructure
 - `watertank_instrumentation`: PMTs in the water tank
 - `cryostat`: Cryostat components
+- `cryostat_insulation`: JACKODUR insulation shell around the outer cryostat
 - `nm_plastic`: Neutron moderator
 - `nm_holding_structure`: Support structure for the neutron moderator (not
   implemented yet)

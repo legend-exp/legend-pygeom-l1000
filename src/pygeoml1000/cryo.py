@@ -132,6 +132,9 @@ REENTRANCE_TUBE_TANGENT_Z = 4215.8  # where the head meets the cylinder, above t
 N_CROWN_SEGMENTS = 8
 N_KNUCKLE_SEGMENTS = 8
 
+# JACKODUR (XPS foam) insulation around the outer vessel
+INSULATION_THICKNESS = 10.0
+
 
 def _head(
     barrel_radius: float, crown_radius: float, knuckle_radius: float, sign: int
@@ -189,6 +192,19 @@ def make_vessel_profile(
     # G4GenericPolycone does not accept repeated points (a head as thick as the barrel)
     repeated = np.r_[False, (np.diff(r) == 0) & (np.diff(z) == 0)]
     return [float(v) for v in z[~repeated]], [float(v) for v in r[~repeated]]
+
+
+def make_insulation_profile(neck_radius: float, insulation_top: float, top: float) -> tuple[list, list]:
+    """Closed (z, r) outline of the insulation around the outer vessel, in the cryostat frame.
+
+    The insulation is the mother volume of the outer vessel: its outside surface moved outwards by the
+    insulation thickness (sampled at the same angles), up to ``insulation_top`` under the water-tank roof.
+    Above that, the radius is adjusted to ``neck_radius`` while the neck is reduced by 1 nm for navigation.
+    """
+    t = INSULATION_THICKNESS
+    z, r = make_vessel_profile(OUTER_VESSEL, (-t, -t, -t), neck_radius + t, insulation_top)
+    # replace the closing point on the axis: step in to the neck and continue up to the top
+    return [*z[:-1], insulation_top, top, top], [*r[:-1], neck_radius, neck_radius, 0]
 
 
 def make_moderator_z_r_r(
@@ -490,7 +506,14 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     mod_thickness = 100
     mod_n_sides = 12
 
-    ocryo_z, ocryo_r = make_vessel_profile(OUTER_VESSEL, (0, 0, 0), neck_radius, outer_neck_top)
+    # The insulation, if placed, is the mother volume of the outer vessel. Where the neck passes through
+    # the water-tank roof there is no room for it, so there the outer vessel's neck is made 1 nm thinner
+    # and lower than the insulation volume for navigation purposes.
+    build_insulation = instr.detail.get("cryostat_insulation", "omit") != "omit"
+    nesting_gap = 1e-6 if build_insulation else 0  # mm
+    ocryo_z, ocryo_r = make_vessel_profile(
+        OUTER_VESSEL, (0, 0, 0), neck_radius - nesting_gap, outer_neck_top - nesting_gap
+    )
 
     # The skirt continues the outer shell down to the floor. The base ring ("foot") surrounds its bottom.
     skirt_radius = OUTER_VESSEL["barrel_radius"]
@@ -504,7 +527,20 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     # The skirt is a plain cylinder, but the cryostat bottom it surrounds is curved: simply
     # shortening the skirt by a fixed amount does not reliably clear that curve. Instead, solve the
     # cryostat profile for the height at which it grows into the skirt wall and end the skirt there.
-    skirt_top = _first_z_at_radius(ocryo_z, ocryo_r, skirt_radius - skirt_thickness) - SKIRT_CRYO_GAP
+    # With the insulation, the skirt ends where it meets the insulation instead of the steel.
+    if build_insulation:
+        # Up the neck the insulation ends 1 mm below the underside of the water-tank roof.
+        insulation_top = (
+            watertank.tank_top_height
+            - watertank.tank_top_bulge_depth
+            - watertank.tank_horizontal_wall
+            - (watertank.tank_pit_height + watertank.tank_central_part_height / 2)
+            - 1
+        )
+        ins_z, ins_r = make_insulation_profile(neck_radius, insulation_top, outer_neck_top)
+        skirt_top = _first_z_at_radius(ins_z, ins_r, skirt_radius - skirt_thickness) - SKIRT_CRYO_GAP
+    else:
+        skirt_top = _first_z_at_radius(ocryo_z, ocryo_r, skirt_radius - skirt_thickness) - SKIRT_CRYO_GAP
 
     # The base ring is a ring of steel fins of ~215mm depth and ~560 kg around the bottom of the skirt. It is modelled as a
     # solid ring of the drawn height, whose outer radius is set by mass instead of the drawn Ø7390 diameter. It also
@@ -632,16 +668,37 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
         instr.registry,
     )
 
+    # the outer vessel sits in the insulation, if that is placed, and in the water otherwise
+    ocryo_mother_lv = instr.mother_lv
+    ocryo_pos = [instr.mother_x_displacement, 0, instr.mother_z_displacement]
+    if build_insulation:
+        insulation_solid = g4.solid.GenericPolycone(
+            "cryostat_insulation_jackodur", 0, 2 * pi, ins_r, ins_z, instr.registry, "mm"
+        )
+        insulation_lv = g4.LogicalVolume(
+            insulation_solid, instr.materials.jackodur, "cryostat_insulation_jackodur", instr.registry
+        )
+        insulation_lv.pygeom_color_rgba = COLORS["insulation"]
+        g4.PhysicalVolume(
+            [0, 0, 0],
+            ocryo_pos,
+            insulation_lv,
+            "cryostat_insulation_jackodur",
+            instr.mother_lv,
+            instr.registry,
+        )
+        # the insulation now faces the water instead of the steel
+        g4.SkinSurface("insulation_surface", insulation_lv, instr.materials.surfaces.to_tyvek, instr.registry)
+        ocryo_mother_lv = insulation_lv
+        ocryo_pos = [0, 0, 0]
+
     g4.PhysicalVolume(
-        [0, 0, 0],
-        [instr.mother_x_displacement, 0, instr.mother_z_displacement],
-        outercryo_lv,
-        "cryostat_outer_steel_316L",
-        instr.mother_lv,
-        instr.registry,
+        [0, 0, 0], ocryo_pos, outercryo_lv, "cryostat_outer_steel_316L", ocryo_mother_lv, instr.registry
     )
 
-    g4.SkinSurface("ocryo_surface", outercryo_lv, instr.materials.surfaces.to_tyvek, instr.registry)
+    # with the insulation placed, it faces the water instead and carries this surface
+    if not build_insulation:
+        g4.SkinSurface("ocryo_surface", outercryo_lv, instr.materials.surfaces.to_tyvek, instr.registry)
     g4.SkinSurface("skirt_surface", skirt_lv, instr.materials.surfaces.to_tyvek, instr.registry)
     g4.SkinSurface("foot_surface", foot_lv, instr.materials.surfaces.to_tyvek, instr.registry)
 
