@@ -419,6 +419,10 @@ def _place_hpge_unit(
         )
         _add_pen_surfaces(pen_pv, b.mother_pv, b.materials, b.registry)
 
+        pen_pv.set_pygeom_active_detector(
+            RemageDetectorInfo("scintillator", 10010, {}, allow_uid_reuse=True, ntuple_name="pen")
+        )
+
     if "front-end_and_insulators" in b.detail and b.detail["front-end_and_insulators"] != "omit":
         front_enc_and_insulator_parts_origin = {
             "signal": {

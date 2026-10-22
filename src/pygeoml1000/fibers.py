@@ -619,13 +619,16 @@ class ModuleFactorySingleFibers(ModuleFactoryBase):
                 self.fiber_cl2_lv[fiber_length],
                 self.registry,
             )
-            g4.PhysicalVolume(
+            fiber_core_pv = g4.PhysicalVolume(
                 [0, 0, 0],
                 [0, 0, 0],
                 fiber_core_lv[fiber_length],
                 f"fiber_core{fiber_name}",
                 fiber_cl1_lv[fiber_length],
                 self.registry,
+            )
+            fiber_core_pv.set_pygeom_active_detector(
+                RemageDetectorInfo("scintillator", 10011, {}, allow_uid_reuse=True, ntuple_name="fiber")
             )
         if self.bend_radius_mm is not None:
             g4.PhysicalVolume(
@@ -1011,13 +1014,16 @@ class ModuleFactorySegment(ModuleFactoryBase):
             self.fiber_cl2_lv,
             self.registry,
         )
-        g4.PhysicalVolume(
+        fiber_core_pv = g4.PhysicalVolume(
             [0, 0, 0],
             [0, 0, 0],
             fiber_core_lv,
             f"fiber_core{v_suffix}",
             fiber_cl1_lv,
             self.registry,
+        )
+        fiber_core_pv.set_pygeom_active_detector(
+            RemageDetectorInfo("scintillator", 10011, {}, allow_uid_reuse=True, ntuple_name="fiber")
         )
         if self.bend_radius_mm is not None:
             g4.PhysicalVolume(
