@@ -4,6 +4,7 @@ cosmogenic:
   watertank: simple
   watertank_instrumentation: simple
   cryostat: simple
+  cryostat_insulation: simple
   nm_plastic: simple
   nm_holding_structure: omit
   fiber_curtain: simple
@@ -16,6 +17,7 @@ radiogenic:
   watertank: omit
   watertank_instrumentation: omit
   cryostat: simple
+  cryostat_insulation: omit
   nm_plastic: simple
   nm_holding_structure: simple
   fiber_curtain: detailed

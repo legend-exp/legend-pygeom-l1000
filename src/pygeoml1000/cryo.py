@@ -78,9 +78,9 @@ Let's say, at the neck, at the barrel, and at the bottom.
 """
 
 """
-The cryostat dimensions seem to change every few months. This cryostat has been made with a mixture of
-imagination, extracting information from CAD drawings by eye, and vaguely remembered TC discussions.
-Feel free to change any of the values as you see fit - the script can handle it, within reason.
+The vessels, the skirt, the base ring and the reentrance tube follow the LEGEND-1000 cryostat drawings by
+Tobias Sterr (28.09.2026). All heads there are torispherical (a crown radius blended into a knuckle radius), and the
+inner surface of each shell is the outer one offset by the wall thickness.
 """
 
 """
@@ -88,216 +88,123 @@ All units in mm.
 """
 
 
-def make_z_and_r(
-    total_height: float,
-    neck_height: float,
-    body_height: float,
-    neck_radius: float,
-    barrel_radius: float,
-    shoulder_fraction: float,
-    bottom_fraction: float,
+def cryo_floor_z() -> float:
+    """Height of the floor in the cryostat frame.
+
+    Heights from the drawings are measured from the floor: the bottom of the base ring, which stands on the
+    inner floor of the water tank. The cryostat frame itself is unchanged, so everything placed inside the
+    argon (HPGe strings, fibers) stays where it was. A function, as watertank imports this module.
+    """
+    return watertank.tank_horizontal_wall - (
+        watertank.tank_pit_height + watertank.tank_central_part_height / 2
+    )
+
+
+# Outside surface of each vessel: barrel radius, crown and knuckle radii of the heads, and the height of
+# the tangent lines where the heads meet the barrel (above the floor).
+OUTER_VESSEL = {
+    "barrel_radius": 3480.0,
+    "crown_radius": 5585.2,
+    "knuckle_radius": 1084.5,
+    "z_bottom_tangent": 2622.1,
+    "z_top_tangent": 6772.0,
+}
+INNER_VESSEL = {
+    "barrel_radius": 3215.0,
+    "crown_radius": 5156.5,
+    "knuckle_radius": 1002.6,
+    "z_bottom_tangent": 2625.2,
+    "z_top_tangent": 6707.6,
+}
+# Wall thicknesses as (bottom head, barrel, top head). Only the barrels are 15 mm.
+OUTER_VESSEL_WALL = (15.2, 15.0, 12.5)
+INNER_VESSEL_WALL = (12.5, 15.0, 12.5)
+# The neck tubes have 10 mm walls.
+OUTER_NECK_WALL = 10.0
+INNER_NECK_RADIUS = 1000.0
+
+# Reentrance tube: Ø1847 inner diameter with a 1.5 mm wall, closed by a torispherical head.
+REENTRANCE_TUBE_RADIUS = 924.9
+REENTRANCE_TUBE_BOTTOM_Z = 3856.3  # apex of the head, above the floor
+REENTRANCE_TUBE_TANGENT_Z = 4215.8  # where the head meets the cylinder, above the floor
+
+# Segments per head section. Each layer uses the same angles, so neighbouring layers stay parallel.
+N_CROWN_SEGMENTS = 8
+N_KNUCKLE_SEGMENTS = 8
+
+# JACKODUR (XPS foam) insulation around the outer vessel
+INSULATION_THICKNESS = 10.0
+
+
+def _head(
+    barrel_radius: float, crown_radius: float, knuckle_radius: float, sign: int
+) -> tuple[np.ndarray, np.ndarray]:
+    """(r, dz) of a torispherical head from the axis out to the tangent line.
+
+    dz is measured from the tangent line: negative for a bottom head (``sign=-1``), positive for a top head.
+    """
+    alpha = np.arcsin((barrel_radius - knuckle_radius) / (crown_radius - knuckle_radius))
+    crown_center = -(crown_radius - knuckle_radius) * np.cos(alpha)
+    a = np.linspace(0, alpha, N_CROWN_SEGMENTS + 1)
+    b = np.linspace(alpha, pi / 2, N_KNUCKLE_SEGMENTS + 1)[1:]
+    r = np.r_[crown_radius * np.sin(a), barrel_radius - knuckle_radius + knuckle_radius * np.sin(b)]
+    dz = np.r_[crown_center + crown_radius * np.cos(a), knuckle_radius * np.cos(b)]
+    return r, sign * dz
+
+
+def make_vessel_profile(
+    vessel: dict, wall: tuple[float, float, float], neck_radius: float, neck_top: float
 ) -> tuple[list, list]:
-    # The definitions of each variable, even when they seem obvious:
-    # total_height - the z span of everything, from the bottom edge of the skirt/foot to the top of the neck
-    # neck_height - the z span of the neck
-    # body_height - the z span of all three pieces of the body (shoulder, barrel, bottom)
-    # neck_radius - the r span of the neck
-    # barrel_radius - the r span of the barrel. This is the maximum radius of the polycone
-    # shoulder_fraction - the fraction, from 0 to 1 not inclusive, of the body which is dedicated to this part
-    # bottom_fraction - same as shoulder_fraction, but for the bottom
+    """Closed (z, r) outline of one cryostat layer, in the cryostat frame.
 
-    # The total height of the skirt is the remainder, except the bottom which exists happily in the skirt
-    skirt_height = total_height - neck_height - (body_height * (1 - bottom_fraction))
-    # The foot at the bottom of the skirt, which I have absolutely no reference for right now
-    # Looks like it's about 1/6th of the skirt's total height in the CAD drawing
-    # skirtfootfraction = 0.16
+    The layer is the outside surface ``vessel`` moved inwards by ``wall`` = (bottom head, barrel,
+    top head) thickness, with a neck of ``neck_radius`` from the top head up to ``neck_top``.
+    """
+    t_bottom, t_barrel, t_top = wall
 
-    # It's easier for me to visualize this as a top-down process, so we build the heights like that
+    def shifted(t):
+        return {
+            "barrel_radius": vessel["barrel_radius"] - t,
+            "crown_radius": vessel["crown_radius"] - t,
+            "knuckle_radius": vessel["knuckle_radius"] - t,
+        }
 
-    # First point - the top of the neck, easy
-    z = [total_height]
-    # We need two of them though, to close the neck of the cryostat
-    z.append(total_height - 0.01)
-    # Bottom of the neck/top of the body's shoulder
-    z.append(total_height - neck_height)
+    z_bot = vessel["z_bottom_tangent"] + cryo_floor_z()
+    z_top = vessel["z_top_tangent"] + cryo_floor_z()
+    r_b, dz_b = _head(**shifted(t_bottom), sign=-1)
+    r_t, dz_t = _head(**shifted(t_top), sign=+1)
 
-    # Now, things get a bit weird. I used a plot digitizer to estimate the curve of the shoulder and
-    # bottom, with (0,0) and (100,100) being the leftmost and rightmost points. I picked the points
-    # by hand, and my hands are unsteady, so apologies if it's not perfectly smooth. I arbitrarily chose
-    # 24 data points as the correct amount to model the curves. If you don't like it, you can replace
-    # this section with your own data points.
-    shoulder_z_fractions = [
-        100.0,
-        96.75493908,
-        94.19470592,
-        91.33901032,
-        88.48921856,
-        85.7626492,
-        83.13086358,
-        80.00523704,
-        76.78461728,
-        73.3266067,
-        70.1684031,
-        66.71040867,
-        62.99861747,
-        59.18412581,
-        55.23895215,
-        51.58334855,
-        47.19498239,
-        42.30662039,
-        36.83597522,
-        30.09483983,
-        23.59108997,
-        17.09058426,
-        8.93256818,
-        0.0,
-    ]
+    # bottom head, barrel (a thinner head than barrel leaves a small step at the tangent line), top head
+    r_barrel = vessel["barrel_radius"] - t_barrel
+    r = np.r_[r_b, r_barrel, r_barrel, r_t[::-1]]
+    z = np.r_[z_bot + dz_b, z_bot, z_top, z_top + dz_t[::-1]]
 
-    for i in shoulder_z_fractions:
-        j = i * 0.01
-        z.append(round(total_height - neck_height - ((1 - j) * shoulder_fraction * body_height), 2))
+    # cut the top head off where it reaches the neck, then go straight up the neck
+    top = shifted(t_top)
+    alpha = np.arcsin(
+        (top["barrel_radius"] - top["knuckle_radius"]) / (top["crown_radius"] - top["knuckle_radius"])
+    )
+    crown_center = z_top - (top["crown_radius"] - top["knuckle_radius"]) * np.cos(alpha)
+    keep = (r > neck_radius) | (z < z_top)
+    r = np.r_[r[keep], neck_radius, neck_radius, 0]
+    z = np.r_[z[keep], crown_center + np.sqrt(top["crown_radius"] ** 2 - neck_radius**2), neck_top, neck_top]
 
-    # One last point for good measure, to put us right at the top of the barrel/bottom of the shoulder
-    z.append(total_height - neck_height - (shoulder_fraction * body_height))
-    # Since there are no changes in radius along the barrel, we can skip to the connection of the barrel and the bottom+skirt
-    z.append(skirt_height)
+    # G4GenericPolycone does not accept repeated points (a head as thick as the barrel)
+    repeated = np.r_[False, (np.diff(r) == 0) & (np.diff(z) == 0)]
+    return [float(v) for v in z[~repeated]], [float(v) for v in r[~repeated]]
 
-    # We do for the bottom as we did for the shoulder, but I reversed the z directionality because it was either that or the
-    # radius directionality, and it felt more natural to flip z
-    bottom_z_fractions = [
-        17.00507462,
-        25.5111244,
-        33.53726606,
-        41.13608615,
-        47.50799906,
-        53.16897911,
-        55.98029612,
-        58.99808524,
-        64.54189,
-        67.53829589,
-        70.26957587,
-        74.64942378,
-        78.57400704,
-        80.55638542,
-        82.66709096,
-        86.0312148,
-        88.58144268,
-        90.93717123,
-        92.61299913,
-        94.36442251,
-        95.78737544,
-        97.59859604,
-        99.13231505,
-        99.9028834,
-    ]
 
-    for i in bottom_z_fractions:
-        j = i * 0.01
-        z.append(round(skirt_height - (j * bottom_fraction * body_height), 2))
+def make_insulation_profile(neck_radius: float, insulation_top: float, top: float) -> tuple[list, list]:
+    """Closed (z, r) outline of the insulation around the outer vessel, in the cryostat frame.
 
-    # And finally, cap the cryostat's bottom z value
-    z.append(round(skirt_height - (bottom_fraction * body_height), 2))
-
-    # Same process for radius, but with more duplicate values
-
-    # Make sure the neck is solid
-    r = [0]
-    r.append(neck_radius)
-    # The neck's height is constant down to where it meets the shoulder
-    r.append(neck_radius)
-
-    # Same process as for the z values of the shoulder's curve
-    shoulder_r_fractions = [
-        100,
-        92.84,
-        86.99,
-        81.43,
-        76.17,
-        70.91,
-        65.94,
-        60.67,
-        55.70,
-        50.29,
-        45.76,
-        40.94,
-        36.26,
-        32.02,
-        27.63,
-        23.54,
-        19.30,
-        15.35,
-        11.84,
-        8.48,
-        5.99,
-        3.95,
-        1.75,
-        0,
-    ]
-    shouldertotalr = barrel_radius - neck_radius
-
-    for i in shoulder_r_fractions:
-        j = i * 0.01
-        r.append(round((1 - j) * shouldertotalr + neck_radius, 2))
-
-    # Next, the point at the meeting of the shoulder and the barrel
-    r.append(barrel_radius)
-    # The barrel stays constant, and we skip to the end of the barrel section
-    r.append(barrel_radius)
-
-    # One more curve for the bottom, and we can move on
-    bottom_r_fractions = [
-        1.89,
-        4.17,
-        6.82,
-        10.23,
-        14.02,
-        18.56,
-        21.21,
-        23.86,
-        28.79,
-        31.82,
-        34.47,
-        39.39,
-        44.32,
-        46.97,
-        49.62,
-        54.55,
-        59.47,
-        64.39,
-        68.56,
-        73.11,
-        76.52,
-        82.58,
-        88.64,
-        93.94,
-    ]
-
-    for i in bottom_r_fractions:
-        j = i * 0.01
-        r.append(round((1 - j) * barrel_radius, 2))
-
-    # The bottom closes to a single point as well, of course
-    r.append(0)
-
-    # Final formatting adjustments and diagnostics
-
-    # Polycones are weird - it might behoove us to simply adjust the z values here
-    for i in range(len(z)):
-        z[i] = z[i] - 5000
-
-    # Turns out pyg4ometry only has the historic definition of G4GenericPolycone added :^/
-    # Not a huge deal, but it does mean we have to inverse the r and z lists
-    # since the historic definition only allows to build from the bottom upwards
-    r.reverse()
-    z.reverse()
-
-    # For testing/diagnostics
-    # print(r)
-    # print(z)
-    # print(len(z))
-    # print(len(r))
-
-    return z, r
+    The insulation is the mother volume of the outer vessel: its outside surface moved outwards by the
+    insulation thickness (sampled at the same angles), up to ``insulation_top`` under the water-tank roof.
+    Above that, the radius is adjusted to ``neck_radius`` while the neck is reduced by 1 nm for navigation.
+    """
+    t = INSULATION_THICKNESS
+    z, r = make_vessel_profile(OUTER_VESSEL, (-t, -t, -t), neck_radius + t, insulation_top)
+    # replace the closing point on the axis: step in to the neck and continue up to the top
+    return [*z[:-1], insulation_top, top, top], [*r[:-1], neck_radius, neck_radius, 0]
 
 
 def make_moderator_z_r_r(
@@ -566,31 +473,23 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     if instr.detail["cryostat"] == "omit":
         return instr
 
-    # We must define these 7 parameters for each of the cryostat polycones
-    # You can find the definitions in the preamble or in make_z_and_r
-    neck_height = 1450
-    body_height = 7805  # Adjusted for a 4m cylindrical section
-    total_height = 10020  # Adjusted to leave 1m min water depth in pillbox
+    # Tops of the four polycones in the cryostat frame. The outer neck top is where the water tank's neck
+    # cut-out is built around. The vacuum ends one cap below it, to represent the lock system. The inner
+    # neck stops 1 mm below the vacuum top, so the two do not share a face: a shared face makes the Geant4
+    # navigator step from the daughter straight into the grandmother.
+    outer_neck_top = 5020
+    cap_thickness = 16
+    vac_top = outer_neck_top - cap_thickness
+    icryo_top = vac_top - 1
+    atmlar_top = vac_top - cap_thickness
+
     neck_radius = NECKRADIUS_START - 2e-9
-    inner_barrel_radius = 3200
-    # These fractions are just guesses. The cylindrical section is 1 - (shoulder + bottom)
-    shoulder_fraction = 0.233
-    bottom_fraction = 0.233
 
-    # The following parameters are internal to this class.
-    ocryo_thickness = 16
-    # However, I should mention the vacuum gap is asymmetric - it has distinct values at the neck, barrel, and bottom
-    vgap_thickness_neck = 45
-    vgap_thickness_barrel = 180
-    vgap_thickness_bottom = 150
-    icryo_thickness = 16
-    neck_ar_thickness = 59  # Thickness of atmospheric argon around the neck assuming 6mm neck thickness
-
-    barrel_radius = inner_barrel_radius + icryo_thickness + ocryo_thickness + vgap_thickness_barrel
-
-    # Parameters for the new reentrance tube with WLSR and metal layers
-    tube_height = 6247  # Height of tube
-    curve_fraction = 0.05  # Fraction for curved transition
+    # Parameters for the new reentrance tube with WLSR and metal layers.
+    # rt_profiles measures heights from 5000 mm below the cryostat origin.
+    tube_bottom = REENTRANCE_TUBE_BOTTOM_Z + cryo_floor_z()
+    tube_height = atmlar_top - tube_bottom
+    curve_fraction = (REENTRANCE_TUBE_TANGENT_Z - REENTRANCE_TUBE_BOTTOM_Z) / tube_height
 
     # WLSR and metal layer parameters (always enabled)
     wls_height = 2179  # Height where WLS layers extend to
@@ -607,28 +506,54 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     mod_thickness = 100
     mod_n_sides = 12
 
-    ocryo_z, ocryo_r = make_z_and_r(
-        total_height, neck_height, body_height, neck_radius, barrel_radius, shoulder_fraction, bottom_fraction
+    # The insulation, if placed, is the mother volume of the outer vessel. Where the neck passes through
+    # the water-tank roof there is no room for it, so there the outer vessel's neck is made 1 nm thinner
+    # and lower than the insulation volume for navigation purposes.
+    build_insulation = instr.detail.get("cryostat_insulation", "omit") != "omit"
+    nesting_gap = 1e-6 if build_insulation else 0  # mm
+    ocryo_z, ocryo_r = make_vessel_profile(
+        OUTER_VESSEL, (0, 0, 0), neck_radius - nesting_gap, outer_neck_top - nesting_gap
     )
 
-    skirt_height = total_height - neck_height - (body_height * (1 - bottom_fraction))
-    skirt_radius = barrel_radius
-    skirt_thickness = 60  # A guess
+    # The skirt continues the outer shell down to the floor. The base ring ("foot") surrounds its bottom.
+    skirt_radius = OUTER_VESSEL["barrel_radius"]
+    skirt_thickness = OUTER_VESSEL_WALL[1]
 
-    if instr.detail["watertank"] == "omit":
-        skirt_bottom = -body_height / 2 - ocryo_thickness * 3 - (skirt_height - ocryo_thickness * 2) / 2
-    else:
-        # 1e-9 to avoid sharing a surface with the bottom of the water volume.
-        skirt_bottom = watertank.tank_horizontal_wall - instr.mother_z_displacement + 1e-9
+    foot_height = 375
+    # 1e-9 to avoid sharing a surface with the bottom of the water volume.
+    foot_bottom = cryo_floor_z() + 1e-9
+    skirt_bottom = foot_bottom
 
     # The skirt is a plain cylinder, but the cryostat bottom it surrounds is curved: simply
     # shortening the skirt by a fixed amount does not reliably clear that curve. Instead, solve the
     # cryostat profile for the height at which it grows into the skirt wall and end the skirt there.
-    skirt_top = _first_z_at_radius(ocryo_z, ocryo_r, skirt_radius - skirt_thickness) - SKIRT_CRYO_GAP
+    # With the insulation, the skirt ends where it meets the insulation instead of the steel.
+    if build_insulation:
+        # Up the neck the insulation ends 1 mm below the underside of the water-tank roof.
+        insulation_top = (
+            watertank.tank_top_height
+            - watertank.tank_top_bulge_depth
+            - watertank.tank_horizontal_wall
+            - (watertank.tank_pit_height + watertank.tank_central_part_height / 2)
+            - 1
+        )
+        ins_z, ins_r = make_insulation_profile(neck_radius, insulation_top, outer_neck_top)
+        skirt_top = _first_z_at_radius(ins_z, ins_r, skirt_radius - skirt_thickness) - SKIRT_CRYO_GAP
+    else:
+        skirt_top = _first_z_at_radius(ocryo_z, ocryo_r, skirt_radius - skirt_thickness) - SKIRT_CRYO_GAP
+
+    # The base ring is a ring of steel fins of ~215mm depth and ~560 kg around the bottom of the skirt. It is modelled as a
+    # solid ring of the drawn height, whose outer radius is set by mass instead of the drawn Ø7390 diameter. It also
+    # takes the missing steel of the skirt, so that skirt and base ring together weigh what the drawing says.
+    foot_mass = 560e3  # g
+    skirt_area = pi * (skirt_radius**2 - (skirt_radius - skirt_thickness) ** 2)
+    missing_skirt_volume = skirt_area * (OUTER_VESSEL["z_bottom_tangent"] + cryo_floor_z() - skirt_top)
+    foot_volume = foot_mass / (instr.materials.metal_steel_316L.density * 1e-3) + missing_skirt_volume
+    foot_inner_radius = skirt_radius + 1e-9
+    foot_outer_radius = np.sqrt(foot_inner_radius**2 + foot_volume / foot_height / pi)
+
     actual_skirt_height = skirt_top - skirt_bottom
     skirt_z = (skirt_top + skirt_bottom) / 2
-    foot_height = 250
-    foot_width = 150  # Not really a guess so much as a placeholder...
 
     skirt_solid = g4.solid.Tubs(
         "cryostat_skirt_steel_316L",
@@ -646,8 +571,8 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     skirt_lv.pygeom_color_rgba = COLORS["steel"]
     foot_solid = g4.solid.Tubs(
         "cryostat_foot_steel_316L",
-        skirt_radius + 1e-9,
-        skirt_radius + foot_width,
+        foot_inner_radius,
+        foot_outer_radius,
         foot_height,
         0,
         2 * pi,
@@ -664,50 +589,21 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     )
     outercryo_lv.pygeom_color_rgba = COLORS["steel"]
 
-    # For the vacuum gap, it should be as simple as subtracting the outer cryostat thicknesses
-    # The neck height stays the same, effectively lowering the body by the thickness
-    # The total_height actually controls where the top of the polycone is, and we only want to lower it by one thickness.
-    # We could opt to not lower it at all, effectively leaving the top open, but I think it's better to have a 'cap' to at
-    # least slightly represent the lock system.
-
-    total_height = total_height - ocryo_thickness
-    body_height = body_height - 2 * ocryo_thickness
-    neck_radius = neck_radius - ocryo_thickness  # Is the steel the same thickness at the neck?
-    barrel_radius = barrel_radius - ocryo_thickness
-
-    vac_z, vac_r = make_z_and_r(
-        total_height, neck_height, body_height, neck_radius, barrel_radius, shoulder_fraction, bottom_fraction
+    # Each further layer is the outside surface of its vessel moved inwards by the wall thickness.
+    vac_z, vac_r = make_vessel_profile(
+        OUTER_VESSEL, OUTER_VESSEL_WALL, neck_radius - OUTER_NECK_WALL, vac_top
     )
 
     vac_lv = construct_vacuum_gap(instr.materials.vacuum, instr.registry, vac_r, vac_z)
     vac_lv.pygeom_color_rgba = False
 
-    # Here things are a bit more complicated with the asymmetric vacuum gap
-    # Of course, there is no vacuum gap at the top of the neck - that's where the lock goes
-
-    # Again, effectively push the body downwards using the neck height as our activator
-    neck_height = neck_height + vgap_thickness_neck
-    # ...Which means the body must be shortened by this amount, plus the bottom vacgap amount
-    body_height = body_height - vgap_thickness_neck - vgap_thickness_bottom
-
-    neck_radius = neck_radius - vgap_thickness_neck
-    barrel_radius = barrel_radius - vgap_thickness_barrel
-
-    icryo_z, icryo_r = make_z_and_r(
-        total_height, neck_height, body_height, neck_radius, barrel_radius, shoulder_fraction, bottom_fraction
-    )
+    icryo_z, icryo_r = make_vessel_profile(INNER_VESSEL, (0, 0, 0), INNER_NECK_RADIUS, icryo_top)
 
     icryo_lv = construct_inner_cryostat(instr.materials.metal_steel_316L, instr.registry, icryo_r, icryo_z)
     icryo_lv.pygeom_color_rgba = COLORS["steel"]
 
-    # The next layer should be again just subtracting by the inner cryo thickness everywhere
-    total_height = total_height - icryo_thickness
-    body_height = body_height - 2 * icryo_thickness
-    neck_radius = neck_radius - icryo_thickness  # Is the steel the same thickness at the neck?
-    barrel_radius = barrel_radius - icryo_thickness
-
-    atmlar_z, atmlar_r = make_z_and_r(
-        total_height, neck_height, body_height, neck_radius, barrel_radius, shoulder_fraction, bottom_fraction
+    atmlar_z, atmlar_r = make_vessel_profile(
+        INNER_VESSEL, INNER_VESSEL_WALL, INNER_NECK_RADIUS - OUTER_NECK_WALL, atmlar_top
     )
 
     atmlar_lv = construct_atmospheric_lar(instr.materials.liquidargon, instr.registry, atmlar_r, atmlar_z)
@@ -720,7 +616,8 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
 
     atmlar_pv.set_pygeom_active_detector(RemageDetectorInfo("scintillator", 10000, {}))
 
-    neck_radius = neck_radius - neck_ar_thickness
+    neck_radius = REENTRANCE_TUBE_RADIUS
+    total_height = atmlar_top + 5000
 
     # Construct the new reentrance tube with all layers (WLSR, OFHC Cu, 316L SS, UAr)
     uglar_lv, uglar_pv = construct_reentrance_tube_with_layers(
@@ -764,27 +661,44 @@ def construct_and_place_cryostat(instr: core.InstrumentationData) -> core.Instru
     )
     g4.PhysicalVolume(
         [0, 0, 0],
-        [
-            instr.mother_x_displacement,
-            0,
-            skirt_z - actual_skirt_height / 2 + foot_height / 2 + instr.mother_z_displacement,
-        ],
+        [instr.mother_x_displacement, 0, foot_bottom + foot_height / 2 + instr.mother_z_displacement],
         foot_lv,
         "cryostat_foot_steel_316L",
         instr.mother_lv,
         instr.registry,
     )
 
+    # the outer vessel sits in the insulation, if that is placed, and in the water otherwise
+    ocryo_mother_lv = instr.mother_lv
+    ocryo_pos = [instr.mother_x_displacement, 0, instr.mother_z_displacement]
+    if build_insulation:
+        insulation_solid = g4.solid.GenericPolycone(
+            "cryostat_insulation_jackodur", 0, 2 * pi, ins_r, ins_z, instr.registry, "mm"
+        )
+        insulation_lv = g4.LogicalVolume(
+            insulation_solid, instr.materials.jackodur, "cryostat_insulation_jackodur", instr.registry
+        )
+        insulation_lv.pygeom_color_rgba = COLORS["insulation"]
+        g4.PhysicalVolume(
+            [0, 0, 0],
+            ocryo_pos,
+            insulation_lv,
+            "cryostat_insulation_jackodur",
+            instr.mother_lv,
+            instr.registry,
+        )
+        # the insulation now faces the water instead of the steel
+        g4.SkinSurface("insulation_surface", insulation_lv, instr.materials.surfaces.to_tyvek, instr.registry)
+        ocryo_mother_lv = insulation_lv
+        ocryo_pos = [0, 0, 0]
+
     g4.PhysicalVolume(
-        [0, 0, 0],
-        [instr.mother_x_displacement, 0, instr.mother_z_displacement],
-        outercryo_lv,
-        "cryostat_outer_steel_316L",
-        instr.mother_lv,
-        instr.registry,
+        [0, 0, 0], ocryo_pos, outercryo_lv, "cryostat_outer_steel_316L", ocryo_mother_lv, instr.registry
     )
 
-    g4.SkinSurface("ocryo_surface", outercryo_lv, instr.materials.surfaces.to_tyvek, instr.registry)
+    # with the insulation placed, it faces the water instead and carries this surface
+    if not build_insulation:
+        g4.SkinSurface("ocryo_surface", outercryo_lv, instr.materials.surfaces.to_tyvek, instr.registry)
     g4.SkinSurface("skirt_surface", skirt_lv, instr.materials.surfaces.to_tyvek, instr.registry)
     g4.SkinSurface("foot_surface", foot_lv, instr.materials.surfaces.to_tyvek, instr.registry)
 
