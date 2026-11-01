@@ -21,7 +21,7 @@ floor:
     r: 0
 tyvek:
   faces: 15
-  r: 4000
+  r: 4080
 wall:
   row1:
     id: 1

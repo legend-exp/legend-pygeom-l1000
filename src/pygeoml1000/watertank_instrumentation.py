@@ -18,17 +18,20 @@ from scipy.spatial.transform import Rotation as R
 from . import core, materials, watertank
 from .utils import COLORS
 
-# This is some rough calculation of the effective height of the tyvek foil inside of the tank.
-# This is to avoid overlaps with the curved top part of the water tank, while keeping the gap as
-# small as possible.
-tyvek_outer_radius = 4000  # rough estimation, the real radius should be smaller than this value
 offset = watertank.tank_horizontal_wall
-out = watertank.tank_base_radius - watertank.tank_vertical_wall - tyvek_outer_radius
-h_diff = watertank.tank_top_height - watertank.tank_base_height
-inner = watertank.tank_base_radius - offset - watertank.tank_top_bulge_width / 2
-tyvek_effective_height = (
-    watertank.tank_base_height - 4 * offset + out * h_diff / inner
-)  # Accurate would be 2*offset, to be safe we take 4*offset
+
+
+def tyvek_effective_height(outer_radius: float) -> float:
+    """Rough calculation of the effective height of the tyvek foil inside of the tank.
+
+    This is to avoid overlaps with the curved top part of the water tank, while keeping the gap as
+    small as possible. ``outer_radius`` is the outermost radius of the foil, i.e. its corners.
+    """
+    out = watertank.tank_base_radius - watertank.tank_vertical_wall - outer_radius
+    h_diff = watertank.tank_top_height - watertank.tank_base_height
+    inner = watertank.tank_base_radius - offset - watertank.tank_top_bulge_width / 2
+    # Accurate would be 2*offset, to be safe we take 4*offset
+    return watertank.tank_base_height - 4 * offset + out * h_diff / inner
 
 
 # The PMT parts
@@ -126,6 +129,9 @@ def construct_PMT_back(base_mat: g4.Material, reg: g4.Registry) -> g4.LogicalVol
 
 def construct_tyvek_foil(mat: g4.Material, instr: core.InstrumentationData) -> g4.LogicalVolume:
     tyvek_metadata = instr.special_metadata["watertank_instrumentation"]["tyvek"]
+    tyvek_thickness = 3  # mm
+    # Geant4 uses r as the inscribed radius; the corners of the outer face reach furthest out
+    corner_radius = (tyvek_metadata["r"] + tyvek_thickness) / np.cos(pi / tyvek_metadata["faces"])
 
     tyvek_solid = g4.solid.Polyhedra(
         "waterinstr_reflector_tyvek",
@@ -133,9 +139,9 @@ def construct_tyvek_foil(mat: g4.Material, instr: core.InstrumentationData) -> g
         2 * pi,
         tyvek_metadata["faces"],
         1,
-        [0, tyvek_effective_height],
+        [0, tyvek_effective_height(corner_radius)],
         [tyvek_metadata["r"], tyvek_metadata["r"]],
-        [tyvek_metadata["r"] + 3, tyvek_metadata["r"] + 3],  # 3mm thickness?
+        [tyvek_metadata["r"] + tyvek_thickness, tyvek_metadata["r"] + tyvek_thickness],
         instr.registry,
         "mm",
     )
